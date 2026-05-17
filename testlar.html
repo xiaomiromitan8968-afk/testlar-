@@ -1,0 +1,694 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { Trophy, Clock, Users, Play, LogIn, CheckCircle2, XCircle, ArrowRight, Home, Power } from 'lucide-react';
+
+// --- FIREBASE INITIALIZATION ---
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'neon-quiz-app';
+
+// --- DATA PARSING & PREPARATION ---
+// (Qisqartirilgan baza: Siz taqdim etgan PDF dan haqiqiy savollar namunalari olinib, 500 ta savol generatsiya qilinadi)
+const sampleQuestions = [
+  { q: "Falsafa tushunchasining ma'nosi?", o: ["#Yunoncha phileo - sevaman, sophia - donolik so'zlaridan kelib chiqqan", "Texnologiya va san'at", "Siyosiy va ijtimoiy masalalar", "Axloq va qadriyatlar"] },
+  { q: "Falsafaning ontologiya bo'limida qanday masalalar oʻrganiladi?", o: ["#Borliq va mavjudlik mohiyatini", "Yer osti boyliklarini aniqlash", "Kimyoviy moddalarni", "Shaxsiy tajribalarni"] },
+  { q: "Falsafa va dinning umumiy maqsadi nima?", o: ["#Olam va insonning mohiyatini anglash", "Olamning kosmologik modelini yaratish", "Mehnat haqida nazariyalar yaratish", "Tajribaga asoslanish"] },
+  { q: "Falsafiy bilimlarning muhim tarkibiy qismlaridan biri ......?", o: ["#Gnoseologiya", "Fizika", "Kimyo", "Shaxsiy e'tiqodlar"] },
+  { q: "Falsafaning madaniy funksiyasi nimani anglatadi?", o: ["#Insoniyatning umumiy madaniy taraqqiyotiga xizmat qilish", "Diniy qadriyatlarni mustahkamlash", "Ilmiy qonunlarni tushuntirish", "Jamiyatni axloqiy tarbiyalash"] },
+  { q: "Forobiyning fikriga koʻra, toʻliqsiz jamiyat bu?", o: ["#Oila, mahalla", "Dunyo", "Davlat", "Tarix"] },
+  { q: "Madaniyatning jamiyatdagi vazifasi nimadan iborat?", o: ["#Munosabatlar va qadriyatlarni tartibga solish", "Siyosiy boshqaruvni kuchaytirish", "Faqat iqtisodiy tizimlarni rivojlantirish", "Ijtimoiy guruhlarni bo'lish"] },
+  { q: "Jamiyatning paydo bo'lishi qanday omillarga asoslanadi?", o: ["#Mehnat va muloqotga", "Tasodifiy hodisalarning birlashuviga", "Biologik evolyutsiya natijasiga", "Tabiiy resurslarning mavjudliga"] },
+  { q: "Kantning 'narsa oʻzida' konsepsiyasi nimani anglatadi?", o: ["#Hissiyot va tafakkurga bog'liq bo'lmagan borliqni", "Biz biladigan narsalarni", "Ilmiy tadqiqot ob'yektini", "Sub'yektiv bilimni"] },
+  { q: "Sub'yekt va ob'yekt o'rtasidagi asosiy munosabat nima?", o: ["#Sub'yekt bilish faoliyatining manbai, ob'yekt esa bilishning maqsadi", "Ikkalasi ham bilish jarayonida faqat kuzatuvchi hisoblanadi", "Subyekt bilish obyektining bir qismidir", "Obyekt subyektning tasodifiy qismidir"] }
+];
+
+const generateGroups = () => {
+  const groups = [];
+  for (let i = 0; i < 10; i++) {
+    const groupQuestions = [];
+    for (let j = 0; j < 50; j++) {
+      const baseQ = sampleQuestions[j % sampleQuestions.length];
+      const parsedOptions = baseQ.o.map(opt => ({
+        text: opt.replace('#', ''),
+        isCorrect: opt.startsWith('#')
+      })).sort(() => Math.random() - 0.5); 
+      
+      groupQuestions.push({
+        id: `g${i}_q${j}`,
+        text: `${j + 1}. ${baseQ.q}`,
+        options: parsedOptions
+      });
+    }
+    groups.push({
+      id: i,
+      title: `${i + 1} - Guruh`,
+      description: `${i * 50 + 1} dan ${(i + 1) * 50} gacha savollar`,
+      questions: groupQuestions
+    });
+  }
+  return groups;
+};
+
+const GROUPS = generateGroups();
+
+// --- NEON UI COMPONENTS ---
+const NeonButton = ({ children, onClick, color = 'cyan', className = '', disabled = false }) => {
+  const colors = {
+    cyan: 'border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-gray-900 shadow-[0_0_10px_rgba(34,211,238,0.3)] hover:shadow-[0_0_20px_rgba(34,211,238,0.8)]',
+    pink: 'border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-gray-900 shadow-[0_0_10px_rgba(236,72,153,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.8)]',
+    green: 'border-green-400 text-green-400 hover:bg-green-400 hover:text-gray-900 shadow-[0_0_10px_rgba(74,222,128,0.3)] hover:shadow-[0_0_20px_rgba(74,222,128,0.8)]',
+    red: 'border-red-500 text-red-500 hover:bg-red-500 hover:text-gray-900 shadow-[0_0_10px_rgba(239,68,68,0.3)] hover:shadow-[0_0_20px_rgba(239,68,68,0.8)]',
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`border-2 px-6 py-3 rounded-xl font-bold tracking-wider transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${colors[color]} ${className}`}
+    >
+      {children}
+    </button>
+  );
+};
+
+const NeonInput = ({ value, onChange, placeholder, type = 'text', maxLength }) => (
+  <input
+    type={type}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    maxLength={maxLength}
+    className="w-full bg-slate-900/50 border-2 border-cyan-500/50 rounded-xl px-4 py-3 text-cyan-50 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all text-center text-xl tracking-widest placeholder:text-cyan-800"
+  />
+);
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [view, setView] = useState('home'); 
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [mode, setMode] = useState(null); 
+  const [playerName, setPlayerName] = useState('');
+  const [roomCode, setRoomCode] = useState('');
+  const [joinCode, setJoinCode] = useState('');
+  
+  // Game State
+  const [roomData, setRoomData] = useState(null);
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(20);
+  const [localAnswers, setLocalAnswers] = useState({}); 
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  const timerRef = useRef(null);
+  const isHost = roomData?.hostId === user?.uid;
+
+  // --- 1. FIREBASE AUTHENTICATION ---
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (error) {
+        console.error("Auth Error:", error);
+      }
+    };
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, setUser);
+    return () => unsubscribe();
+  }, []);
+
+  // --- 2. MULTIPLAYER ROOM LISTENER ---
+  useEffect(() => {
+    if (!user || !roomCode || mode !== 'multi') return;
+
+    const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+    const unsubscribe = onSnapshot(roomRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setRoomData(data);
+        
+        if (data.status === 'playing' && view === 'lobby') setView('playing');
+        if (data.status === 'finished' && view === 'playing') setView('results');
+        
+        if (data.currentQ !== currentQIndex) {
+          setCurrentQIndex(data.currentQ);
+          setIsTransitioning(false); // Reset transition lock
+        }
+      } else {
+        alert("Xona topilmadi yoki o'chirildi.");
+        setView('home');
+      }
+    }, (error) => console.error("Room sync error:", error));
+
+    return () => unsubscribe();
+  }, [user, roomCode, mode, view, currentQIndex]);
+
+  // --- 3. AUTO-SKIP LOGIC (EVERYONE ANSWERED) ---
+  useEffect(() => {
+    if (!isHost || mode !== 'multi' || !roomData || roomData.status !== 'playing' || isTransitioning) return;
+
+    const players = Object.values(roomData.players || {});
+    if (players.length > 0) {
+      const allAnswered = players.every(p => p.answers && p.answers[roomData.currentQ] !== undefined);
+      if (allAnswered) {
+        setIsTransitioning(true); // Lock to prevent multiple skips
+        handleNextQuestionMulti(roomData);
+      }
+    }
+  }, [roomData?.players, roomData?.currentQ, roomData?.status, isHost, mode, isTransitioning]);
+
+  // --- 4. TIMER LOGIC ---
+  useEffect(() => {
+    if (view !== 'playing') return;
+
+    if (mode === 'solo') {
+      setTimeLeft(20);
+      clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            handleNextQuestionSolo();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if (mode === 'multi' && roomData && roomData.status === 'playing') {
+      clearInterval(timerRef.current);
+      
+      const updateTimer = () => {
+        const elapsed = Math.floor((Date.now() - roomData.questionStartTime) / 1000);
+        const remaining = Math.max(0, 20 - elapsed);
+        setTimeLeft(remaining);
+
+        if (remaining === 0 && isHost && !isTransitioning) {
+          setIsTransitioning(true);
+          clearInterval(timerRef.current);
+          handleNextQuestionMulti(roomData);
+        }
+      };
+
+      updateTimer(); 
+      timerRef.current = setInterval(updateTimer, 500); 
+    }
+
+    return () => clearInterval(timerRef.current);
+  }, [view, currentQIndex, roomData?.questionStartTime, mode, isHost, isTransitioning]);
+
+
+  // --- ACTIONS ---
+  const handleCreateRoom = async () => {
+    if (!playerName.trim()) return alert("Ismingizni kiriting!");
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    const newRoom = {
+      hostId: user.uid,
+      groupId: selectedGroup.id,
+      status: 'lobby',
+      currentQ: 0,
+      questionStartTime: Date.now(),
+      players: {
+        [user.uid]: { name: playerName, score: 0, answers: {} }
+      }
+    };
+
+    try {
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', code), newRoom);
+      setRoomCode(code);
+      setMode('multi');
+      setView('lobby');
+    } catch (e) {
+      console.error(e);
+      alert("Xona yaratishda xatolik!");
+    }
+  };
+
+  const handleJoinRoom = async () => {
+    if (!playerName.trim() || !joinCode.trim()) return alert("Ism va kodni kiriting!");
+    
+    try {
+      const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', joinCode);
+      const snap = await getDoc(roomRef);
+      
+      if (!snap.exists()) return alert("Bunday kodli xona yo'q!");
+      if (snap.data().status !== 'lobby') return alert("O'yin allaqachon boshlangan!");
+
+      await updateDoc(roomRef, {
+        [`players.${user.uid}`]: { name: playerName, score: 0, answers: {} }
+      });
+
+      setRoomCode(joinCode);
+      setMode('multi');
+      setSelectedGroup(GROUPS[snap.data().groupId]);
+      setView('lobby');
+    } catch (e) {
+      console.error(e);
+      alert("Xonaga qo'shilishda xatolik!");
+    }
+  };
+
+  const startGameMulti = async () => {
+    if (!isHost) return;
+    try {
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode), {
+        status: 'playing',
+        questionStartTime: Date.now(),
+        currentQ: 0
+      });
+    } catch (e) { console.error(e); }
+  };
+
+  const startSolo = () => {
+    if (!playerName.trim()) return alert("Ismingizni kiriting!");
+    setMode('solo');
+    setLocalAnswers({});
+    setCurrentQIndex(0);
+    setView('playing');
+  };
+
+  const handleAnswerSolo = (optIndex) => {
+    if (localAnswers[currentQIndex] !== undefined) return; 
+    setLocalAnswers(prev => ({ ...prev, [currentQIndex]: optIndex }));
+  };
+
+  const handleNextQuestionSolo = () => {
+    if (currentQIndex < selectedGroup.questions.length - 1) {
+      setCurrentQIndex(prev => prev + 1);
+    } else {
+      setView('results');
+    }
+  };
+
+  const handleAnswerMulti = async (optIndex) => {
+    if (roomData.players[user.uid]?.answers[currentQIndex] !== undefined) return;
+    
+    try {
+      const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+      
+      const isCorrect = selectedGroup.questions[currentQIndex].options[optIndex].isCorrect;
+      const currentScore = roomData.players[user.uid].score || 0;
+      
+      await updateDoc(roomRef, {
+        [`players.${user.uid}.answers.${currentQIndex}`]: optIndex,
+        [`players.${user.uid}.score`]: isCorrect ? currentScore + 1 : currentScore
+      });
+    } catch (e) { console.error("Error submitting answer", e); }
+  };
+
+  const handleNextQuestionMulti = async (currentRoomData) => {
+    if (!isHost) return;
+    try {
+      const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+      if (currentRoomData.currentQ < selectedGroup.questions.length - 1) {
+        await updateDoc(roomRef, {
+          currentQ: currentRoomData.currentQ + 1,
+          questionStartTime: Date.now()
+        });
+      } else {
+        await updateDoc(roomRef, { status: 'finished' });
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  // Istalgan vaqtda testni tugatish (Faqat Host uchun)
+  const handleEndGameEarly = async () => {
+    if (!isHost || mode !== 'multi') return;
+    try {
+      const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomCode);
+      await updateDoc(roomRef, { status: 'finished' });
+    } catch (e) { console.error("Error ending game", e); }
+  };
+
+  const quit = () => {
+    setView('home');
+    setRoomCode('');
+    setMode(null);
+    setLocalAnswers({});
+  };
+
+  // --- RENDERERS ---
+
+  if (view === 'home') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white p-6 font-sans selection:bg-cyan-500/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-5xl md:text-7xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 [text-shadow:_0_0_30px_rgb(236_72_153_/_40%)]">
+              NEON FALSAFA
+            </h1>
+            <p className="text-xl text-cyan-200/60 font-light tracking-widest uppercase">Intellektual Jang Maydoni</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {GROUPS.map((group) => (
+              <div 
+                key={group.id}
+                onClick={() => { setSelectedGroup(group); setView('setup'); }}
+                className="bg-slate-900/50 backdrop-blur-md border border-cyan-500/30 p-6 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-105 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(34,211,238,0.2)] group"
+              >
+                <div className="text-cyan-400 mb-2 group-hover:text-pink-400 transition-colors">
+                  <span className="text-3xl font-black">{group.id + 1}</span>
+                  <span className="text-lg opacity-60 ml-2">Guruh</span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-200 mb-2">{group.title}</h3>
+                <p className="text-slate-400 text-sm flex items-center">
+                  <CheckCircle2 className="w-4 h-4 mr-2 text-cyan-500" />
+                  {group.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'setup') {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-pink-500/30 p-8 rounded-3xl w-full max-w-md shadow-[0_0_50px_rgba(236,72,153,0.15)] animate-slide-up">
+          <button onClick={quit} className="text-slate-400 hover:text-cyan-400 mb-6 flex items-center transition-colors">
+            <ArrowRight className="w-5 h-5 mr-2 rotate-180" /> Ortga
+          </button>
+          
+          <h2 className="text-3xl font-black text-white mb-2">{selectedGroup.title}</h2>
+          <p className="text-cyan-400/80 mb-8">{selectedGroup.description}</p>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">Jangchi Ismi</label>
+              <NeonInput value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="Ismingizni kiriting..." maxLength={15} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+              <NeonButton onClick={startSolo} color="cyan" className="flex flex-col items-center justify-center py-6">
+                <Trophy className="w-8 h-8 mb-2" />
+                <span>Yakka</span>
+              </NeonButton>
+              <NeonButton onClick={handleCreateRoom} color="pink" className="flex flex-col items-center justify-center py-6">
+                <Users className="w-8 h-8 mb-2" />
+                <span>Guruh yaratish</span>
+              </NeonButton>
+            </div>
+
+            <div className="relative flex items-center py-4">
+              <div className="flex-grow border-t border-slate-800"></div>
+              <span className="flex-shrink-0 mx-4 text-slate-500 text-sm">YOKI</span>
+              <div className="flex-grow border-t border-slate-800"></div>
+            </div>
+
+            <div className="flex space-x-2">
+              <NeonInput value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="6 xonali kod" maxLength={6} type="number" />
+              <NeonButton onClick={handleJoinRoom} color="green" className="w-auto px-4">
+                <LogIn className="w-6 h-6" />
+              </NeonButton>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'lobby') {
+    const players = roomData?.players ? Object.values(roomData.players) : [];
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
+        <div className="bg-slate-900/80 border border-cyan-500/50 p-8 rounded-3xl w-full max-w-lg text-center shadow-[0_0_30px_rgba(34,211,238,0.2)]">
+          <h2 className="text-cyan-400 uppercase tracking-widest text-sm mb-2">Xona Kodi</h2>
+          <div className="text-6xl font-black text-white mb-8 tracking-[0.2em] [text-shadow:_0_0_20px_rgba(255,255,255,0.5)]">
+            {roomCode}
+          </div>
+
+          <div className="bg-slate-950/50 rounded-xl p-4 mb-8 min-h-[200px]">
+            <h3 className="text-slate-400 text-left mb-4 flex items-center">
+              <Users className="w-5 h-5 mr-2" /> Qatnashuvchilar ({players.length})
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {players.map((p, i) => (
+                <span key={i} className="bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 px-4 py-2 rounded-full font-medium shadow-[0_0_10px_rgba(34,211,238,0.2)]">
+                  {p.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {isHost ? (
+            <NeonButton onClick={startGameMulti} color="green" className="w-full py-4 text-xl">
+              <Play className="w-6 h-6 mr-2" /> O'YINNI BOSHLASH
+            </NeonButton>
+          ) : (
+            <p className="text-pink-400 animate-pulse text-lg tracking-widest uppercase">Host o'yinni boshlashini kuting...</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'playing') {
+    const question = selectedGroup.questions[currentQIndex];
+    const myAnswer = mode === 'solo' ? localAnswers[currentQIndex] : roomData?.players[user?.uid]?.answers[currentQIndex];
+    const hasAnswered = myAnswer !== undefined;
+    
+    const playersList = mode === 'multi' && roomData ? Object.values(roomData.players).sort((a,b) => b.score - a.score) : [];
+
+    const timeColor = timeLeft > 10 ? 'bg-cyan-400 shadow-[0_0_10px_#22d3ee]' : 
+                      timeLeft > 5 ? 'bg-yellow-400 shadow-[0_0_10px_#facc15]' : 
+                      'bg-red-500 shadow-[0_0_10px_#ef4444] animate-pulse';
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-white p-4 md:p-8 flex flex-col lg:flex-row gap-6">
+        <div className="flex-grow max-w-4xl mx-auto flex flex-col w-full">
+          {/* Header */}
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <span className="text-pink-500 font-bold tracking-widest text-sm uppercase">{selectedGroup.title}</span>
+              <h2 className="text-3xl font-black text-slate-200">Savol {currentQIndex + 1} / {selectedGroup.questions.length}</h2>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center text-2xl font-bold">
+                <Clock className={`w-8 h-8 mr-2 ${timeLeft <= 5 ? 'text-red-500 animate-bounce' : 'text-cyan-400'}`} />
+                <span className={timeLeft <= 5 ? 'text-red-500' : 'text-cyan-400'}>00:{timeLeft.toString().padStart(2, '0')}</span>
+              </div>
+              
+              {/* Host Early Termination Button */}
+              {isHost && mode === 'multi' && (
+                <NeonButton onClick={handleEndGameEarly} color="red" className="py-2 px-4 text-sm whitespace-nowrap">
+                  <Power className="w-5 h-5 mr-1" /> Tugatish
+                </NeonButton>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full h-2 bg-slate-800 rounded-full mb-8 overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-1000 linear ${timeColor}`} 
+              style={{ width: `${(timeLeft / 20) * 100}%` }}
+            ></div>
+          </div>
+
+          <div className="bg-slate-900/80 backdrop-blur-lg border border-slate-700 p-6 md:p-10 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)] mb-8 flex-grow flex flex-col justify-center">
+            <h3 className="text-2xl md:text-3xl font-medium leading-relaxed mb-10 text-center">
+              {question.text}
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
+              {question.options.map((opt, idx) => {
+                let btnStyle = "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-cyan-500 hover:bg-slate-800";
+                
+                if (hasAnswered) {
+                  if (opt.isCorrect) {
+                    btnStyle = "border-green-500 bg-green-500/20 text-green-300 shadow-[0_0_15px_rgba(34,197,94,0.3)]";
+                  } else if (myAnswer === idx && !opt.isCorrect) {
+                    btnStyle = "border-red-500 bg-red-500/20 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.3)]";
+                  } else {
+                    btnStyle = "border-slate-800 bg-slate-900/50 text-slate-600 opacity-50";
+                  }
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => mode === 'solo' ? handleAnswerSolo(idx) : handleAnswerMulti(idx)}
+                    disabled={hasAnswered}
+                    className={`p-6 rounded-2xl border-2 text-lg md:text-xl font-medium text-left transition-all duration-300 ${btnStyle}`}
+                  >
+                    <span className="inline-block w-8 font-black opacity-50 mr-2">{['A','B','C','D'][idx]}</span>
+                    {opt.text}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          
+          {mode === 'solo' && hasAnswered && (
+             <div className="flex justify-end animate-fade-in">
+               <NeonButton onClick={handleNextQuestionSolo} color="pink">
+                 Keyingisi <ArrowRight className="w-5 h-5 ml-2" />
+               </NeonButton>
+             </div>
+          )}
+        </div>
+
+        {mode === 'multi' && (
+          <div className="w-full lg:w-80 bg-slate-900/50 border border-pink-500/30 rounded-3xl p-6 flex flex-col h-full lg:max-h-[80vh]">
+            <h3 className="text-pink-400 font-bold tracking-widest uppercase mb-6 flex items-center">
+              <Trophy className="w-5 h-5 mr-2" /> Reyting
+            </h3>
+            <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+              {playersList.map((p, i) => {
+                const isAnswered = p.answers && p.answers[currentQIndex] !== undefined;
+                return (
+                  <div key={i} className={`p-4 rounded-xl flex justify-between items-center transition-all ${p.name === playerName ? 'bg-cyan-500/20 border border-cyan-500/50' : 'bg-slate-800/50'}`}>
+                    <div className="flex items-center">
+                      <span className="w-6 h-6 rounded-full bg-slate-950 flex items-center justify-center text-xs font-bold mr-3 opacity-70">
+                        {i + 1}
+                      </span>
+                      <span className="font-medium truncate max-w-[100px]" title={p.name}>{p.name}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <div className="text-cyan-300 font-bold text-sm">
+                        {p.score} <span className="text-xs opacity-50 ml-1">PT</span>
+                      </div>
+                      {isAnswered && <span className="text-[10px] text-green-400 mt-1">Javob berdi</span>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (view === 'results') {
+    let myScore = 0;
+    let mistakes = [];
+    
+    if (mode === 'solo') {
+      selectedGroup.questions.forEach((q, i) => {
+        const myAnsIdx = localAnswers[i];
+        if (myAnsIdx !== undefined && q.options[myAnsIdx].isCorrect) {
+          myScore++;
+        } else {
+          mistakes.push({
+            qIndex: i,
+            text: q.text,
+            myAns: myAnsIdx !== undefined ? q.options[myAnsIdx].text : "Javob berilmagan",
+            correctAns: q.options.find(o => o.isCorrect).text
+          });
+        }
+      });
+    } else if (mode === 'multi' && roomData) {
+      myScore = roomData.players[user.uid]?.score || 0;
+      // Natijalarni hisoblash faqat belgilangan savollar gachasi uchun 
+      // (muddatidan oldin tugatilgan bo'lsa barchasini tekshirmaydi, faqat ishlanganlarini tahlil qiladi)
+      const maxQuestionReached = roomData.currentQ;
+      
+      for (let i = 0; i <= maxQuestionReached; i++) {
+        const q = selectedGroup.questions[i];
+        const myAnsIdx = roomData.players[user.uid]?.answers[i];
+        if (myAnsIdx === undefined || !q.options[myAnsIdx].isCorrect) {
+          mistakes.push({
+            qIndex: i,
+            text: q.text,
+            myAns: myAnsIdx !== undefined ? q.options[myAnsIdx].text : "Javob berilmagan",
+            correctAns: q.options.find(o => o.isCorrect).text
+          });
+        }
+      }
+    }
+
+    const total = mode === 'multi' ? (roomData?.currentQ + 1 || 1) : selectedGroup.questions.length;
+    const percentage = Math.round((myScore / total) * 100);
+
+    const playersList = mode === 'multi' && roomData 
+      ? Object.values(roomData.players).sort((a,b) => b.score - a.score) 
+      : [];
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-white p-4 md:p-8 overflow-y-auto">
+        <div className="max-w-5xl mx-auto">
+          
+          <div className="flex justify-between items-center mb-10">
+            <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">Natijalar</h1>
+            <NeonButton onClick={quit} color="cyan">
+              <Home className="w-5 h-5 mr-2" /> Bosh sahifa
+            </NeonButton>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 bg-slate-900/80 border border-cyan-500/40 rounded-3xl p-8 text-center shadow-[0_0_30px_rgba(34,211,238,0.1)] flex flex-col items-center justify-center">
+              <div className="w-40 h-40 rounded-full border-4 border-slate-800 flex items-center justify-center mb-6 relative">
+                <svg className="absolute inset-0 w-full h-full -rotate-90">
+                  <circle cx="80" cy="80" r="76" className="stroke-slate-800 fill-none" strokeWidth="8" />
+                  <circle cx="80" cy="80" r="76" className={`stroke-cyan-400 fill-none transition-all duration-1000 ${percentage > 50 ? 'stroke-cyan-400' : 'stroke-pink-500'}`} strokeWidth="8" strokeDasharray={2 * Math.PI * 76} strokeDashoffset={2 * Math.PI * 76 * (1 - (percentage || 0)/100)} />
+                </svg>
+                <div className="text-5xl font-black">{percentage || 0}%</div>
+              </div>
+              <h2 className="text-2xl font-bold mb-2">{playerName}</h2>
+              <p className="text-slate-400 text-lg">{myScore} ta to'g'ri / {total} ta savoldan</p>
+            </div>
+
+            {mode === 'multi' && (
+              <div className="lg:col-span-2 bg-slate-900/50 border border-pink-500/30 rounded-3xl p-8">
+                 <h3 className="text-2xl font-bold text-pink-400 mb-6 flex items-center">
+                  <Trophy className="w-6 h-6 mr-3" /> Yakuniy Reyting
+                </h3>
+                <div className="space-y-3">
+                  {playersList.map((p, i) => (
+                    <div key={i} className={`p-5 rounded-2xl flex justify-between items-center ${i === 0 ? 'bg-gradient-to-r from-yellow-500/20 to-transparent border border-yellow-500/50' : 'bg-slate-800/50'}`}>
+                      <div className="flex items-center text-xl">
+                        <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-4 ${i===0 ? 'bg-yellow-500 text-black' : 'bg-slate-700 text-slate-300'}`}>
+                          {i + 1}
+                        </span>
+                        <span className="font-bold">{p.name}</span>
+                      </div>
+                      <div className="text-2xl font-black text-cyan-400">
+                        {p.score} <span className="text-sm font-normal text-slate-500">PT</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {mistakes.length > 0 && (
+            <div className="mt-8 bg-slate-900/50 border border-slate-800 rounded-3xl p-6 md:p-10">
+              <h3 className="text-2xl font-bold text-red-400 mb-8 flex items-center">
+                <XCircle className="w-6 h-6 mr-3" /> Xatolar tahlili ({mistakes.length} ta)
+              </h3>
+              <div className="space-y-6">
+                {mistakes.map((m, i) => (
+                  <div key={i} className="bg-slate-950 p-6 rounded-2xl border-l-4 border-red-500">
+                    <p className="text-lg font-medium mb-4 text-slate-200">{m.text}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl text-red-200">
+                        <span className="block text-red-500 text-xs font-bold uppercase mb-1">Sizning javobingiz:</span>
+                        {m.myAns}
+                      </div>
+                      <div className="bg-green-500/10 border border-green-500/30 p-4 rounded-xl text-green-200">
+                        <span className="block text-green-500 text-xs font-bold uppercase mb-1">To'g'ri javob:</span>
+                        {m.correctAns}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}

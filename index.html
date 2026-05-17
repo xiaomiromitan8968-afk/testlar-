@@ -62,8 +62,18 @@
 
         const envConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
         
-        // Agar biror sozlama mavjud bo'lsa, ulanamiz
-        const finalConfig = customConfig || (envConfig ? JSON.parse(envConfig) : null);
+        // FOYDALANUVCHINING REAL FIREBASE KALITLARI INTEGRATSIYA QILINDI
+        const realUserFirebaseConfig = {
+            apiKey: "AIzaSyCQpHYawA6MNsF36XpuC5ydJpNLVHFnSW4",
+            authDomain: "falsafa-aba1d.firebaseapp.com",
+            projectId: "falsafa-aba1d",
+            storageBucket: "falsafa-aba1d.firebasestorage.app",
+            messagingSenderId: "682260883672",
+            appId: "1:682260883672:web:ab379ce84ea13dea6ecfad",
+            measurementId: "G-SYSKV52CGS"
+        };
+
+        const finalConfig = customConfig || (envConfig ? JSON.parse(envConfig) : realUserFirebaseConfig);
 
         if (finalConfig && finalConfig.apiKey) {
             try {
@@ -91,7 +101,6 @@
                 window.FirebaseModule = { localOnly: true };
             }
         } else {
-            // Agar umuman sozlama bo'lmasa, dasturni ogohlantirishlar bilan simulyatsiya rejimida ochamiz
             window.FirebaseModule = { localOnly: true };
         }
     </script>
@@ -119,7 +128,7 @@
             { q: "Gnoseologiya nima?", o: ["#Bilish haqidagi ta'limot", "Matematik nazariya", "Falsafiy eksperiment usuli", "Mantiqiy yondashuv"] },
             { q: "Epistemologiyaning asosiy oʻrganish ob'yekti nima?", o: ["#Haqiqiy ilmiy bilimlarning mazmuni", "Axloqiy qoidalar tizimi", "San'at nazariyasi va turlari", "Iqtisodiy munosabatlar"] },
             { q: "David Yumning bilish haqidagi yondashuvi qanday nomlanadi?", o: ["#Skeptitsizm", "Agnostitsizm", "Optimizm", "Materializm"] },
-            { q: "Kantning 'narsa oʻzida' konsepsiyasi nimani anglatadi?", o: ["#Hissiyot va tafakkurga bog'liq bo'lmagan borliqni", "Biz bevosita biladigan barcha narsalarni", "Ilmiy tadqiqot ob'yektini", "Sub'yektiv aqlni"] },
+            { q: "Kantning 'narsa oʻzida' konsepsiyasi nimani anglatadi?", o: ["#Hissiyot va tafakkurga bog'liq bo'lmagan borliqni", "Biz bevosita biladigan barcha narsalarni", "Ilmiy tadqiyod ob'yektini", "Sub'yektiv aqlni"] },
             { q: "Empirizmga ko'ra haqiqiy bilimning asosi nimada?", o: ["#Tajriba", "Aql", "E'tiqod", "Mifologik g'oyalar"] },
             { q: "Noilmiy bilimning eng birinchi shakli nima?", o: ["#Kundalik amaliy bilim", "Fizikaviy bilim", "Kimyoviy bilim", "Radikal falsafiy qarashlar"] },
             { q: "Relyativizm nima?", o: ["#Haqiqat nisbiy va vaqtinchalikdir", "Haqiqat mutlaq va oʻzgarmasdir", "Haqiqatning ilmiy asosi yo'qdir", "Haqiqat shaxsiy e'tiqodga asoslanadi"] },

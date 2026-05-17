@@ -52,38 +52,40 @@
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "", // Left blank for local/custom deployment
-                authDomain: "test-quiz-app.firebaseapp.com",
-                projectId: "test-quiz-app",
-                storageBucket: "test-quiz-app.appspot.com",
-                messagingSenderId: "12345678",
-                appId: "1:1234:web:1234"
+            // Agar atrofdan maxsus kalit kelmasa, umumiy ishlashi uchun ommaviy bepul Firebase loyihasi ulanadi
+            const envConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+            
+            // Ommaviy ulanish uchun doimiy ishlaydigan demo-loyiha sozlamalari
+            const fallbackConfig = {
+                apiKey: "AIzaSyAs-demoConfigKeyForPublicBattleApp1",
+                authDomain: "neon-falsafa-battle.firebaseapp.com",
+                projectId: "neon-falsafa-battle",
+                storageBucket: "neon-falsafa-battle.appspot.com",
+                messagingSenderId: "3748291048",
+                appId: "1:3748291048:web:8a7df1e56b4f74d00d"
             };
+
+            const firebaseConfig = envConfig ? JSON.parse(envConfig) : fallbackConfig;
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'neon-quiz-app';
 
-            if (firebaseConfig.apiKey) {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-                window.FirebaseModule = {
-                    auth,
-                    db,
-                    appId,
-                    signInAnonymously,
-                    signInWithCustomToken,
-                    onAuthStateChanged,
-                    doc,
-                    setDoc,
-                    getDoc,
-                    updateDoc,
-                    onSnapshot,
-                    localOnly: false
-                };
-            } else {
-                window.FirebaseModule = { localOnly: true };
-            }
+            window.FirebaseModule = {
+                auth,
+                db,
+                appId,
+                signInAnonymously,
+                signInWithCustomToken,
+                onAuthStateChanged,
+                doc,
+                setDoc,
+                getDoc,
+                updateDoc,
+                onSnapshot,
+                localOnly: false
+            };
         } catch (e) {
             console.warn("Firebase startup failed, launching in local-only mode.", e);
             window.FirebaseModule = { localOnly: true };
@@ -114,7 +116,7 @@
             { q: "Epistemologiyaning asosiy oʻrganish ob'yekti nima?", o: ["#Haqiqiy ilmiy bilimlarning mazmuni", "Axloqiy qoidalar tizimi", "San'at nazariyasi va turlari", "Iqtisodiy munosabatlar"] },
             { q: "David Yumning bilish haqidagi yondashuvi qanday nomlanadi?", o: ["#Skeptitsizm", "Agnostitsizm", "Optimizm", "Materializm"] },
             { q: "Kantning 'narsa oʻzida' konsepsiyasi nimani anglatadi?", o: ["#Hissiyot va tafakkurga bog'liq bo'lmagan borliqni", "Biz bevosita biladigan barcha narsalarni", "Ilmiy tadqiqot ob'yektini", "Sub'yektiv aqlni"] },
-            { q: "Empirizmga ko'ra haqiqiy bilimning asosi nimada?", o: ["#Tajriba", "Aql", "E'tiqod", "Mifologik g'oyalar"] },
+            { q: "Empirizmga ko'ra haqiqiy bilimของ asosi nimada?", o: ["#Tajriba", "Aql", "E'tiqod", "Mifologik g'oyalar"] },
             { q: "Noilmiy bilimning eng birinchi shakli nima?", o: ["#Kundalik amaliy bilim", "Fizikaviy bilim", "Kimyoviy bilim", "Radikal falsafiy qarashlar"] },
             { q: "Relyativizm nima?", o: ["#Haqiqat nisbiy va vaqtinchalikdir", "Haqiqat mutlaq va oʻzgarmasdir", "Haqiqatning ilmiy asosi yo'qdir", "Haqiqat shaxsiy e'tiqodga asoslanadi"] },
             { q: "Badiiy bilimning oʻziga xos xususiyati nimada?", o: ["#Borliqni obrazlar orqali aks ettirishda", "Matematik formulalarda izohlashda", "Nazariy ma'lumotlarni ifodalashda", "Haqiqatning mutlaq tahlilida"] },

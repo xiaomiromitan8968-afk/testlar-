@@ -6,8 +6,6 @@
     <title>Neon Falsafa Battle</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- React and ReactDOM from CDN -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -47,68 +45,93 @@
 
     <div id="root"></div>
 
-    <!-- Firebase SDKs -->
-    <script type="module" defer>
+    <!-- Firebase SDKs with Safe Fallback Loading -->
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global Firebase Configuration fallback
-        const firebaseConfig = window.__firebase_config ? JSON.parse(window.__firebase_config) : {
-            apiKey: "", // Key placeholder, environment overrides this if available
-            authDomain: "test-quiz-app.firebaseapp.com",
-            projectId: "test-quiz-app",
-            storageBucket: "test-quiz-app.appspot.com",
-            messagingSenderId: "12345678",
-            appId: "1:1234:web:1234"
-        };
-        const appId = window.__app_id || 'neon-quiz-app';
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "", // Left blank for local/custom deployment
+                authDomain: "test-quiz-app.firebaseapp.com",
+                projectId: "test-quiz-app",
+                storageBucket: "test-quiz-app.appspot.com",
+                messagingSenderId: "12345678",
+                appId: "1:1234:web:1234"
+            };
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'neon-quiz-app';
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+            if (firebaseConfig.apiKey) {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
 
-        // Expose Firebase to our React application
-        window.FirebaseModule = {
-            auth,
-            db,
-            appId,
-            signInAnonymously,
-            signInWithCustomToken,
-            onAuthStateChanged,
-            doc,
-            setDoc,
-            getDoc,
-            updateDoc,
-            onSnapshot
-        };
+                window.FirebaseModule = {
+                    auth,
+                    db,
+                    appId,
+                    signInAnonymously,
+                    signInWithCustomToken,
+                    onAuthStateChanged,
+                    doc,
+                    setDoc,
+                    getDoc,
+                    updateDoc,
+                    onSnapshot,
+                    localOnly: false
+                };
+            } else {
+                window.FirebaseModule = { localOnly: true };
+            }
+        } catch (e) {
+            console.warn("Firebase startup failed, launching in local-only mode.", e);
+            window.FirebaseModule = { localOnly: true };
+        }
     </script>
 
     <!-- React Application Component in Babel/JSX -->
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- SAVOLLAR BAZASI (PDF dan tahlil qilingan haqiqiy falsafiy testlar namunasi) ---
-        const sampleQuestions = [
-            { q: "Falsafa tushunchasining ma'nosi?", o: ["#Yunoncha phileo - sevaman, sophia - donolik so'zlaridan kelib chiqqan", "Texnologiya va san'at", "Siyosiy va ijtimoiy masalalar", "Axloq va qadriyatlar"] },
-            { q: "Falsafaning ontologiya bo'limida qanday masalalar oʻrganiladi?", o: ["#Borliq va mavjudlik mohiyatini", "Yer osti boyliklarini aniqlash", "Kimyoviy moddalarni", "Shaxsiy tajribalarni"] },
-            { q: "Falsafa va dinning umumiy maqsadi nima?", o: ["#Olam va insonning mohiyatini anglash", "Olamning kosmologik modelini yaratish", "Mehnat haqida nazariyalar yaratish", "Tajribaga asoslanish"] },
-            { q: "Falsafiy bilimlarning muhim tarkibiy qismlaridan biri ......?", o: ["#Gnoseologiya", "Fizika", "Kimyo", "Shaxsiy e'tiqodlar"] },
-            { q: "Falsafaning madaniy funksiyasi nimani anglatadi?", o: ["#Insoniyatning umumiy madaniy taraqqiyotiga xizmat qilish", "Diniy qadriyatlarni mustahkamlash", "Ilmiy qonunlarni tushuntirish", "Jamiyatni axloqiy tarbiyalash"] },
-            { q: "Forobiyning fikriga koʻra, toʻliqsiz jamiyat bu?", o: ["#Oila, mahalla", "Dunyo", "Davlat", "Tarix"] },
-            { q: "Madaniyatning jamiyatdagi vazifasi nimadan iborat?", o: ["#Munosabatlar va qadriyatlarni tartibga solish", "Siyosiy boshqaruvni kuchaytirish", "Faqat iqtisodiy tizimlarni rivojlantirish", "Ijtimoiy guruhlarni bo'lish"] },
-            { q: "Jamiyatning paydo bo'lishi qanday omillarga asoslanadi?", o: ["#Mehnat va muloqotga", "Tasodifiy hodisalarning birlashuviga", "Biologik evolyutsiya natijasiga", "Tabiiy resurslarning mavjudliga"] },
-            { q: "Kantning 'narsa oʻzida' konsepsiyasi nimani anglatadi?", o: ["#Hissiyot va tafakkurga bog'liq bo'lmagan borliqni", "Biz biladigan narsalarni", "Ilmiy tadqiqot ob'yektini", "Sub'yektiv bilimni"] },
-            { q: "Sub'yekt va ob'yekt o'rtasidagi asosiy munosabat nima?", o: ["#Sub'yekt bilish faoliyatining manbai, ob'yekt esa bilishning maqsadi", "Ikkalasi ham bilish jarayonida faqat kuzatuvchi hisoblanadi", "Subyekt bilish obyektining bir qismidir", "Obyekt subyektning tasodifiy qismidir"] }
+        // --- HAQIQIY FALSAFA SAVOLLARI BAZASI (PDFdan olingan matnlar) ---
+        const realPhilosophyQuestions = [
+            { q: "Falsafa tushunchasining ma'nosi nima?", o: ["#Yunoncha phileo - sevaman, sophia - donolik so'zlaridan kelib chiqqan bo'lib, donolikka muhabbat", "Texnologiya va san'at uyg'unligi", "Siyosiy va ijtimoiy munosabatlar", "Axloqiy qadriyatlar va diniy qoidalar"] },
+            { q: "Falsafaning ontologiya bo'limida qanday masalalar oʻrganiladi?", o: ["#Borliq va mavjudlik mohiyati", "Yer osti tabiiy boyliklarini aniqlash", "Kimyoviy elementlar va moddalar", "Shaxsiy tajribalar va hislar"] },
+            { q: "Falsafa va dinning umumiy maqsadi nima?", o: ["#Olam va insonning mohiyatini anglash", "Olamning kosmologik modelini yaratish", "Mehnat haqida nazariyalar yaratish", "Tajriba va eksperimentlarga asoslanish"] },
+            { q: "Falsafiy bilimlarning muhim tarkibiy qismlaridan biri nima?", o: ["#Gnoseologiya", "Fizika", "Kimyo", "Shaxsiy e'tiqodlar"] },
+            { q: "Falsafaning madaniy funksiyasi nimani anglatadi?", o: ["#Insoniyatning umumiy madaniy taraqqiyotiga xizmat qilish", "Diniy qadriyatlarni mustahkamlash", "Ilmiy qonunlarni tushuntirish", "Jamiyatni faqat axloqiy tarbiyalash"] },
+            { q: "Falsafaning ijtimoiy sohaga ta'siri qanday namoyon bo'ladi?", o: ["#Jamiyatni boshqarishdagi qarashlarni shakllantirish orqali", "Faqat axloqiy qadriyatlarni o'rgatishda", "Tabiiy hodisalarni tushuntirishda", "Ilmiy haqiqatlarni targ'ib qilishda"] },
+            { q: "Falsafiy dunyoqarashning eng muhim vazifasi nima?", o: ["#Insonning o'zini va borliqni anglashiga yordam berish", "Ilmiy ma'lumotlarni to'plash", "Jamiyatni iqtisodiy isloh qilish", "Diniy qoidalarni kuchaytirish"] },
+            { q: "Jamiyat qanday tizim sifatida qaraladi?", o: ["#Rivojlanuvchi va oʻzgaruvchan tizim", "Biologik evolyutsion birlik", "Statik ijtimoiy guruh", "Faqatgina iqtisodiy tuzilma"] },
+            { q: "Forobiyning fikriga koʻra, toʻliqsiz jamiyat nima?", o: ["#Oila, mahalla", "Dunyo", "Davlat", "Tarix"] },
+            { q: "Tarixiy rivojlanish jarayonida sub'yektiv omillar qanday rol o'ynaydi?", o: ["#Jamiyatning rivojlanishiga muhim ta'sir ko'rsatadi", "Tasodifiy hodisalarni to'liq boshqaradi", "Faqat iqtisodiy jarayonlarni shakllantiradi", "Umuman ahamiyatsiz hisoblanadi"] },
+            { q: "Qaysi jamiyat toʻliqsiz hisoblanadi?", o: ["#Bir oila, qishloq yoki ovul", "Shahar yoki milliy birlik", "Xalqaro sivilizatsiya", "Umumiy madaniy jamiyat"] },
+            { q: "Jamiyatning paydo bo'lishi qanday omillarga asoslanadi?", o: ["#Mehnat va muloqotga", "Tasodifiy voqealarning birlashuviga", "Biologik evolyutsiya natijasiga", "Tabiiy resurslarning mavjudligiga"] },
+            { q: "Forobiyning fikriga koʻra, to'liq jamiyatning birinchi bosqichi nima?", o: ["#Shahar jamiyati", "Oila", "Milliy birlik", "Qishloq"] },
+            { q: "P.A.Sorokin jamiyatni qanday tizim sifatida tasvirlagan?", o: ["#Gorizontal, vertikal va fluktuatsion tizimlar", "Ijtimoiy-siyosiy yopiq tizimlar", "Faqat iqtisodiy tuzilma", "Etnik guruhlar yig'indisi"] },
+            { q: "Gnoseologiya nima?", o: ["#Bilish haqidagi ta'limot", "Matematik nazariya", "Falsafiy eksperiment usuli", "Mantiqiy yondashuv"] },
+            { q: "Epistemologiyaning asosiy oʻrganish ob'yekti nima?", o: ["#Haqiqiy ilmiy bilimlarning mazmuni", "Axloqiy qoidalar tizimi", "San'at nazariyasi va turlari", "Iqtisodiy munosabatlar"] },
+            { q: "David Yumning bilish haqidagi yondashuvi qanday nomlanadi?", o: ["#Skeptitsizm", "Agnostitsizm", "Optimizm", "Materializm"] },
+            { q: "Kantning 'narsa oʻzida' konsepsiyasi nimani anglatadi?", o: ["#Hissiyot va tafakkurga bog'liq bo'lmagan borliqni", "Biz bevosita biladigan barcha narsalarni", "Ilmiy tadqiqot ob'yektini", "Sub'yektiv aqlni"] },
+            { q: "Empirizmga ko'ra haqiqiy bilimning asosi nimada?", o: ["#Tajriba", "Aql", "E'tiqod", "Mifologik g'oyalar"] },
+            { q: "Noilmiy bilimning eng birinchi shakli nima?", o: ["#Kundalik amaliy bilim", "Fizikaviy bilim", "Kimyoviy bilim", "Radikal falsafiy qarashlar"] },
+            { q: "Relyativizm nima?", o: ["#Haqiqat nisbiy va vaqtinchalikdir", "Haqiqat mutlaq va oʻzgarmasdir", "Haqiqatning ilmiy asosi yo'qdir", "Haqiqat shaxsiy e'tiqodga asoslanadi"] },
+            { q: "Badiiy bilimning oʻziga xos xususiyati nimada?", o: ["#Borliqni obrazlar orqali aks ettirishda", "Matematik formulalarda izohlashda", "Nazariy ma'lumotlarni ifodalashda", "Haqiqatning mutlaq tahlilida"] },
+            { q: "Ontologiya atamasi qaysi so'zdan olingan?", o: ["#Yunoncha «ontos» - borliq, «logos» - ta'limot", "Lotincha «onto» - tiriklik", "Arabcha «vujud» - mavjudlik", "Nemischa «sein» - borliq"] },
+            { q: "«Hamma narsa sondir» degan fikr kimga tegishli?", o: ["#Pifagor", "Fales", "Anaksimandr", "Ksenofan"] },
+            { q: "«Oqayotgan suvga ikki marta tushib bo’lmaydi» fikr muallifi kim?", o: ["#Geraklit", "Fales", "Anaksimandr", "Ksenofan"] },
+            { q: "Ibn Sino fikricha, «Vujudi vojib» nima?", o: ["#Alloh (Yaratuvchi)", "Inson", "Koinot", "Vaqt va makon"] },
+            { q: "Monizm ta’limotiga to‘g‘ri ta’rif berilgan qatorni ko‘rsating?", o: ["#Olamning asosi yagona substansiyadan iborat deb hisoblovchi ta'limot", "Olam ikkita teng asosga ega degan ta'limot", "Olamda juda ko'p mustaqil kuchlar mavjudligi", "Olamni inkor etuvchi qarash"] }
         ];
 
-        // 10 ta guruh uchun 50 tadan jami 500 ta savol hosil qiluvchi generator
+        // 10 guruh uchun 50 tadan jami 500 ta savol hosil qiluvchi generator
         const generateGroups = () => {
             const groups = [];
             for (let i = 0; i < 10; i++) {
                 const groupQuestions = [];
                 for (let j = 0; j < 50; j++) {
-                    const baseQ = sampleQuestions[j % sampleQuestions.length];
+                    const baseQ = realPhilosophyQuestions[j % realPhilosophyQuestions.length];
                     const parsedOptions = baseQ.o.map(opt => ({
                         text: opt.replace('#', ''),
                         isCorrect: opt.startsWith('#')
@@ -123,7 +146,7 @@
                 groups.push({
                     id: i,
                     title: `${i + 1} - Guruh`,
-                    description: `${i * 50 + 1} dan ${(i + 1) * 50} gacha savollar`,
+                    description: `${i * 50 + 1} dan ${(i + 1) * 50} gacha bo'lgan testlar`,
                     questions: groupQuestions
                 });
             }
@@ -132,20 +155,72 @@
 
         const GROUPS = generateGroups();
 
-        // --- INTERFAOL NEON TUGMALAR ---
+        // --- CUSTOM INLINE SVG NEON ICONS (For ultimate React stability) ---
+        const Icons = {
+            Clock: () => (
+                <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            ),
+            Trophy: () => (
+                <svg className="w-7 h-7 text-yellow-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34M12 2a4 4 0 00-4 4v5a4 4 0 008 0V6a4 4 0 00-4-4z" />
+                </svg>
+            ),
+            Users: () => (
+                <svg className="w-6 h-6 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zm14 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                </svg>
+            ),
+            Power: () => (
+                <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
+                </svg>
+            ),
+            UserSingle: () => (
+                <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
+                </svg>
+            ),
+            Play: () => (
+                <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+            ),
+            LogIn: () => (
+                <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M15 3H7a2 2 0 00-2 2v14a2 2 0 002 2h8M10 17l5-5-5-5M15 12H3" />
+                </svg>
+            ),
+            ArrowLeft: () => (
+                <svg className="w-5 h-5 text-slate-300 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="19" y1="12" x2="5" y2="12" />
+                    <polyline points="12 19 5 12 12 5" />
+                </svg>
+            ),
+            Home: () => (
+                <svg className="w-5 h-5 text-cyan-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+            )
+        };
+
+        // --- NEON BUTTON ---
         const NeonButton = ({ children, onClick, color = 'cyan', className = '', disabled = false }) => {
             const colors = {
-                cyan: 'border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-gray-950 shadow-[0_0_10px_rgba(34,211,238,0.3)] hover:shadow-[0_0_20px_rgba(34,211,238,0.8)]',
-                pink: 'border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-gray-950 shadow-[0_0_10px_rgba(236,72,153,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.8)]',
-                green: 'border-green-400 text-green-400 hover:bg-green-400 hover:text-gray-950 shadow-[0_0_10px_rgba(74,222,128,0.3)] hover:shadow-[0_0_20px_rgba(74,222,128,0.8)]',
-                red: 'border-red-500 text-red-500 hover:bg-red-500 hover:text-gray-950 shadow-[0_0_10px_rgba(239,68,68,0.3)] hover:shadow-[0_0_20px_rgba(239,68,68,0.8)]',
+                cyan: 'border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-gray-950 shadow-[0_0_10px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.7)]',
+                pink: 'border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-gray-950 shadow-[0_0_10px_rgba(236,72,153,0.2)] hover:shadow-[0_0_20px_rgba(236,72,153,0.7)]',
+                green: 'border-green-400 text-green-400 hover:bg-green-400 hover:text-gray-950 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_20px_rgba(74,222,128,0.7)]',
+                red: 'border-red-500 text-red-500 hover:bg-red-500 hover:text-gray-950 shadow-[0_0_10px_rgba(239,68,68,0.2)] hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]',
             };
 
             return (
                 <button
                     onClick={onClick}
                     disabled={disabled}
-                    className={`border-2 px-6 py-3 rounded-xl font-extrabold tracking-wider transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${colors[color]} ${className}`}
+                    className={`border-2 px-6 py-3 rounded-xl font-extrabold tracking-wider transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center ${colors[color]} ${className}`}
                 >
                     {children}
                 </button>
@@ -163,7 +238,7 @@
             />
         );
 
-        // --- ASOSIY APPARAT COMPONENTI ---
+        // --- MAIN APP COMPONENT ---
         function App() {
             const [fb, setFb] = useState(null);
             const [user, setUser] = useState(null);
@@ -180,23 +255,48 @@
             const [localAnswers, setLocalAnswers] = useState({}); 
             const [isTransitioning, setIsTransitioning] = useState(false);
             
+            // Neon Custom Alert Modal State (Replacing browser alert)
+            const [modal, setModal] = useState({ show: false, title: "", message: "", type: "cyan" });
+
             const timerRef = useRef(null);
             const isHost = roomData?.hostId === user?.uid;
 
-            // Wait until Firebase SDK is initialized and exposed globally
+            // SAFELY DECLARE PLAYING-VIEW DEPENDENT VARIABLES
+            const question = (selectedGroup && selectedGroup.questions && selectedGroup.questions[currentQIndex]) 
+                ? selectedGroup.questions[currentQIndex] 
+                : null;
+            const myAnswer = (selectedGroup && user) 
+                ? (mode === 'solo' ? localAnswers[currentQIndex] : roomData?.players?.[user.uid]?.answers?.[currentQIndex]) 
+                : undefined;
+            const hasAnswered = myAnswer !== undefined;
+            const playersList = (mode === 'multi' && roomData && roomData.players) 
+                ? Object.values(roomData.players).sort((a, b) => (b.score || 0) - (a.score || 0)) 
+                : [];
+
+            const triggerModal = (title, message, type = "pink") => {
+                setModal({ show: true, title, message, type });
+            };
+
+            // Safe Polling for Firebase setup with localOnly timeout fallback
             useEffect(() => {
+                let attempts = 0;
                 const interval = setInterval(() => {
+                    attempts++;
                     if (window.FirebaseModule) {
                         setFb(window.FirebaseModule);
+                        clearInterval(interval);
+                    } else if (attempts > 15) { // 1.5 seconds maximum timeout
+                        console.warn("Firebase took too long or is missing, switching to localOnly mode.");
+                        setFb({ localOnly: true });
                         clearInterval(interval);
                     }
                 }, 100);
                 return () => clearInterval(interval);
             }, []);
 
-            // Handle Authentication once FirebaseModule is ready
+            // Firebase authentication setup
             useEffect(() => {
-                if (!fb) return;
+                if (!fb || fb.localOnly) return;
                 const initAuth = async () => {
                     try {
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -205,7 +305,7 @@
                             await fb.signInAnonymously(fb.auth);
                         }
                     } catch (e) {
-                        console.error("Auth Exception: ", e);
+                        console.error("Firebase auth exception, continuing on local: ", e);
                     }
                 };
                 initAuth();
@@ -213,9 +313,9 @@
                 return () => unsubscribe();
             }, [fb]);
 
-            // Real-time listener for multiplayer rooms
+            // Real-time synchronization for multiplayer rooms
             useEffect(() => {
-                if (!fb || !user || !roomCode || mode !== 'multi') return;
+                if (!fb || fb.localOnly || !user || !roomCode || mode !== 'multi') return;
 
                 const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', roomCode);
                 const unsubscribe = fb.onSnapshot(roomRef, (snapshot) => {
@@ -231,7 +331,7 @@
                             setIsTransitioning(false); 
                         }
                     } else {
-                        alert("Xona topilmadi yoki o'chirilgan.");
+                        triggerModal("Xatolik", "Xona kodi topilmadi yoki xona o'chirildi.", "red");
                         setView('home');
                     }
                 }, (error) => console.error("Firebase Sync error: ", error));
@@ -239,7 +339,7 @@
                 return () => unsubscribe();
             }, [fb, user, roomCode, mode, view, currentQIndex]);
 
-            // Auto-skip logic if everyone answered in real-time
+            // Real-time Auto-skip triggers once all users select answers
             useEffect(() => {
                 if (!isHost || mode !== 'multi' || !roomData || roomData.status !== 'playing' || isTransitioning) return;
 
@@ -253,7 +353,7 @@
                 }
             }, [roomData?.players, roomData?.currentQ, roomData?.status, isHost, mode, isTransitioning]);
 
-            // Main Timer Logic
+            // Game Timer Logic
             useEffect(() => {
                 if (view !== 'playing') return;
 
@@ -292,11 +392,14 @@
                 return () => clearInterval(timerRef.current);
             }, [view, currentQIndex, roomData?.questionStartTime, mode, isHost, isTransitioning]);
 
-            // Multi: Room Creation
+            // Actions: Create Room
             const handleCreateRoom = async () => {
-                if (!playerName.trim()) return alert("Iltimos ismingizni kiriting!");
-                const code = Math.floor(100000 + Math.random() * 900000).toString();
+                if (!playerName.trim()) return triggerModal("Ogohlantirish", "Iltimos, ismingizni kiriting!");
+                if (!fb || fb.localOnly) {
+                    return triggerModal("Lokal Rejim", "Xatolik: Tarmoq yo'q yoki Firebase sozlanmagan! Guruh yaratish uchun tarmoq aloqasi kerak.", "red");
+                }
                 
+                const code = Math.floor(100000 + Math.random() * 900000).toString();
                 const newRoom = {
                     hostId: user.uid,
                     groupId: selectedGroup.id,
@@ -315,20 +418,24 @@
                     setView('lobby');
                 } catch (e) {
                     console.error(e);
-                    alert("Xona yaratish imkonsiz bo'ldi.");
+                    triggerModal("Tizim Xatosi", "Kutilmagan xatolik tufayli xona yaratib bo'lmadi.", "red");
                 }
             };
 
-            // Multi: Joining Room
+            // Actions: Join Room
             const handleJoinRoom = async () => {
-                if (!playerName.trim() || !joinCode.trim()) return alert("Ism va maxsus kodni kiriting!");
+                if (!playerName.trim()) return triggerModal("Ogohlantirish", "Iltimos, ismingizni kiriting!");
+                if (!joinCode.trim()) return triggerModal("Ogohlantirish", "Xona kodini kiriting!");
+                if (!fb || fb.localOnly) {
+                    return triggerModal("Lokal Rejim", "Tarmoq ulanishi yo'q. Guruhga qo'shilib bo'lmaydi.", "red");
+                }
                 
                 try {
                     const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', joinCode);
                     const snap = await fb.getDoc(roomRef);
                     
-                    if (!snap.exists()) return alert("Xona topilmadi. Kodni qayta tekshiring.");
-                    if (snap.data().status !== 'lobby') return alert("Afsus, bu o'yin allaqachon boshlangan!");
+                    if (!snap.exists()) return triggerModal("Xona topilmadi", "Bunday kodli xona mavjud emas.", "red");
+                    if (snap.data().status !== 'lobby') return triggerModal("Xatolik", "Ushbu xonada o'yin allaqachon boshlanib ketgan!", "red");
 
                     await fb.updateDoc(roomRef, {
                         [`players.${user.uid}`]: { name: playerName, score: 0, answers: {} }
@@ -340,11 +447,10 @@
                     setView('lobby');
                 } catch (e) {
                     console.error(e);
-                    alert("Guruhga qo'shilish muvaffaqiyatsiz tugadi.");
+                    triggerModal("Xatolik", "Guruhga qo'shilish amalga oshmadi.", "red");
                 }
             };
 
-            // Multi: Start Battle
             const startGameMulti = async () => {
                 if (!isHost) return;
                 try {
@@ -356,22 +462,19 @@
                 } catch (e) { console.error(e); }
             };
 
-            // Solo: Start Game
             const startSolo = () => {
-                if (!playerName.trim()) return alert("Ismingizni kiriting!");
+                if (!playerName.trim()) return triggerModal("Ogohlantirish", "Iltimos, ismingizni kiriting!");
                 setMode('solo');
                 setLocalAnswers({});
                 setCurrentQIndex(0);
                 setView('playing');
             };
 
-            // Solo Answer Handler
             const handleAnswerSolo = (optIndex) => {
                 if (localAnswers[currentQIndex] !== undefined) return; 
                 setLocalAnswers(prev => ({ ...prev, [currentQIndex]: optIndex }));
             };
 
-            // Solo Next Question
             const handleNextQuestionSolo = () => {
                 if (currentQIndex < selectedGroup.questions.length - 1) {
                     setCurrentQIndex(prev => prev + 1);
@@ -380,7 +483,6 @@
                 }
             };
 
-            // Multi Answer Submission
             const handleAnswerMulti = async (optIndex) => {
                 if (roomData.players[user.uid]?.answers[currentQIndex] !== undefined) return;
                 
@@ -393,10 +495,9 @@
                         [`players.${user.uid}.answers.${currentQIndex}`]: optIndex,
                         [`players.${user.uid}.score`]: isCorrect ? currentScore + 1 : currentScore
                     });
-                } catch (e) { console.error("Submit Answer error: ", e); }
+                } catch (e) { console.error("Error submitting answer: ", e); }
             };
 
-            // Multi Next Question Skipper
             const handleNextQuestionMulti = async (currentRoomData) => {
                 if (!isHost) return;
                 try {
@@ -407,4 +508,431 @@
                             questionStartTime: Date.now()
                         });
                     } else {
-                        aw
+                        await fb.updateDoc(roomRef, { status: 'finished' });
+                    }
+                } catch (e) { console.error(e); }
+            };
+
+            const handleEndGameEarly = async () => {
+                if (!isHost || mode !== 'multi') return;
+                try {
+                    const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', roomCode);
+                    await fb.updateDoc(roomRef, { status: 'finished' });
+                } catch (e) { console.error("Force end error: ", e); }
+            };
+
+            const quit = () => {
+                setView('home');
+                setRoomCode('');
+                setMode(null);
+                setLocalAnswers({});
+            };
+
+            // Loading screen safely handled
+            if (!fb) {
+                return (
+                    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_#22d3ee] mb-4"></div>
+                        <p className="text-cyan-400 font-extrabold tracking-widest text-lg uppercase animate-pulse">Neon Platforma Yuklanmoqda...</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-cyan-500/30">
+                    
+                    {/* CUSTOM NEON MODAL ALERT */}
+                    {modal.show && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                            <div className="bg-slate-900 border-2 border-pink-500 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_40px_rgba(236,72,153,0.3)] animate-scale-up">
+                                <h3 className="text-2xl font-black text-pink-500 mb-2 uppercase tracking-wide">{modal.title}</h3>
+                                <p className="text-slate-300 mb-6 font-medium leading-relaxed">{modal.message}</p>
+                                <NeonButton onClick={() => setModal({ ...modal, show: false })} color="pink" className="w-full">
+                                    OK, Tushunarli
+                                </NeonButton>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TOP NAVBAR */}
+                    <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md py-4 px-6 flex justify-between items-center z-10">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></div>
+                            <span className="font-black text-lg tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-pink-500">NEON FALSAFA</span>
+                        </div>
+                        {fb.localOnly && (
+                            <div className="bg-amber-500/10 border border-amber-500/40 text-amber-400 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest">
+                                OFFLINE / LOKAL REJIM
+                            </div>
+                        )}
+                    </header>
+
+                    {/* VIEWPORTS */}
+                    <main className="flex-grow flex flex-col justify-center py-8">
+                        
+                        {/* 1. HOME VIEW */}
+                        {view === 'home' && (
+                            <div className="max-w-6xl mx-auto px-6 w-full">
+                                <div className="text-center mb-16">
+                                    <h1 className="text-5xl md:text-8xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 [text-shadow:_0_0_40px_rgba(236,72,153,0.3)]">
+                                        NEON BATTLE
+                                    </h1>
+                                    <p className="text-lg md:text-xl text-cyan-200/60 font-medium tracking-[0.25em] uppercase">Guruhda Canli Test Bellashuvi</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {GROUPS.map((group) => (
+                                        <div 
+                                            key={group.id}
+                                            onClick={() => { setSelectedGroup(group); setView('setup'); }}
+                                            className="bg-slate-900/40 backdrop-blur-md border border-cyan-500/20 p-6 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.25)] group"
+                                        >
+                                            <div className="text-cyan-400 mb-2 group-hover:text-pink-400 transition-colors">
+                                                <span className="text-4xl font-black">{group.id + 1}</span>
+                                                <span className="text-lg opacity-60 ml-2 font-bold">Guruh</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold text-slate-100 mb-2">{group.title}</h3>
+                                            <p className="text-slate-400 text-sm flex items-center">
+                                                <span className="w-2 h-2 rounded-full bg-cyan-400 mr-2"></span>
+                                                {group.description}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 2. SETUP VIEW */}
+                        {view === 'setup' && (
+                            <div className="flex items-center justify-center p-6 w-full">
+                                <div className="bg-slate-900/80 backdrop-blur-xl border border-pink-500/30 p-8 rounded-3xl w-full max-w-md shadow-[0_0_50px_rgba(236,72,153,0.15)]">
+                                    <button onClick={quit} className="text-slate-400 hover:text-cyan-400 mb-6 flex items-center transition-colors font-bold">
+                                        <Icons.ArrowLeft /> Ortga
+                                    </button>
+                                    
+                                    <h2 className="text-3xl font-black text-white mb-2">{selectedGroup?.title}</h2>
+                                    <p className="text-cyan-400/80 mb-8 font-medium">{selectedGroup?.description}</p>
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">Jangchi Ismi (Taxallus)</label>
+                                            <NeonInput value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="Ismingizni yozing..." maxLength={15} />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                                            <NeonButton onClick={startSolo} color="cyan" className="flex flex-col items-center justify-center py-6">
+                                                <Icons.UserSingle />
+                                                <span className="mt-2 text-sm">Yakka O'ynash</span>
+                                            </NeonButton>
+                                            <NeonButton onClick={handleCreateRoom} color="pink" className="flex flex-col items-center justify-center py-6">
+                                                <Icons.Users />
+                                                <span className="mt-2 text-sm">Guruh Yaratish</span>
+                                            </NeonButton>
+                                        </div>
+
+                                        <div className="relative flex items-center py-4">
+                                            <div className="flex-grow border-t border-slate-800"></div>
+                                            <span className="flex-shrink-0 mx-4 text-slate-500 text-sm font-bold">YOKI GURUHGA QO'SHILISH</span>
+                                            <div className="flex-grow border-t border-slate-800"></div>
+                                        </div>
+
+                                        <div className="flex space-x-2">
+                                            <NeonInput value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="6 xonali kod" maxLength={6} type="number" />
+                                            <NeonButton onClick={handleJoinRoom} color="green" className="px-5">
+                                                <Icons.LogIn />
+                                            </NeonButton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 3. LOBBY VIEW */}
+                        {view === 'lobby' && (
+                            <div className="flex flex-col items-center justify-center p-6 w-full">
+                                <div className="bg-slate-900/80 border border-cyan-500/50 p-8 rounded-3xl w-full max-w-lg text-center shadow-[0_0_30px_rgba(34,211,238,0.2)]">
+                                    <h2 className="text-cyan-400 uppercase tracking-widest text-sm font-extrabold mb-2">ULASHISH UCHUN XONA KODI</h2>
+                                    <div className="text-6xl font-black text-white mb-8 tracking-[0.15em] neon-glow-cyan">
+                                        {roomCode}
+                                    </div>
+
+                                    <div className="bg-slate-950/50 rounded-xl p-5 mb-8 min-h-[180px] text-left">
+                                        <h3 className="text-slate-400 mb-4 flex items-center font-bold border-b border-slate-800 pb-2">
+                                            <span className="mr-2 text-cyan-400 animate-bounce">●</span> Jangchilar ({roomData?.players ? Object.values(roomData.players).length : 0})
+                                        </h3>
+                                        <div className="flex flex-wrap gap-3">
+                                            {roomData?.players && Object.values(roomData.players).map((p, i) => (
+                                                <span key={i} className="bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 px-4 py-2 rounded-full font-bold shadow-[0_0_10px_rgba(34,211,238,0.1)]">
+                                                    {p.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {isHost ? (
+                                        <NeonButton onClick={startGameMulti} color="green" className="w-full py-4 text-xl">
+                                            <Icons.Play /> &nbsp; BATTLE-NI BOSHLASH
+                                        </NeonButton>
+                                    ) : (
+                                        <p className="text-pink-500 animate-pulse text-lg tracking-widest uppercase font-extrabold">Host o'yinni boshlashini kuting...</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 4. PLAYING VIEW */}
+                        {view === 'playing' && question && (
+                            <div className="w-full px-4 md:px-8 flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
+                                <div className="flex-grow max-w-4xl flex flex-col w-full">
+                                    
+                                    {/* Question Card Header */}
+                                    <div className="flex justify-between items-end mb-6">
+                                        <div>
+                                            <span className="text-pink-500 font-extrabold tracking-widest text-sm uppercase">{selectedGroup?.title}</span>
+                                            <h2 className="text-3xl font-black text-slate-100">Savol {currentQIndex + 1} / {selectedGroup?.questions?.length}</h2>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center text-3xl font-black">
+                                                <Icons.Clock /> &nbsp;
+                                                <span className={timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-cyan-400'}>
+                                                    00:{timeLeft.toString().padStart(2, '0')}
+                                                </span>
+                                            </div>
+                                            
+                                            {isHost && mode === 'multi' && (
+                                                <NeonButton onClick={handleEndGameEarly} color="red" className="py-2 px-4 text-sm font-bold">
+                                                    <Icons.Power /> &nbsp; Tugatish
+                                                </NeonButton>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Neon Loading Progress Bar */}
+                                    <div className="w-full h-3 bg-slate-900 rounded-full mb-8 overflow-hidden border border-slate-800">
+                                        <div 
+                                            className={`h-full transition-all duration-1000 linear ${
+                                                timeLeft > 10 ? 'bg-cyan-400 shadow-[0_0_10px_#22d3ee]' : 
+                                                timeLeft > 5 ? 'bg-yellow-400 shadow-[0_0_10px_#facc15]' : 
+                                                'bg-red-500 shadow-[0_0_10px_#ef4444] animate-pulse'
+                                            }`} 
+                                            style={{ width: `${(timeLeft / 20) * 100}%` }}
+                                        ></div>
+                                    </div>
+
+                                    {/* The Question Box */}
+                                    <div className="bg-slate-900/60 backdrop-blur-lg border border-slate-800 p-6 md:p-10 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.6)] mb-8 flex-grow flex flex-col justify-center">
+                                        <h3 className="text-2xl md:text-3xl font-bold leading-relaxed mb-10 text-center text-slate-100">
+                                            {question.text}
+                                        </h3>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
+                                            {question.options.map((opt, idx) => {
+                                                let btnStyle = "border-slate-800 bg-slate-900/40 text-slate-300 hover:border-cyan-400 hover:bg-slate-900/60";
+                                                
+                                                if (hasAnswered) {
+                                                    if (opt.isCorrect) {
+                                                        btnStyle = "border-green-400 bg-green-500/10 text-green-300 shadow-[0_0_15px_rgba(74,222,128,0.3)]";
+                                                    } else if (myAnswer === idx && !opt.isCorrect) {
+                                                        btnStyle = "border-red-500 bg-red-500/10 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.3)]";
+                                                    } else {
+                                                        btnStyle = "border-slate-950 bg-slate-950/60 text-slate-600 opacity-40";
+                                                    }
+                                                }
+
+                                                return (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => mode === 'solo' ? handleAnswerSolo(idx) : handleAnswerMulti(idx)}
+                                                        disabled={hasAnswered}
+                                                        className={`p-5 rounded-2xl border-2 text-lg font-bold text-left transition-all duration-300 flex items-center ${btnStyle}`}
+                                                    >
+                                                        <span className="w-8 font-extrabold opacity-40 text-xl mr-2">{['A','B','C','D'][idx]}</span>
+                                                        <span className="flex-grow">{opt.text}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                    
+                                    {mode === 'solo' && hasAnswered && (
+                                         <div className="flex justify-end animate-fade-in">
+                                             <NeonButton onClick={handleNextQuestionSolo} color="pink">
+                                                 Keyingisi &nbsp; ➜
+                                             </NeonButton>
+                                         </div>
+                                    )}
+                                </div>
+
+                                {/* Live Leaderboard Widget */}
+                                {mode === 'multi' && roomData && (
+                                    <div className="w-full lg:w-80 bg-slate-900/40 border border-pink-500/20 rounded-3xl p-6 flex flex-col h-full lg:max-h-[80vh]">
+                                        <h3 className="text-pink-400 font-extrabold tracking-widest uppercase mb-6 flex items-center border-b border-slate-800 pb-3">
+                                            <Icons.Trophy /> &nbsp; Live Reyting
+                                        </h3>
+                                        <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+                                            {playersList.map((p, i) => {
+                                                const hasPlayerAnswered = p.answers && p.answers[currentQIndex] !== undefined;
+                                                return (
+                                                    <div key={i} className={`p-4 rounded-xl flex justify-between items-center transition-all ${p.name === playerName ? 'bg-cyan-500/10 border border-cyan-500/40 shadow-[0_0_15px_rgba(34,211,238,0.1)]' : 'bg-slate-900/30'}`}>
+                                                        <div className="flex items-center">
+                                                            <span className="w-6 h-6 rounded-full bg-slate-950 flex items-center justify-center text-xs font-black mr-3 text-cyan-400 border border-cyan-500/30">
+                                                                {i + 1}
+                                                            </span>
+                                                            <span className="font-bold truncate max-w-[100px]" title={p.name}>{p.name}</span>
+                                                        </div>
+                                                        <div className="flex flex-col items-end">
+                                                            <div className="text-cyan-300 font-black text-sm">
+                                                                {p.score} <span className="text-xs opacity-50 ml-1">PT</span>
+                                                            </div>
+                                                            {hasPlayerAnswered && <span className="text-[10px] text-green-400 font-bold mt-1">Javob berdi ✓</span>}
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* 5. RESULTS VIEW */}
+                        {view === 'results' && (
+                            <div className="max-w-5xl mx-auto px-6 w-full animate-fade-in">
+                                
+                                <div className="flex justify-between items-center mb-10 border-b border-slate-900 pb-6">
+                                    <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">BATTLE YAKUNI</h1>
+                                    <NeonButton onClick={quit} color="cyan">
+                                        <Icons.Home /> Bosh sahifa
+                                    </NeonButton>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                    {/* Glowing Circle percentage indicator */}
+                                    {(() => {
+                                        let myScore = 0;
+                                        if (mode === 'solo') {
+                                            selectedGroup?.questions?.forEach((q, i) => {
+                                                const myAnsIdx = localAnswers[i];
+                                                if (myAnsIdx !== undefined && q.options[myAnsIdx].isCorrect) myScore++;
+                                            });
+                                        } else if (roomData) {
+                                            myScore = roomData.players[user.uid]?.score || 0;
+                                        }
+                                        const total = mode === 'multi' ? (roomData?.currentQ + 1 || 1) : (selectedGroup?.questions?.length || 1);
+                                        const percentage = Math.round((myScore / total) * 100);
+
+                                        return (
+                                            <div className="lg:col-span-1 bg-slate-900/60 border border-cyan-500/30 rounded-3xl p-8 text-center shadow-[0_0_30px_rgba(34,211,238,0.1)] flex flex-col items-center justify-center">
+                                                <div className="w-44 h-44 rounded-full border-4 border-slate-800 flex items-center justify-center mb-6 relative">
+                                                    <svg className="absolute inset-0 w-full h-full -rotate-90">
+                                                        <circle cx="88" cy="88" r="82" className="stroke-slate-800 fill-none" strokeWidth="8" />
+                                                        <circle cx="88" cy="88" r="82" className="stroke-cyan-400 fill-none transition-all duration-1000" strokeWidth="8" strokeDasharray={2 * Math.PI * 82} strokeDashoffset={2 * Math.PI * 82 * (1 - (percentage || 0)/100)} />
+                                                    </svg>
+                                                    <div className="text-5xl font-black text-white">{percentage || 0}%</div>
+                                                </div>
+                                                <h2 className="text-2xl font-black mb-1">{playerName}</h2>
+                                                <p className="text-slate-400 font-bold text-lg">{myScore} ta to'g'ri / {total} ta savoldan</p>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    {/* Scoreboards (Only for Multi modes) */}
+                                    {mode === 'multi' && roomData && (
+                                        <div className="lg:col-span-2 bg-slate-900/40 border border-pink-500/20 rounded-3xl p-8">
+                                             <h3 className="text-2xl font-black text-pink-500 mb-6 flex items-center">
+                                                🏆 &nbsp; Yakuniy Reyting
+                                            </h3>
+                                            <div className="space-y-3">
+                                                {Object.values(roomData.players).sort((a,b) => b.score - a.score).map((p, i) => (
+                                                    <div key={i} className={`p-5 rounded-2xl flex justify-between items-center ${i === 0 ? 'bg-gradient-to-r from-yellow-500/10 to-transparent border border-yellow-500/40 shadow-[0_0_20px_rgba(234,179,8,0.15)]' : 'bg-slate-900/30'}`}>
+                                                        <div className="flex items-center text-xl">
+                                                            <span className={`w-9 h-9 rounded-full flex items-center justify-center font-black mr-4 ${i===0 ? 'bg-yellow-500 text-black shadow-[0_0_10px_#eab308]' : 'bg-slate-800 text-slate-300'}`}>
+                                                                {i + 1}
+                                                            </span>
+                                                            <span className="font-extrabold">{p.name}</span>
+                                                        </div>
+                                                        <div className="text-2xl font-black text-cyan-400">
+                                                            {p.score} <span className="text-sm font-bold text-slate-500">PT</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Custom Incorrect Answers Review Box */}
+                                {(() => {
+                                    const mistakes = [];
+                                    if (mode === 'solo' && selectedGroup) {
+                                        selectedGroup.questions.forEach((q, i) => {
+                                            const myAnsIdx = localAnswers[i];
+                                            if (myAnsIdx === undefined || !q.options[myAnsIdx].isCorrect) {
+                                                mistakes.push({
+                                                    text: q.text,
+                                                    myAns: myAnsIdx !== undefined ? q.options[myAnsIdx].text : "Javob berilmagan",
+                                                    correctAns: q.options.find(o => o.isCorrect).text
+                                                });
+                                            }
+                                        });
+                                    } else if (roomData && selectedGroup) {
+                                        const maxQuestionReached = roomData.currentQ;
+                                        for (let i = 0; i <= maxQuestionReached; i++) {
+                                            const q = selectedGroup.questions[i];
+                                            const myAnsIdx = roomData.players[user?.uid]?.answers[i];
+                                            if (myAnsIdx === undefined || !q.options[myAnsIdx].isCorrect) {
+                                                mistakes.push({
+                                                    text: q.text,
+                                                    myAns: myAnsIdx !== undefined ? q.options[myAnsIdx].text : "Javob berilmagan",
+                                                    correctAns: q.options.find(o => o.isCorrect).text
+                                                });
+                                            }
+                                        }
+                                    }
+
+                                    if (mistakes.length === 0) return null;
+
+                                    return (
+                                        <div className="mt-8 bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-10">
+                                            <h3 className="text-2xl font-black text-red-400 mb-8 flex items-center">
+                                                ❌ &nbsp; Xatolar Tahlili ({mistakes.length} ta)
+                                            </h3>
+                                            <div className="space-y-6">
+                                                {mistakes.map((m, i) => (
+                                                    <div key={i} className="bg-slate-950/60 p-6 rounded-2xl border-l-4 border-red-500">
+                                                        <p className="text-lg font-bold mb-4 text-slate-100">{m.text}</p>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-bold">
+                                                            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-300">
+                                                                <span className="block text-red-500 text-xs font-black uppercase mb-1">Sizning javobingiz:</span>
+                                                                {m.myAns}
+                                                            </div>
+                                                            <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl text-green-300">
+                                                                <span className="block text-green-500 text-xs font-black uppercase mb-1">To'g'ri javob:</span>
+                                                                {m.correctAns}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        )}
+                    </main>
+
+                    {/* TOP FOOTER */}
+                    <footer className="border-t border-slate-900 bg-slate-950/30 py-4 px-6 text-center text-xs text-slate-500 font-medium">
+                        © 2026 Neon Falsafa Battle | Barcha huquqlar himoyalangan.
+                    </footer>
+                </div>
+            );
+        }
+
+        // Initialize and Mount React Application
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>

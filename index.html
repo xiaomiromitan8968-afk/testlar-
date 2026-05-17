@@ -51,38 +51,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Tarjima qilingan o'zbekcha Firebase kalitlarini asl inglizcha holatiga qaytarish funksiyasi
-        function sanitizeConfig(config) {
-            if (!config) return null;
-            const clean = {};
-            for (const key in config) {
-                const val = config[key];
-                // Kalitni normallashtirish (barcha bo'shliqlar, belgilarni o'chirish va kichik harfga o'tkazish)
-                const normalized = key.trim().toLowerCase()
-                    .replace(/['’`‘]/g, '') // o'lchov so'zidagi o' harfini tozalash
-                    .replace(/[^a-z0-9]/g, ''); // faqat harf va sonlarni qoldirish
-                
-                if (normalized === 'apikey') {
-                    clean.apiKey = val;
-                } else if (normalized === 'authdomain') {
-                    clean.authDomain = val;
-                } else if (normalized === 'projectid' || normalized === 'loyihaidentifikatori' || normalized === 'loyiha') {
-                    clean.projectId = val;
-                } else if (normalized === 'storagebucket') {
-                    clean.storageBucket = val;
-                } else if (normalized === 'messagingsenderid' || normalized === 'xabarlarsenderid' || normalized === 'xabalarsenderid') {
-                    clean.messagingSenderId = val;
-                } else if (normalized === 'appid') {
-                    clean.appId = val;
-                } else if (normalized === 'measurementid' || normalized === 'olchovidentifikatori') {
-                    clean.measurementId = val;
-                } else {
-                    clean[key] = val;
-                }
-            }
-            return clean;
-        }
-
         // LocalStorage-dan maxsus foydalanuvchi kiritgan sozlamalarni tekshirish
         const customConfigStr = localStorage.getItem('neon_firebase_config');
         let customConfig = null;
@@ -94,7 +62,7 @@
 
         const envConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
         
-        // FOYDALANUVCHINING REAL FIREBASE KALITLARI INTEGRATSIYA QILINDI
+        // FOYDALANUVCHINING REAL FIREBASE INGLIZCHA KALITLARI
         const realUserFirebaseConfig = {
             apiKey: "AIzaSyCQpHYawA6MNsF36XpuC5ydJpNLVHFnSW4",
             authDomain: "falsafa-aba1d.firebaseapp.com",
@@ -105,8 +73,7 @@
             measurementId: "G-SYSKV52CGS"
         };
 
-        const rawConfig = customConfig || (envConfig ? JSON.parse(envConfig) : realUserFirebaseConfig);
-        const finalConfig = sanitizeConfig(rawConfig);
+        const finalConfig = customConfig || (envConfig ? JSON.parse(envConfig) : realUserFirebaseConfig);
 
         if (finalConfig && finalConfig.apiKey) {
             try {

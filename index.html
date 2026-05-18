@@ -2,1221 +2,1328 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Falsafa Battle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tarixiy Koshif - Professional Smart Gid</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React and ReactDOM from CDN -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <!-- Babel for JSX compilation in browser -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Custom Neon Styles -->
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #020617;
         }
-        /* Custom Scrollbar for Neon */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+
+        /* Glassmorphism & Effects */
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(30, 41, 59, 0.5);
-            border-radius: 10px;
+        
+        .glass-light {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #22d3ee;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #22d3ee;
+
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
         }
-        /* Text Glows */
-        .neon-glow-cyan {
-            text-shadow: 0 0 15px rgba(34, 211, 238, 0.6), 0 0 30px rgba(34, 211, 238, 0.2);
+
+        .indigo-glow {
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.45);
         }
-        .neon-glow-pink {
-            text-shadow: 0 0 15px rgba(236, 72, 153, 0.6), 0 0 30px rgba(236, 72, 153, 0.2);
+
+        /* Scan Overlay Line */
+        @keyframes cyber-scan {
+            0% { top: 4%; }
+            50% { top: 96%; }
+            100% { top: 4%; }
+        }
+        .scan-line {
+            position: absolute;
+            left: 2%;
+            width: 96%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #fbbf24, #6366f1, #fbbf24, transparent);
+            box-shadow: 0 0 12px #6366f1, 0 0 4px #fbbf24;
+            animation: cyber-scan 3.5s ease-in-out infinite;
+        }
+
+        /* Audio Wave Animation */
+        .wave-bar {
+            width: 4px;
+            height: 8px;
+            background-color: #6366f1;
+            border-radius: 4px;
+            transition: height 0.1s ease;
+        }
+        
+        .wave-active {
+            animation: sound-bounce 0.6s ease-in-out infinite alternate;
+        }
+        .wave-active:nth-child(2) { animation-delay: 0.1s; }
+        .wave-active:nth-child(3) { animation-delay: 0.2s; }
+        .wave-active:nth-child(4) { animation-delay: 0.3s; }
+        .wave-active:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes sound-bounce {
+            0% { height: 6px; transform: scaleY(0.8); }
+            100% { height: 26px; transform: scaleY(1.2); }
+        }
+
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
-<body class="text-slate-100 overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden no-select">
 
-    <div id="root"></div>
+    <!-- Top Premium Navigation Bar -->
+    <header class="glass-dark border-b border-slate-900 px-6 py-4 flex justify-between items-center z-40 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <i class="fa-solid fa-feather-pointed text-slate-950 text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-extrabold tracking-wide bg-gradient-to-r from-amber-400 to-indigo-400 bg-clip-text text-transparent">Tarixiy Koshif</h1>
+                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">AI Silk Road Guide • Pro</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-show-history" class="w-10 h-10 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </button>
+            <button id="btn-show-settings" class="w-10 h-10 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
+        </div>
+    </header>
 
-    <!-- Firebase SDKs with Safe Fallback Loading -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- Main View Switcher Area -->
+    <main class="flex-1 relative overflow-hidden bg-slate-950">
 
-        // LocalStorage-dan maxsus foydalanuvchi kiritgan sozlamalarni tekshirish
-        const customConfigStr = localStorage.getItem('neon_firebase_config');
-        let customConfig = null;
-        try {
-            if (customConfigStr) customConfig = JSON.parse(customConfigStr);
-        } catch(e) {
-            console.error("Custom config parse error", e);
-        }
+        <!-- 1. STUDIO VIEW (Camera & Scanner) -->
+        <section id="view-studio" class="absolute inset-0 flex flex-col z-10 transition-all duration-300">
+            <!-- Camera Viewfinder -->
+            <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
+                <video id="camera-stream" class="w-full h-full object-cover" autoplay playsinline></video>
+                
+                <!-- Scanner Interface Elements -->
+                <div class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                    <div class="relative w-72 h-72 sm:w-96 sm:h-96 border border-white/10 rounded-3xl bg-black/10 backdrop-blur-[1px] flex items-center justify-center">
+                        <!-- Neon Bracket corners -->
+                        <div class="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-amber-500 rounded-tl-3xl"></div>
+                        <div class="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-amber-500 rounded-tr-3xl"></div>
+                        <div class="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-indigo-500 rounded-bl-3xl"></div>
+                        <div class="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-indigo-500 rounded-br-3xl"></div>
+                        
+                        <!-- Pulse Target Center -->
+                        <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center animate-pulse">
+                            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+                        </div>
 
-        const envConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-        
-        // FOYDALANUVCHINING REAL FIREBASE INGLIZCHA KALITLARI
-        const realUserFirebaseConfig = {
-            apiKey: "AIzaSyCQpHYawA6MNsF36XpuC5ydJpNLVHFnSW4",
-            authDomain: "falsafa-aba1d.firebaseapp.com",
-            projectId: "falsafa-aba1d",
-            storageBucket: "falsafa-aba1d.firebasestorage.app",
-            messagingSenderId: "682260883672",
-            appId: "1:682260883672:web:ab379ce84ea13dea6ecfad",
-            measurementId: "G-SYSKV52CGS"
-        };
+                        <!-- Active laser scanner line -->
+                        <div id="laser-line" class="scan-line hidden"></div>
+                    </div>
+                </div>
 
-        const finalConfig = customConfig || (envConfig ? JSON.parse(envConfig) : realUserFirebaseConfig);
+                <!-- Instant Tip Bar -->
+                <div class="absolute top-6 left-6 right-6 z-20 pointer-events-none flex justify-center">
+                    <div class="glass-dark px-4 py-2 rounded-full flex items-center gap-2 border border-amber-500/20 shadow-md">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span class="text-xs font-semibold text-slate-200">Kamerani tarixiy buyum yoki bitikka to'g'rilang</span>
+                    </div>
+                </div>
+            </div>
 
-        if (finalConfig && finalConfig.apiKey) {
-            try {
-                const app = initializeApp(finalConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'neon-quiz-app';
-
-                window.FirebaseModule = {
-                    auth,
-                    db,
-                    appId,
-                    signInAnonymously,
-                    signInWithCustomToken,
-                    onAuthStateChanged,
-                    doc,
-                    setDoc,
-                    getDoc,
-                    updateDoc,
-                    onSnapshot,
-                    localOnly: false
-                };
-            } catch(e) {
-                console.error("Firebase init failed: ", e);
-                window.FirebaseModule = { localOnly: true };
-            }
-        } else {
-            window.FirebaseModule = { localOnly: true };
-        }
-    </script>
-
-    <!-- React Application Component in Babel/JSX -->
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        // --- HAQIQIY FALSAFA SAVOLLARI BAZASI (PDFdan olingan matnlar) ---
-        const realPhilosophyQuestions = [
-            { q: "Falsafa tushunchasining ma'nosi nima?", o: ["#Yunoncha phileo - sevaman, sophia - donolik so'zlaridan kelib chiqqan bo'lib, donolikka muhabbat", "Texnologiya va san'at uyg'unligi", "Siyosiy va ijtimoiy munosabatlar", "Axloqiy qadriyatlar va diniy qoidalar"] },
-            { q: "Falsafaning ontologiya bo'limida qanday masalalar oʻrganiladi?", o: ["#Borliq va mavjudlik mohiyati", "Yer osti tabiiy boyliklarini aniqlash", "Kimyoviy elementlar va moddalar", "Shaxsiy tajribalar va hislar"] },
-            { q: "Falsafa va dinning umumiy maqsadi nima?", o: ["#Olam va insonning mohiyatini anglash", "Olamning kosmologik modelini yaratish", "Mehnat haqida nazariyalar yaratish", "Tajriba va eksperimentlarga asoslanish"] },
-            { q: "Falsafiy bilimlarning muhim tarkibiy qismlaridan biri nima?", o: ["#Gnoseologiya", "Fizika", "Kimyo", "Shaxsiy e'tiqodlar"] },
-            { q: "Falsafaning madaniy funksiyasi nimani anglatadi?", o: ["#Insoniyatning umumiy madaniy taraqqiyotiga xizmat qilish", "Diniy qadriyatlarni mustahkamlash", "Ilmiy qonunlarni tushuntirish", "Jamiyatni faqat axloqiy tarbiyalash"] },
-            { q: "Falsafaning ijtimoiy sohaga ta'siri qanday namoyon bo'ladi?", o: ["#Jamiyatni boshqarishdagi qarashlarni shakllantirish orqali", "Faqat axloqiy qadriyatlarni o'rgatishda", "Tabiiy hodisalarni tushuntirishda", "Ilmiy haqiqatlarni targ'ib qilishda"] },
-            { q: "Falsafiy dunyoqarashning eng muhim vazifasi nima?", o: ["#Insonning o'zini va borliqni anglashiga yordam berish", "Ilmiy ma'lumotlarni to'plash", "Jamiyatni iqtisodiy isloh qilish", "Diniy qoidalarni kuchaytirish"] },
-            { q: "Jamiyat qanday tizim sifatida qaraladi?", o: ["#Rivojlanuvchi va oʻzgaruvchan tizim", "Biologik evolyutsion birlik", "Statik ijtimoiy guruh", "Faqatgina iqtisodiy tuzilma"] },
-            { q: "Forobiyning fikriga koʻra, toʻliqsiz jamiyat nima?", o: ["#Oila, mahalla", "Dunyo", "Davlat", "Tarix"] },
-            { q: "Tarixiy rivojlanish jarayonida sub'yektiv omillar qanday rol o'ynaydi?", o: ["#Jamiyatning rivojlanishiga muhim ta'sir ko'rsatadi", "Tasodifiy hodisalarni to'liq boshqaradi", "Faqat iqtisodiy jarayonlarni shakllantiradi", "Umuman ahamiyatsiz hisoblanadi"] },
-            { q: "Qaysi jamiyat toʻliqsiz hisoblanadi?", o: ["#Bir oila, qishloq yoki ovul", "Shahar yoki milliy birlik", "Xalqaro sivilizatsiya", "Umumiy madaniy jamiyat"] },
-            { q: "Jamiyatning paydo bo'lishi qanday omillarga asoslanadi?", o: ["#Mehnat va muloqotga", "Tasodifiy voqealarning birlashuviga", "Biologik evolyutsiya natijasiga", "Tabiiy resurslarning mavjudligiga"] },
-            { q: "Forobiyning fikriga koʻra, to'liq jamiyatning birinchi bosqichi nima?", o: ["#Shahar jamiyati", "Oila", "Milliy birlik", "Qishloq"] },
-            { q: "P.A.Sorokin jamiyatni qanday tizim sifatida tasvirlagan?", o: ["#Gorizontal, vertikal va fluktuatsion tizimlar", "Ijtimoiy-siyosiy yopiq tizimlar", "Faqat iqtisodiy tuzilma", "Etnik guruhlar yig'indisi"] },
-            { q: "Gnoseologiya nima?", o: ["#Bilish haqidagi ta'limot", "Matematik nazariya", "Falsafiy eksperiment usuli", "Mantiqiy yondashuv"] },
-            { q: "Epistemologiyaning asosiy oʻrganish ob'yekti nima?", o: ["#Haqiqiy ilmiy bilimlarning mazmuni", "Axloqiy qoidalar tizimi", "San'at nazariyasi va turlari", "Iqtisodiy munosabatlar"] },
-            { q: "David Yumning bilish haqidagi yondashuvi qanday nomlanadi?", o: ["#Skeptitsizm", "Agnostitsizm", "Optimizm", "Materializm"] },
-            { q: "Kantning 'narsa oʻzida' konsepsiyasi nimani anglatadi?", o: ["#Hissiyot va tafakkurga bog'liq bo'lmagan borliqni", "Biz bevosita biladigan barcha narsalarni", "Ilmiy tadqiyod ob'yektini", "Sub'yektiv aqlni"] },
-            { q: "Empirizmga ko'ra haqiqiy bilimning asosi nimada?", o: ["#Tajriba", "Aql", "E'tiqod", "Mifologik g'oyalar"] },
-            { q: "Noilmiy bilimning eng birinchi shakli nima?", o: ["#Kundalik amaliy bilim", "Fizikaviy bilim", "Kimyoviy bilim", "Radikal falsafiy qarashlar"] },
-            { q: "Relyativizm nima?", o: ["#Haqiqat nisbiy va vaqtinchalikdir", "Haqiqat mutlaq va oʻzgarmasdir", "Haqiqatning ilmiy asosi yo'qdir", "Haqiqat shaxsiy e'tiqodga asoslanadi"] },
-            { q: "Badiiy bilimning oʻziga xos xususiyati nimada?", o: ["#Borliqni obrazlar orqali aks ettirishda", "Matematik formulalarda izohlashda", "Nazariy ma'lumotlarni ifodalashda", "Haqiqatning mutlaq tahlilida"] },
-            { q: "Ontologiya atamasi qaysi so'zdan olingan?", o: ["#Yunoncha «ontos» - borliq, «logos» - ta'limot", "Lotincha «onto» - tiriklik", "Arabcha «vujud» - mavjudlik", "Nemischa «sein» - borliq"] },
-            { q: "«Hamma narsa sondir» degan fikr kimga tegishli?", o: ["#Pifagor", "Fales", "Anaksimandr", "Ksenofan"] },
-            { q: "«Oqayotgan suvga ikki marta tushib bo’lmaydi» fikr muallifi kim?", o: ["#Geraklit", "Fales", "Anaksimandr", "Ksenofan"] },
-            { q: "Ibn Sino fikricha, «Vujudi vojib» nima?", o: ["#Alloh (Yaratuvchi)", "Inson", "Koinot", "Vaqt va makon"] },
-            { q: "Monizm ta’limotiga to‘g‘ri ta’rif berilgan qatorni ko‘rsating?", o: ["#Olamning asosi yagona substansiyadan iborat deb hisoblovchi ta'limot", "Olam ikkita teng asosga ega degan ta'limot", "Olamda juda ko'p mustaqil kuchlar mavjudligi", "Olamni inkor etuvchi qarash"] }
-        ];
-
-        // 10 guruh uchun 50 tadan jami 500 ta savol hosil qiluvchi generator
-        const generateGroups = () => {
-            const groups = [];
-            for (let i = 0; i < 10; i++) {
-                const groupQuestions = [];
-                for (let j = 0; j < 50; j++) {
-                    const baseQ = realPhilosophyQuestions[j % realPhilosophyQuestions.length];
-                    const parsedOptions = baseQ.o.map(opt => ({
-                        text: opt.replace('#', ''),
-                        isCorrect: opt.startsWith('#')
-                    })).sort(() => Math.random() - 0.5); 
-                    
-                    groupQuestions.push({
-                        id: `g${i}_q${j}`,
-                        text: `${j + 1}. ${baseQ.q}`,
-                        options: parsedOptions
-                    });
-                }
-                groups.push({
-                    id: i,
-                    title: `${i + 1} - Guruh`,
-                    description: `${i * 50 + 1} dan ${(i + 1) * 50} gacha bo'lgan testlar`,
-                    questions: groupQuestions
-                });
-            }
-            return groups;
-        };
-
-        const GROUPS = generateGroups();
-
-        // --- CUSTOM INLINE SVG NEON ICONS ---
-        const Icons = {
-            Clock: () => (
-                <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                </svg>
-            ),
-            Trophy: () => (
-                <svg className="w-7 h-7 text-yellow-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34M12 2a4 4 0 00-4 4v5a4 4 0 008 0V6a4 4 0 00-4-4z" />
-                </svg>
-            ),
-            Users: () => (
-                <svg className="w-6 h-6 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zm14 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-                </svg>
-            ),
-            Power: () => (
-                <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
-                </svg>
-            ),
-            UserSingle: () => (
-                <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
-                </svg>
-            ),
-            Play: () => (
-                <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-            ),
-            LogIn: () => (
-                <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path d="M15 3H7a2 2 0 00-2 2v14a2 2 0 002 2h8M10 17l5-5-5-5M15 12H3" />
-                </svg>
-            ),
-            ArrowLeft: () => (
-                <svg className="w-5 h-5 text-slate-300 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <line x1="19" y1="12" x2="5" y2="12" />
-                    <polyline points="12 19 5 12 12 5" />
-                </svg>
-            ),
-            Home: () => (
-                <svg className="w-5 h-5 text-cyan-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-            ),
-            Settings: () => (
-                <svg className="w-6 h-6 text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-                </svg>
-            )
-        };
-
-        // --- NEON BUTTON ---
-        const NeonButton = ({ children, onClick, color = 'cyan', className = '', disabled = false }) => {
-            const colors = {
-                cyan: 'border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-gray-950 shadow-[0_0_10px_rgba(34,211,238,0.2)] hover:shadow-[0_0_20px_rgba(34,211,238,0.7)]',
-                pink: 'border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-gray-950 shadow-[0_0_10px_rgba(236,72,153,0.2)] hover:shadow-[0_0_20px_rgba(236,72,153,0.7)]',
-                green: 'border-green-400 text-green-400 hover:bg-green-400 hover:text-gray-950 shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:shadow-[0_0_20px_rgba(74,222,128,0.7)]',
-                red: 'border-red-500 text-red-500 hover:bg-red-500 hover:text-gray-950 shadow-[0_0_10px_rgba(239,68,68,0.2)] hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]',
-            };
-
-            return (
-                <button
-                    onClick={onClick}
-                    disabled={disabled}
-                    className={`border-2 px-6 py-3 rounded-xl font-extrabold tracking-wider transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center ${colors[color]} ${className}`}
-                >
-                    {children}
+            <!-- Controller Bar -->
+            <div class="h-32 bg-slate-950 border-t border-slate-900 px-8 flex justify-between items-center z-20">
+                <!-- Gallery Picker -->
+                <button id="btn-open-gallery" class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-slate-300 hover:text-amber-400 hover:border-amber-500/30 transition-all active:scale-90" onclick="document.getElementById('file-picker').click()">
+                    <i class="fa-regular fa-image text-lg mb-1"></i>
+                    <span class="text-[9px] font-bold uppercase tracking-wider">Galereya</span>
                 </button>
-            );
-        };
+                <input type="file" id="file-picker" accept="image/*" class="hidden">
 
-        const NeonInput = ({ value, onChange, placeholder, type = 'text', maxLength, className = "" }) => (
-            <input
-                type={type}
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                maxLength={maxLength}
-                className={`w-full bg-slate-900/60 border-2 border-cyan-500/50 rounded-xl px-4 py-3 text-cyan-50 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all text-center text-xl font-bold tracking-widest placeholder:text-cyan-850 ${className}`}
-            />
-        );
+                <!-- Capture Trigger -->
+                <button id="btn-trigger-capture" class="w-20 h-20 rounded-full bg-slate-900 border-4 border-slate-800 flex items-center justify-center transition-all hover:border-amber-500 active:scale-90 relative group">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center group-hover:scale-105 transition-all">
+                        <i class="fa-solid fa-camera text-slate-950 text-xl"></i>
+                    </div>
+                </button>
 
-        // --- MAIN APP COMPONENT ---
-        function App() {
-            const [fb, setFb] = useState(null);
-            const [user, setUser] = useState(null);
-            const [view, setView] = useState('home'); 
-            const [selectedGroup, setSelectedGroup] = useState(null);
-            const [mode, setMode] = useState(null); // 'solo' | 'multi' | 'simulation'
-            const [playerName, setPlayerName] = useState('');
-            const [roomCode, setRoomCode] = useState('');
-            const [joinCode, setJoinCode] = useState('');
+                <!-- Camera Rotator -->
+                <button id="btn-flip" class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-slate-300 hover:text-indigo-400 hover:border-indigo-500/30 transition-all active:scale-90">
+                    <i class="fa-solid fa-camera-rotate text-lg mb-1"></i>
+                    <span class="text-[9px] font-bold uppercase tracking-wider">Kamera</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. ANALYZING / PROCESSING VIEW -->
+        <section id="view-analyzing" class="absolute inset-0 bg-slate-950 z-35 flex flex-col items-center justify-center transition-all duration-300 hidden">
+            <div class="relative w-36 h-36 mb-8 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border border-dashed border-amber-500/20 animate-spin" style="animation-duration: 15s"></div>
+                <div class="absolute inset-2 rounded-full border border-dashed border-indigo-500/40 animate-spin" style="animation-duration: 8s; animation-direction: reverse;"></div>
+                <div class="absolute inset-4 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
+                    <i class="fa-solid fa-brain-circuit text-3xl text-amber-400 animate-pulse"></i>
+                </div>
+            </div>
             
-            // Real Firebase or Simulated State
-            const [roomData, setRoomData] = useState(null);
-            const [currentQIndex, setCurrentQIndex] = useState(0);
-            const [timeLeft, setTimeLeft] = useState(20);
-            const [localAnswers, setLocalAnswers] = useState({}); 
-            const [isTransitioning, setIsTransitioning] = useState(false);
+            <h2 class="text-xl font-bold tracking-wider text-center text-white px-8">Kognitiv Tahlil Jarayoni</h2>
+            <div id="loader-status" class="text-sm text-slate-400 mt-2 font-medium tracking-wide min-h-[20px] text-center">
+                Buyum parametrlari tekshirilmoqda...
+            </div>
             
-            // Custom Modals
-            const [modal, setModal] = useState({ show: false, title: "", message: "", type: "cyan" });
-            const [showSettings, setShowSettings] = useState(false);
-            const [configInput, setConfigInput] = useState("");
+            <div class="w-48 bg-slate-900 h-1.5 rounded-full overflow-hidden mt-6 border border-slate-800">
+                <div id="loader-progress" class="h-full bg-gradient-to-r from-amber-500 to-indigo-500 rounded-full w-0 transition-all duration-500"></div>
+            </div>
+        </section>
 
-            const timerRef = useRef(null);
-            const simulationBotsTimerRef = useRef([]);
-            const isHost = mode === 'simulation' || roomData?.hostId === user?.uid;
-
-            // SAFELY DECLARE PLAYING-VIEW DEPENDENT VARIABLES
-            const question = (selectedGroup && selectedGroup.questions && selectedGroup.questions[currentQIndex]) 
-                ? selectedGroup.questions[currentQIndex] 
-                : null;
-            const myAnswer = (selectedGroup) 
-                ? (mode === 'solo' 
-                    ? localAnswers[currentQIndex] 
-                    : roomData?.players?.[mode === 'simulation' ? 'user-player' : user?.uid]?.answers?.[currentQIndex]) 
-                : undefined;
-            const hasAnswered = myAnswer !== undefined;
-            const playersList = (roomData && roomData.players) 
-                ? Object.values(roomData.players).sort((a, b) => (b.score || 0) - (a.score || 0)) 
-                : [];
-
-            const triggerModal = (title, message, type = "pink") => {
-                setModal({ show: true, title, message, type });
-            };
-
-            // --- HOISTED GAME FUNCTIONS (Declared before useEffect hooks to avoid ReferenceError TDZ) ---
-            
-            const quit = () => {
-                setView('home');
-                setRoomCode('');
-                setMode(null);
-                setLocalAnswers({});
-                setRoomData(null);
-                setCurrentQIndex(0);
-                setIsTransitioning(false);
-            };
-
-            const startSolo = () => {
-                if (!playerName.trim()) return triggerModal("Ogohlantirish", "Iltimos, ismingizni kiriting!");
-                setMode('solo');
-                setLocalAnswers({});
-                setCurrentQIndex(0);
-                setView('playing');
-            };
-
-            const handleAnswerSolo = (optIndex) => {
-                if (localAnswers[currentQIndex] !== undefined) return; 
-                setLocalAnswers(prev => ({ ...prev, [currentQIndex]: optIndex }));
-            };
-
-            const handleNextQuestionSolo = () => {
-                if (currentQIndex < selectedGroup.questions.length - 1) {
-                    setCurrentQIndex(prev => prev + 1);
-                } else {
-                    setView('results');
-                }
-            };
-
-            // Handle Simulated Next Question (either timeout or all answered)
-            const handleNextQuestionSimulated = () => {
-                if (isTransitioning) return;
-                setIsTransitioning(true);
-
-                setRoomData(prev => {
-                    if (!prev) return prev;
-                    const nextQ = prev.currentQ + 1;
-                    if (nextQ < selectedGroup.questions.length) {
-                        setCurrentQIndex(nextQ);
-                        setIsTransitioning(false);
-                        return {
-                            ...prev,
-                            currentQ: nextQ,
-                            questionStartTime: Date.now()
-                        };
-                    } else {
-                        setView('results');
-                        return {
-                            ...prev,
-                            status: 'finished'
-                        };
-                    }
-                });
-            };
-
-            const handleNextQuestionMulti = async (currentRoomData) => {
-                if (!isHost) return;
-                try {
-                    const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', roomCode);
-                    if (currentRoomData.currentQ < selectedGroup.questions.length - 1) {
-                        await fb.updateDoc(roomRef, {
-                            currentQ: currentRoomData.currentQ + 1,
-                            questionStartTime: Date.now()
-                        });
-                    } else {
-                        await fb.updateDoc(roomRef, { status: 'finished' });
-                    }
-                } catch (e) { console.error(e); }
-            };
-
-            const handleAnswerMultiOrSim = async (optIndex) => {
-                if (mode === 'simulation') {
-                    if (roomData.players['user-player']?.answers[currentQIndex] !== undefined) return;
-                    
-                    setRoomData(prev => {
-                        const isCorrect = selectedGroup.questions[currentQIndex].options[optIndex].isCorrect;
-                        const currentScore = prev.players['user-player'].score || 0;
-                        const updatedPlayers = {
-                            ...prev.players,
-                            'user-player': {
-                                ...prev.players['user-player'],
-                                score: isCorrect ? currentScore + 1 : currentScore,
-                                answers: {
-                                    ...prev.players['user-player'].answers,
-                                    [currentQIndex]: optIndex
-                                }
-                            }
-                        };
-
-                        // Check if everyone has answered
-                        const allAnswered = Object.values(updatedPlayers).every(p => p.answers && p.answers[currentQIndex] !== undefined);
-                        if (allAnswered && !isTransitioning) {
-                            setTimeout(() => {
-                                handleNextQuestionSimulated();
-                            }, 1000);
-                        }
-
-                        return {
-                            ...prev,
-                            players: updatedPlayers
-                        };
-                    });
-                } else {
-                    if (roomData.players[user.uid]?.answers[currentQIndex] !== undefined) return;
-                    
-                    try {
-                        const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', roomCode);
-                        const isCorrect = selectedGroup.questions[currentQIndex].options[optIndex].isCorrect;
-                        const currentScore = roomData.players[user.uid].score || 0;
-                        
-                        await fb.updateDoc(roomRef, {
-                            [`players.${user.uid}.answers.${currentQIndex}`]: optIndex,
-                            [`players.${user.uid}.score`]: isCorrect ? currentScore + 1 : currentScore
-                        });
-                    } catch (e) { console.error("Error submitting answer: ", e); }
-                }
-            };
-
-            // Actions: Create Room (Real Firebase multiplayer)
-            const handleCreateRoom = async () => {
-                if (!playerName.trim()) return triggerModal("Ogohlantirish", "Iltimos, ismingizni kiriting!");
-                if (!fb || fb.localOnly) {
-                    // Agar Firebase ulanmagan bo'lsa, foydalanuvchiga simulyatsiya rejimini taklif qilamiz
-                    return triggerModal(
-                        "Ulanish Muammosi", 
-                        "Sizda Firebase sozlanmagan yoki internet aloqasi yo'q! Haqiqiy multiplayer o'rniga 'Botlar bilan o'ynash' rejimidan foydalaning yoki Sozlamalar (⚙) bo'limidan Firebase kalitlarini kiriting.", 
-                        "pink"
-                    );
-                }
+        <!-- 3. DETAILED ANALYSIS RESULTS VIEW -->
+        <section id="view-results" class="absolute inset-0 bg-slate-950 z-30 transition-all duration-300 hidden flex-col overflow-y-auto">
+            <!-- Header Result Card -->
+            <div class="relative w-full h-80 shrink-0 bg-black">
+                <img id="analyzed-photo" class="w-full h-full object-cover" src="" alt="Skanerlangan obyekt">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-black/60"></div>
                 
-                const code = Math.floor(100000 + Math.random() * 900000).toString();
-                const newRoom = {
-                    hostId: user.uid,
-                    groupId: selectedGroup.id,
-                    status: 'lobby',
-                    currentQ: 0,
-                    questionStartTime: Date.now(),
-                    players: {
-                        [user.uid]: { name: playerName, score: 0, answers: {} }
-                    }
-                };
-
-                try {
-                    await fb.setDoc(fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', code), newRoom);
-                    setRoomCode(code);
-                    setMode('multi');
-                    setView('lobby');
-                } catch (e) {
-                    console.error(e);
-                    triggerModal("Tizim Xatosi", "Kutilmagan xatolik tufayli xona yaratib bo'lmadi.", "red");
-                }
-            };
-
-            // Actions: Join Room
-            const handleJoinRoom = async () => {
-                if (!playerName.trim()) return triggerModal("Ogohlantirish", "Iltimos, ismingizni kiriting!");
-                if (!joinCode.trim()) return triggerModal("Ogohlantirish", "Xona kodini kiriting!");
-                if (!fb || fb.localOnly) {
-                    return triggerModal("Lokal Rejim", "Tarmoq ulanishi yo'q. Guruhga faqat simulyatsiya rejimida o'ynash mumkin.", "red");
-                }
+                <!-- Quick Controls on Photo -->
+                <button id="btn-close-results" class="absolute top-6 left-6 w-11 h-11 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-90 transition-all">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </button>
                 
-                try {
-                    const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', joinCode);
-                    const snap = await fb.getDoc(roomRef);
-                    
-                    if (!snap.exists()) return triggerModal("Xona topilmadi", "Bunday kodli xona mavjud emas.", "red");
-                    if (snap.data().status !== 'lobby') return triggerModal("Xatolik", "Ushbu xonada o'yin allaqachon boshlanib ketgan!", "red");
+                <!-- Main Header Metadata -->
+                <div class="absolute bottom-6 left-6 right-6">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span id="badge-era" class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-widest">...</span>
+                        <span id="badge-confidence" class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase tracking-widest">Ishonch: ...</span>
+                    </div>
+                    <h2 id="result-title" class="text-2xl font-black text-white leading-tight">Qadimgi buyum</h2>
+                    <p id="result-subtitle" class="text-xs text-slate-300 mt-1 font-medium"><i class="fa-solid fa-location-dot text-amber-500 mr-1"></i> <span id="val-origin">...</span></p>
+                </div>
+            </div>
 
-                    await fb.updateDoc(roomRef, {
-                        [`players.${user.uid}`]: { name: playerName, score: 0, answers: {} }
-                    });
-
-                    setRoomCode(joinCode);
-                    setMode('multi');
-                    setSelectedGroup(GROUPS[snap.data().groupId]);
-                    setView('lobby');
-                } catch (e) {
-                    console.error(e);
-                    triggerModal("Xatolik", "Guruhga qo'shilish amalga oshmadi.", "red");
-                }
-            };
-
-            const startGameMulti = async () => {
-                if (!isHost) return;
-                try {
-                    await fb.updateDoc(fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', roomCode), {
-                        status: 'playing',
-                        questionStartTime: Date.now(),
-                        currentQ: 0
-                    });
-                } catch (e) { console.error(e); }
-            };
-
-            const handleEndGameEarly = async () => {
-                if (mode === 'simulation') {
-                    setView('results');
-                    setRoomData(prev => ({ ...prev, status: 'finished' }));
-                } else {
-                    if (!isHost || mode !== 'multi') return;
-                    try {
-                        const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', roomCode);
-                        await fb.updateDoc(roomRef, { status: 'finished' });
-                    } catch (e) { console.error("Force end error: ", e); }
-                }
-            };
-
-            // Custom Firebase config saved locally
-            const handleSaveConfig = () => {
-                try {
-                    const parsed = JSON.parse(configInput);
-                    if (!parsed.apiKey) {
-                        return triggerModal("Xato", "Kiritilgan config tarkibida apiKey maydoni mavjud emas!", "red");
-                    }
-                    localStorage.setItem('neon_firebase_config', JSON.stringify(parsed));
-                    setShowSettings(false);
-                    triggerModal("Muvaffaqiyatli", "Firebase sozlamalari muvaffaqiyatli saqlandi! Sahifa yangilanmoqda...", "green");
-                    setTimeout(() => window.location.reload(), 2000);
-                } catch(e) {
-                    triggerModal("Format xatosi", "Iltimos, sozlamalarni to'g'ri JSON formatida kiriting!", "red");
-                }
-            };
-
-            const handleClearConfig = () => {
-                localStorage.removeItem('neon_firebase_config');
-                setShowSettings(false);
-                triggerModal("Muvaffaqiyatli", "Firebase sozlamalari o'chirildi! Lokal rejimga qaytilmoqda...", "green");
-                setTimeout(() => window.location.reload(), 2000);
-            };
-
-            // --- 5. EFFECT HOOKS ---
-
-            // Safe Polling for Firebase setup
-            useEffect(() => {
-                let attempts = 0;
-                const interval = setInterval(() => {
-                    attempts++;
-                    if (window.FirebaseModule) {
-                        setFb(window.FirebaseModule);
-                        clearInterval(interval);
-                    } else if (attempts > 10) { 
-                        setFb({ localOnly: true });
-                        clearInterval(interval);
-                    }
-                }, 100);
-                return () => clearInterval(interval);
-            }, []);
-
-            // Firebase authentication setup
-            useEffect(() => {
-                if (!fb || fb.localOnly) return;
-                const initAuth = async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await fb.signInWithCustomToken(fb.auth, __initial_auth_token);
-                        } else {
-                            await fb.signInAnonymously(fb.auth);
-                        }
-                    } catch (e) {
-                        console.error("Firebase auth exception: ", e);
-                    }
-                };
-                initAuth();
-                const unsubscribe = fb.onAuthStateChanged(fb.auth, setUser);
-                return () => unsubscribe();
-            }, [fb]);
-
-            // Real-time synchronization for multiplayer rooms (Real Firebase mode)
-            useEffect(() => {
-                if (!fb || fb.localOnly || !user || !roomCode || mode !== 'multi') return;
-
-                const roomRef = fb.doc(fb.db, 'artifacts', fb.appId, 'public', 'data', 'rooms', roomCode);
-                const unsubscribe = fb.onSnapshot(roomRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.data();
-                        setRoomData(data);
-                        
-                        if (data.status === 'playing' && view === 'lobby') setView('playing');
-                        if (data.status === 'finished' && view === 'playing') setView('results');
-                        
-                        if (data.currentQ !== currentQIndex) {
-                            setCurrentQIndex(data.currentQ);
-                            setIsTransitioning(false); 
-                        }
-                    } else {
-                        triggerModal("Xatolik", "Xona topilmadi yoki o'chirildi.", "red");
-                        setView('home');
-                    }
-                }, (error) => console.error("Firebase Sync error: ", error));
-
-                return () => unsubscribe();
-            }, [fb, user, roomCode, mode, view, currentQIndex]);
-
-            // Real-time Auto-skip triggers once all users select answers (Real Firebase mode)
-            useEffect(() => {
-                if (mode !== 'multi' || !isHost || !roomData || roomData.status !== 'playing' || isTransitioning) return;
-
-                const players = Object.values(roomData.players || {});
-                if (players.length > 0) {
-                    const allAnswered = players.every(p => p.answers && p.answers[roomData.currentQ] !== undefined);
-                    if (allAnswered) {
-                        setIsTransitioning(true); 
-                        handleNextQuestionMulti(roomData);
-                    }
-                }
-            }, [roomData?.players, roomData?.currentQ, roomData?.status, isHost, mode, isTransitioning]);
-
-            // Start Simulated Multiplayer Game (with Bots)
-            const handleStartSimulation = () => {
-                if (!playerName.trim()) return triggerModal("Ogohlantirish", "Iltimos, ismingizni kiriting!");
-                setMode('simulation');
-                setRoomCode('BOTS66');
-                setCurrentQIndex(0);
-                setRoomData({
-                    hostId: 'user-player',
-                    groupId: selectedGroup.id,
-                    status: 'playing',
-                    currentQ: 0,
-                    questionStartTime: Date.now(),
-                    players: {
-                        'user-player': { name: playerName, score: 0, answers: {} },
-                        'bot-1': { name: "Alisher (Bot)", score: 0, answers: {} },
-                        'bot-2': { name: "Madina (Bot)", score: 0, answers: {} },
-                        'bot-3': { name: "Jasur (Bot)", score: 0, answers: {} }
-                    }
-                });
-                setView('playing');
-            };
-
-            // --- SIMULATED MULTIPLAYER (BOTS) ACTION ---
-            // Triggered whenever the question changes in simulation mode
-            useEffect(() => {
-                if (mode !== 'simulation' || view !== 'playing' || !roomData) return;
-
-                // Clear previous simulation bot timeouts
-                simulationBotsTimerRef.current.forEach(clearTimeout);
-                simulationBotsTimerRef.current = [];
-
-                const botIds = ['bot-1', 'bot-2', 'bot-3'];
-                
-                botIds.forEach(botId => {
-                    // Bot decides answer and delay
-                    const randomDelay = 3000 + Math.random() * 8000; // 3 to 11 seconds
-                    const timer = setTimeout(() => {
-                        setRoomData(prev => {
-                            if (!prev || prev.status !== 'playing') return prev;
+            <!-- Structured Results & Action Center -->
+            <div class="flex-1 px-6 pb-12">
+                <!-- Media / Audio Player Station -->
+                <div class="glass-dark rounded-2xl p-4 border border-slate-800 mb-6 flex flex-col gap-3 -mt-4 relative z-10 shadow-xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                                <i class="fa-solid fa-circle-play text-indigo-400 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Audio Gid</h4>
+                                <p id="audio-status-label" class="text-sm font-semibold text-slate-200">Eshittirishga tayyor</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <!-- Animated Waves -->
+                            <div id="audio-visualizer" class="flex gap-1 items-center h-6 px-2">
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                                <span class="wave-bar"></span>
+                            </div>
                             
-                            const botsOptions = selectedGroup.questions[currentQIndex].options;
-                            // 70% probability bot chooses correct answer
-                            const chooseCorrect = Math.random() < 0.75;
-                            let botChosenIndex = 0;
-                            if (chooseCorrect) {
-                                botChosenIndex = botsOptions.findIndex(o => o.isCorrect);
-                            } else {
-                                const incorrectIndices = botsOptions.map((o, idx) => !o.isCorrect ? idx : null).filter(v => v !== null);
-                                botChosenIndex = incorrectIndices[Math.floor(Math.random() * incorrectIndices.length)] || 0;
-                            }
-
-                            const isCorrect = botsOptions[botChosenIndex].isCorrect;
-                            const currentScore = prev.players[botId].score || 0;
-
-                            const updatedPlayers = {
-                                ...prev.players,
-                                [botId]: {
-                                    ...prev.players[botId],
-                                    score: isCorrect ? currentScore + 1 : currentScore,
-                                    answers: {
-                                        ...prev.players[botId].answers,
-                                        [currentQIndex]: botChosenIndex
-                                    }
-                                }
-                            };
-
-                            // Check if everyone (user + bots) has answered
-                            const allPlayers = Object.values(updatedPlayers);
-                            const allAnswered = allPlayers.every(p => p.answers && p.answers[currentQIndex] !== undefined);
-
-                            if (allAnswered && !isTransitioning) {
-                                setTimeout(() => {
-                                    handleNextQuestionSimulated();
-                                }, 1000);
-                            }
-
-                            return {
-                                ...prev,
-                                players: updatedPlayers
-                            };
-                        });
-                    }, randomDelay);
-
-                    simulationBotsTimerRef.current.push(timer);
-                });
-
-                return () => {
-                    simulationBotsTimerRef.current.forEach(clearTimeout);
-                };
-            }, [currentQIndex, view, mode]);
-
-            // Main Game Timer loop
-            useEffect(() => {
-                if (view !== 'playing') return;
-
-                if (mode === 'solo') {
-                    setTimeLeft(20);
-                    clearInterval(timerRef.current);
-                    timerRef.current = setInterval(() => {
-                        setTimeLeft((prev) => {
-                            if (prev <= 1) {
-                                clearInterval(timerRef.current);
-                                handleNextQuestionSolo();
-                                return 0;
-                            }
-                            return prev - 1;
-                        });
-                    }, 1000);
-                } else if (mode === 'simulation') {
-                    setTimeLeft(20);
-                    clearInterval(timerRef.current);
-                    timerRef.current = setInterval(() => {
-                        setTimeLeft((prev) => {
-                            if (prev <= 1) {
-                                clearInterval(timerRef.current);
-                                // Force Bot answers that haven't responded yet
-                                setRoomData(roomState => {
-                                    const botIds = ['bot-1', 'bot-2', 'bot-3'];
-                                    const updatedPlayers = { ...roomState.players };
-                                    
-                                    botIds.forEach(botId => {
-                                        if (updatedPlayers[botId].answers[currentQIndex] === undefined) {
-                                            updatedPlayers[botId].answers[currentQIndex] = Math.floor(Math.random() * 4);
-                                        }
-                                    });
-                                    return { ...roomState, players: updatedPlayers };
-                                });
-                                handleNextQuestionSimulated();
-                                return 0;
-                            }
-                            return prev - 1;
-                        });
-                    }, 1000);
-                } else if (mode === 'multi' && roomData && roomData.status === 'playing') {
-                    clearInterval(timerRef.current);
-                    
-                    const updateTimer = () => {
-                        const elapsed = Math.floor((Date.now() - roomData.questionStartTime) / 1000);
-                        const remaining = Math.max(0, 20 - elapsed);
-                        setTimeLeft(remaining);
-
-                        if (remaining === 0 && isHost && !isTransitioning) {
-                            setIsTransitioning(true);
-                            clearInterval(timerRef.current);
-                            handleNextQuestionMulti(roomData);
-                        }
-                    };
-
-                    updateTimer(); 
-                    timerRef.current = setInterval(updateTimer, 500); 
-                }
-
-                return () => clearInterval(timerRef.current);
-            }, [view, currentQIndex, roomData?.questionStartTime, mode, isHost, isTransitioning]);
-
-            return (
-                <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-cyan-500/30">
-                    
-                    {/* CUSTOM NEON MODAL ALERT */}
-                    {modal.show && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-                            <div className="bg-slate-900 border-2 border-pink-500 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_40px_rgba(236,72,153,0.3)] animate-scale-up">
-                                <h3 className="text-2xl font-black text-pink-500 mb-2 uppercase tracking-wide">{modal.title}</h3>
-                                <p className="text-slate-300 mb-6 font-medium leading-relaxed">{modal.message}</p>
-                                <NeonButton onClick={() => setModal({ ...modal, show: false })} color="pink" className="w-full">
-                                    Tushunarli
-                                </NeonButton>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* SETTINGS GEAR CONFIG MODAL */}
-                    {showSettings && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-                            <div className="bg-slate-900 border-2 border-cyan-400 rounded-3xl p-8 max-w-lg w-full shadow-[0_0_40px_rgba(34,211,238,0.25)]">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-2xl font-black text-cyan-400 uppercase tracking-wide">⚙ Firebase Sozlamalari</h3>
-                                    <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-cyan-400 font-extrabold text-xl">✕</button>
-                                </div>
-                                <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-                                    Do'stlaringiz bilan haqiqiy vaqt rejimida multiplayer o'ynash uchun o'zingizning shaxsiy Firebase konfiguratsiyangizni bu erga joylashtiring. Bu brauzeringizning shaxsiy xotirasida saqlanadi.
-                                </p>
-                                <textarea
-                                    value={configInput}
-                                    onChange={(e) => setConfigInput(e.target.value)}
-                                    placeholder={`{\n  "apiKey": "YOUR_API_KEY",\n  "authDomain": "PROJECT_ID.firebaseapp.com",\n  "projectId": "PROJECT_ID",\n  "storageBucket": "PROJECT_ID.appspot.com",\n  "messagingSenderId": "SENDER_ID",\n  "appId": "APP_ID"\n}`}
-                                    className="w-full h-48 bg-slate-950/80 border-2 border-cyan-500/30 rounded-xl p-4 text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.2)] mb-6 resize-none"
-                                />
-                                <div className="flex gap-4">
-                                    <NeonButton onClick={handleSaveConfig} color="green" className="flex-1 py-3 text-sm">
-                                        Saqlash va Ulanish
-                                    </NeonButton>
-                                    <button onClick={handleClearConfig} className="border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-4 py-3 rounded-xl font-bold transition-all text-sm">
-                                        O'chirish
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* TOP NAVBAR */}
-                    <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md py-4 px-6 flex justify-between items-center z-10">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></div>
-                            <span className="font-black text-lg tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-pink-500">NEON FALSAFA</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            {(!fb || fb.localOnly) ? (
-                                <div className="bg-amber-500/10 border border-amber-500/40 text-amber-400 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest">
-                                    SOZLANMAGAN / LOKAL MULTI
-                                </div>
-                            ) : (
-                                <div className="bg-green-500/10 border border-green-500/40 text-green-400 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest">
-                                    ONLINE REJIM ACTIVE
-                                </div>
-                            )}
-                            <button onClick={() => {
-                                const currentConfig = localStorage.getItem('neon_firebase_config') || "";
-                                setConfigInput(currentConfig);
-                                setShowSettings(true);
-                            }} title="Firebase Sozlamalari">
-                                <Icons.Settings />
+                            <button id="btn-audio-action" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all shadow-md">
+                                <i class="fa-solid fa-volume-high"></i> Tinglash
                             </button>
                         </div>
-                    </header>
-
-                    {/* VIEWPORTS */}
-                    <main className="flex-grow flex flex-col justify-center py-8">
-                        
-                        {/* 1. HOME VIEW */}
-                        {view === 'home' && (
-                            <div className="max-w-6xl mx-auto px-6 w-full">
-                                <div className="text-center mb-16">
-                                    <h1 className="text-5xl md:text-8xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 [text-shadow:_0_0_40px_rgba(236,72,153,0.3)]">
-                                        NEON BATTLE
-                                    </h1>
-                                    <p className="text-lg md:text-xl text-cyan-200/60 font-medium tracking-[0.25em] uppercase">Guruhda Canli Test Bellashuvi</p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {GROUPS.map((group) => (
-                                        <div 
-                                            key={group.id}
-                                            onClick={() => { setSelectedGroup(group); setView('setup'); }}
-                                            className="bg-slate-900/40 backdrop-blur-md border border-cyan-500/20 p-6 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.25)] group"
-                                        >
-                                            <div className="text-cyan-400 mb-2 group-hover:text-pink-400 transition-colors">
-                                                <span className="text-4xl font-black">{group.id + 1}</span>
-                                                <span className="text-lg opacity-60 ml-2 font-bold">Guruh</span>
-                                            </div>
-                                            <h3 className="text-xl font-bold text-slate-100 mb-2">{group.title}</h3>
-                                            <p className="text-slate-400 text-sm flex items-center">
-                                                <span className="w-2 h-2 rounded-full bg-cyan-400 mr-2"></span>
-                                                {group.description}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 2. SETUP VIEW */}
-                        {view === 'setup' && (
-                            <div className="flex items-center justify-center p-6 w-full animate-fade-in">
-                                <div className="bg-slate-900/80 backdrop-blur-xl border border-pink-500/30 p-8 rounded-3xl w-full max-w-md shadow-[0_0_50px_rgba(236,72,153,0.15)]">
-                                    <button onClick={quit} className="text-slate-400 hover:text-cyan-400 mb-6 flex items-center transition-colors font-bold">
-                                        <Icons.ArrowLeft /> Ortga
-                                    </button>
-                                    
-                                    <h2 className="text-3xl font-black text-white mb-2">{selectedGroup?.title}</h2>
-                                    <p className="text-cyan-400/80 mb-8 font-medium">{selectedGroup?.description}</p>
-
-                                    <div className="space-y-6">
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">Jangchi Ismi (Taxallus)</label>
-                                            <NeonInput value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="Ismingizni yozing..." maxLength={15} />
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
-                                            <NeonButton onClick={startSolo} color="cyan" className="flex flex-col items-center justify-center py-6">
-                                                <Icons.UserSingle />
-                                                <span className="mt-2 text-xs">Yakka O'ynash</span>
-                                            </NeonButton>
-                                            
-                                            {(!fb || fb.localOnly) ? (
-                                                <NeonButton onClick={handleStartSimulation} color="pink" className="flex flex-col items-center justify-center py-6">
-                                                    <Icons.Users />
-                                                    <span className="mt-2 text-xs">Botlar Bilan Jang</span>
-                                                </NeonButton>
-                                            ) : (
-                                                <NeonButton onClick={handleCreateRoom} color="pink" className="flex flex-col items-center justify-center py-6">
-                                                    <Icons.Users />
-                                                    <span className="mt-2 text-xs">Guruh Yaratish</span>
-                                                </NeonButton>
-                                            )}
-                                        </div>
-
-                                        <div className="relative flex items-center py-2">
-                                            <div className="flex-grow border-t border-slate-800"></div>
-                                            <span className="flex-shrink-0 mx-4 text-slate-500 text-xs font-bold uppercase">Yoki Do'stlar Guruhiga qo'shilish</span>
-                                            <div className="flex-grow border-t border-slate-800"></div>
-                                        </div>
-
-                                        <div className="flex space-x-2">
-                                            <NeonInput value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="6 xonali kod" maxLength={6} type="number" />
-                                            <NeonButton onClick={handleJoinRoom} color="green" className="px-5">
-                                                <Icons.LogIn />
-                                            </NeonButton>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 3. LOBBY VIEW */}
-                        {view === 'lobby' && (
-                            <div className="flex flex-col items-center justify-center p-6 w-full">
-                                <div className="bg-slate-900/80 border border-cyan-500/50 p-8 rounded-3xl w-full max-w-lg text-center shadow-[0_0_30px_rgba(34,211,238,0.2)]">
-                                    <h2 className="text-cyan-400 uppercase tracking-widest text-sm font-extrabold mb-2">ULASHISH UCHUN XONA KODI</h2>
-                                    <div className="text-6xl font-black text-white mb-8 tracking-[0.15em] neon-glow-cyan">
-                                        {roomCode}
-                                    </div>
-
-                                    <div className="bg-slate-950/50 rounded-xl p-5 mb-8 min-h-[180px] text-left">
-                                        <h3 className="text-slate-400 mb-4 flex items-center font-bold border-b border-slate-800 pb-2">
-                                            <span className="mr-2 text-cyan-400 animate-bounce">●</span> Jangchilar ({roomData?.players ? Object.values(roomData.players).length : 0})
-                                        </h3>
-                                        <div className="flex flex-wrap gap-3">
-                                            {roomData?.players && Object.values(roomData.players).map((p, i) => (
-                                                <span key={i} className="bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 px-4 py-2 rounded-full font-bold shadow-[0_0_10px_rgba(34,211,238,0.1)]">
-                                                    {p.name}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {isHost ? (
-                                        <NeonButton onClick={startGameMulti} color="green" className="w-full py-4 text-xl">
-                                            <Icons.Play /> &nbsp; BATTLE-NI BOSHLASH
-                                        </NeonButton>
-                                    ) : (
-                                        <p className="text-pink-500 animate-pulse text-lg tracking-widest uppercase font-extrabold">Host o'yinni boshlashini kuting...</p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 4. PLAYING VIEW */}
-                        {view === 'playing' && question && (
-                            <div className="w-full px-4 md:px-8 flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
-                                <div className="flex-grow max-w-4xl flex flex-col w-full">
-                                    
-                                    {/* Question Card Header */}
-                                    <div className="flex justify-between items-end mb-6">
-                                        <div>
-                                            <span className="text-pink-500 font-extrabold tracking-widest text-sm uppercase">{selectedGroup?.title}</span>
-                                            <h2 className="text-3xl font-black text-slate-100">Savol {currentQIndex + 1} / {selectedGroup?.questions?.length}</h2>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex items-center text-3xl font-black">
-                                                <Icons.Clock /> &nbsp;
-                                                <span className={timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-cyan-400'}>
-                                                    00:{timeLeft.toString().padStart(2, '0')}
-                                                </span>
-                                            </div>
-                                            
-                                            {isHost && (
-                                                <NeonButton onClick={handleEndGameEarly} color="red" className="py-2 px-4 text-sm font-bold animate-pulse">
-                                                    <Icons.Power /> &nbsp; Tugatish
-                                                </NeonButton>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Neon Loading Progress Bar */}
-                                    <div className="w-full h-3 bg-slate-900 rounded-full mb-8 overflow-hidden border border-slate-800">
-                                        <div 
-                                            className={`h-full transition-all duration-1000 linear ${
-                                                timeLeft > 10 ? 'bg-cyan-400 shadow-[0_0_10px_#22d3ee]' : 
-                                                timeLeft > 5 ? 'bg-yellow-400 shadow-[0_0_10px_#facc15]' : 
-                                                'bg-red-500 shadow-[0_0_10px_#ef4444] animate-pulse'
-                                            }`} 
-                                            style={{ width: `${(timeLeft / 20) * 100}%` }}
-                                        ></div>
-                                    </div>
-
-                                    {/* The Question Box */}
-                                    <div className="bg-slate-900/60 backdrop-blur-lg border border-slate-800 p-6 md:p-10 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.6)] mb-8 flex-grow flex flex-col justify-center">
-                                        <h3 className="text-2xl md:text-3xl font-bold leading-relaxed mb-10 text-center text-slate-100">
-                                            {question.text}
-                                        </h3>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
-                                            {question.options.map((opt, idx) => {
-                                                let btnStyle = "border-slate-800 bg-slate-900/40 text-slate-300 hover:border-cyan-400 hover:bg-slate-900/60";
-                                                
-                                                if (hasAnswered) {
-                                                    if (opt.isCorrect) {
-                                                        btnStyle = "border-green-400 bg-green-500/10 text-green-300 shadow-[0_0_15px_rgba(74,222,128,0.3)]";
-                                                    } else if (myAnswer === idx && !opt.isCorrect) {
-                                                        btnStyle = "border-red-500 bg-red-500/10 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.3)]";
-                                                    } else {
-                                                        btnStyle = "border-slate-950 bg-slate-950/60 text-slate-600 opacity-40";
-                                                    }
-                                                }
-
-                                                return (
-                                                    <button
-                                                        key={idx}
-                                                        onClick={() => mode === 'solo' ? handleAnswerSolo(idx) : handleAnswerMultiOrSim(idx)}
-                                                        disabled={hasAnswered}
-                                                        className={`p-5 rounded-2xl border-2 text-lg font-bold text-left transition-all duration-300 flex items-center ${btnStyle}`}
-                                                    >
-                                                        <span className="w-8 font-extrabold opacity-40 text-xl mr-2">{['A','B','C','D'][idx]}</span>
-                                                        <span className="flex-grow">{opt.text}</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                    
-                                    {mode === 'solo' && hasAnswered && (
-                                         <div className="flex justify-end animate-fade-in">
-                                             <NeonButton onClick={handleNextQuestionSolo} color="pink">
-                                                 Keyingisi &nbsp; ➜
-                                             </NeonButton>
-                                         </div>
-                                    )}
-                                </div>
-
-                                {/* Live Leaderboard Widget */}
-                                {(mode === 'multi' || mode === 'simulation') && roomData && (
-                                    <div className="w-full lg:w-80 bg-slate-900/40 border border-pink-500/20 rounded-3xl p-6 flex flex-col h-full lg:max-h-[80vh] animate-slide-up">
-                                        <h3 className="text-pink-400 font-extrabold tracking-widest uppercase mb-6 flex items-center border-b border-slate-800 pb-3">
-                                            <Icons.Trophy /> &nbsp; Live Reyting
-                                        </h3>
-                                        <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
-                                            {playersList.map((p, i) => {
-                                                // Check if this specific player has answered the current question
-                                                const hasPlayerAnswered = p.answers && p.answers[currentQIndex] !== undefined;
-                                                return (
-                                                    <div key={i} className={`p-4 rounded-xl flex justify-between items-center transition-all ${p.name === playerName ? 'bg-cyan-500/10 border border-cyan-500/40 shadow-[0_0_15px_rgba(34,211,238,0.1)]' : 'bg-slate-900/30'}`}>
-                                                        <div className="flex items-center">
-                                                            <span className="w-6 h-6 rounded-full bg-slate-950 flex items-center justify-center text-xs font-black mr-3 text-cyan-400 border border-cyan-500/30">
-                                                                {i + 1}
-                                                            </span>
-                                                            <span className="font-bold truncate max-w-[100px]" title={p.name}>{p.name}</span>
-                                                        </div>
-                                                        <div className="flex flex-col items-end">
-                                                            <div className="text-cyan-300 font-black text-sm">
-                                                                {p.score || 0} <span className="text-xs opacity-50 ml-1">PT</span>
-                                                            </div>
-                                                            {hasPlayerAnswered && <span className="text-[10px] text-green-400 font-bold mt-1">Javob berdi ✓</span>}
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* 5. RESULTS VIEW */}
-                        {view === 'results' && (
-                            <div className="max-w-5xl mx-auto px-6 w-full animate-fade-in">
-                                
-                                <div className="flex justify-between items-center mb-10 border-b border-slate-900 pb-6">
-                                    <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">BATTLE YAKUNI</h1>
-                                    <NeonButton onClick={quit} color="cyan">
-                                        <Icons.Home /> Bosh sahifa
-                                    </NeonButton>
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                    {/* Glowing Circle percentage indicator */}
-                                    {(() => {
-                                        let myScore = 0;
-                                        if (mode === 'solo') {
-                                            selectedGroup?.questions?.forEach((q, i) => {
-                                                const myAnsIdx = localAnswers[i];
-                                                if (myAnsIdx !== undefined && q.options[myAnsIdx].isCorrect) myScore++;
-                                            });
-                                        } else if (roomData) {
-                                            const activeUid = mode === 'simulation' ? 'user-player' : user?.uid;
-                                            myScore = roomData.players?.[activeUid]?.score || 0;
-                                        }
-                                        const total = (mode === 'multi' || mode === 'simulation') ? (roomData?.currentQ + 1 || 1) : (selectedGroup?.questions?.length || 1);
-                                        const percentage = Math.round((myScore / total) * 100);
-
-                                        return (
-                                            <div className="lg:col-span-1 bg-slate-900/60 border border-cyan-500/30 rounded-3xl p-8 text-center shadow-[0_0_30px_rgba(34,211,238,0.1)] flex flex-col items-center justify-center">
-                                                <div className="w-44 h-44 rounded-full border-4 border-slate-800 flex items-center justify-center mb-6 relative">
-                                                    <svg className="absolute inset-0 w-full h-full -rotate-90">
-                                                        <circle cx="88" cy="88" r="82" className="stroke-slate-800 fill-none" strokeWidth="8" />
-                                                        <circle cx="88" cy="88" r="82" className="stroke-cyan-400 fill-none transition-all duration-1000" strokeWidth="8" strokeDasharray={2 * Math.PI * 82} strokeDashoffset={2 * Math.PI * 82 * (1 - (percentage || 0)/100)} />
-                                                    </svg>
-                                                    <div className="text-5xl font-black text-white">{percentage || 0}%</div>
-                                                </div>
-                                                <h2 className="text-2xl font-black mb-1">{playerName}</h2>
-                                                <p className="text-slate-400 font-bold text-lg">{myScore} ta to'g'ri / {total} ta savoldan</p>
-                                            </div>
-                                        );
-                                    })()}
-
-                                    {/* Scoreboards (Only for Multi modes) */}
-                                    {(mode === 'multi' || mode === 'simulation') && roomData && (
-                                        <div className="lg:col-span-2 bg-slate-900/40 border border-pink-500/20 rounded-3xl p-8">
-                                             <h3 className="text-2xl font-black text-pink-500 mb-6 flex items-center">
-                                                🏆 &nbsp; Yakuniy Reyting
-                                             </h3>
-                                            <div className="space-y-3">
-                                                {playersList.map((p, i) => (
-                                                    <div key={i} className={`p-5 rounded-2xl flex justify-between items-center ${i === 0 ? 'bg-gradient-to-r from-yellow-500/10 to-transparent border border-yellow-500/40 shadow-[0_0_20px_rgba(234,179,8,0.15)]' : 'bg-slate-900/30'}`}>
-                                                        <div className="flex items-center text-xl">
-                                                            <span className={`w-9 h-9 rounded-full flex items-center justify-center font-black mr-4 ${i===0 ? 'bg-yellow-500 text-black shadow-[0_0_10px_#eab308]' : 'bg-slate-800 text-slate-300'}`}>
-                                                                {i + 1}
-                                                            </span>
-                                                            <span className="font-extrabold">{p.name}</span>
-                                                        </div>
-                                                        <div className="text-2xl font-black text-cyan-400">
-                                                            {p.score || 0} <span className="text-sm font-bold text-slate-500">PT</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Custom Incorrect Answers Review Box */}
-                                {(() => {
-                                    const mistakes = [];
-                                    if (mode === 'solo' && selectedGroup) {
-                                        selectedGroup.questions.forEach((q, i) => {
-                                            const myAnsIdx = localAnswers[i];
-                                            if (myAnsIdx === undefined || !q.options[myAnsIdx].isCorrect) {
-                                                mistakes.push({
-                                                    text: q.text,
-                                                    myAns: myAnsIdx !== undefined ? q.options[myAnsIdx].text : "Javob berilmagan",
-                                                    correctAns: q.options.find(o => o.isCorrect).text
-                                                });
-                                            }
-                                        });
-                                    } else if (roomData && selectedGroup) {
-                                        const maxQuestionReached = roomData.currentQ;
-                                        const activeUid = mode === 'simulation' ? 'user-player' : user?.uid;
-                                        for (let i = 0; i <= maxQuestionReached; i++) {
-                                            const q = selectedGroup.questions[i];
-                                            const myAnsIdx = roomData.players?.[activeUid]?.answers?.[i];
-                                            if (myAnsIdx === undefined || !q.options[myAnsIdx].isCorrect) {
-                                                mistakes.push({
-                                                    text: q.text,
-                                                    myAns: myAnsIdx !== undefined ? q.options[myAnsIdx].text : "Javob berilmagan",
-                                                    correctAns: q.options.find(o => o.isCorrect).text
-                                                });
-                                            }
-                                        }
-                                    }
-
-                                    if (mistakes.length === 0) return null;
-
-                                    return (
-                                        <div className="mt-8 bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-10">
-                                            <h3 className="text-2xl font-black text-red-400 mb-8 flex items-center">
-                                                ❌ &nbsp; Xatolar Tahlili ({mistakes.length} ta)
-                                            </h3>
-                                            <div className="space-y-6">
-                                                {mistakes.map((m, i) => (
-                                                    <div key={i} className="bg-slate-950/60 p-6 rounded-2xl border-l-4 border-red-500">
-                                                        <p className="text-lg font-bold mb-4 text-slate-100">{m.text}</p>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-bold">
-                                                            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-300">
-                                                                <span className="block text-red-500 text-xs font-black uppercase mb-1">Sizning javobingiz:</span>
-                                                                {m.myAns}
-                                                            </div>
-                                                            <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl text-green-300">
-                                                                <span className="block text-green-500 text-xs font-black uppercase mb-1">To'g'ri javob:</span>
-                                                                {m.correctAns}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-                            </div>
-                        )}
-                    </main>
-
-                    {/* TOP FOOTER */}
-                    <footer className="border-t border-slate-900 bg-slate-950/30 py-4 px-6 text-center text-xs text-slate-500 font-medium">
-                        © 2026 Neon Falsafa Battle | Barcha huquqlar himoyalangan.
-                    </footer>
+                    </div>
+                    
+                    <!-- Quick audio controls -->
+                    <div class="flex items-center justify-between border-t border-slate-900 pt-3 text-xs text-slate-400">
+                        <span id="audio-voice-used">Ovoz turi: Yuklanmoqda...</span>
+                        <button id="btn-export-pdf" class="flex items-center gap-1 text-emerald-400 font-bold hover:text-emerald-300">
+                            <i class="fa-solid fa-file-pdf"></i> PDF Yuklash
+                        </button>
+                    </div>
                 </div>
-            );
+
+                <!-- Artifact Spec Sheet (Grid Details) -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-900">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Davri (Era)</span>
+                        <p id="val-era" class="text-sm font-bold text-slate-200">Noma'lum</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-900">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Ashyosi (Material)</span>
+                        <p id="val-material" class="text-sm font-bold text-slate-200">Loy</p>
+                    </div>
+                </div>
+
+                <!-- Tabbed Layout for Analysis -->
+                <div class="flex border-b border-slate-900 mb-4 gap-4">
+                    <button id="tab-btn-desc" class="py-2.5 font-bold text-sm border-b-2 border-amber-500 text-amber-400 transition-all">Tavsif</button>
+                    <button id="tab-btn-inscription" class="py-2.5 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">Iyerogliflar / Bitiklar</button>
+                    <button id="tab-btn-context" class="py-2.5 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">Tarixiy Kontekst</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div id="tab-content-desc" class="tab-panel prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-4">
+                    <!-- description -->
+                </div>
+
+                <div id="tab-content-inscription" class="tab-panel prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-4 hidden">
+                    <!-- Inscriptions content -->
+                </div>
+
+                <div id="tab-content-context" class="tab-panel prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-4 hidden">
+                    <!-- Historical Context -->
+                </div>
+
+                <!-- Did You Know Block -->
+                <div class="mt-8 bg-indigo-950/30 rounded-2xl p-5 border border-indigo-500/15 relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl"></div>
+                    <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-lightbulb"></i> Bilib qo'ygan yaxshi!
+                    </h4>
+                    <p id="val-didyouknow" class="text-slate-300 text-xs leading-relaxed italic">...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. SETTINGS MODAL VIEW -->
+        <section id="view-settings" class="absolute inset-0 bg-slate-950/95 z-45 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-black tracking-wide text-white">Ilova Sozlamalari</h3>
+                <button id="btn-close-settings" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-95">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Voice Settings -->
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900">
+                    <h4 class="text-sm font-bold text-amber-400 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-volume-high"></i> Gid Ovozini Tanlash
+                    </h4>
+                    
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Texnologiyasi</label>
+                            <select id="setting-engine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                                <option value="gemini" selected>Premium Sun'iy Intellekt Ovozi (Tavsiya etiladi)</option>
+                                <option value="webspeech">Tizim Tezkor Ovozi (Internet talab qilmaydi)</option>
+                            </select>
+                        </div>
+
+                        <div id="container-voice-select" class="space-y-2">
+                            <label class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Personaji (Tembr)</label>
+                            <select id="setting-voice" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                                <option value="Aoede">Aoede - Yoqimli va Mayin</option>
+                                <option value="Kore">Kore - Professional va Tushunarli</option>
+                                <option value="Zephyr" selected>Zephyr - Chuqur va Tafakkurli</option>
+                                <option value="Leda">Leda - Do'stona va Aniq</option>
+                                <option value="Fenrir">Fenrir - Kuchli va Vakolatli</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs text-slate-400 font-semibold mb-1">
+                                <span>Ovoz Tezligi</span>
+                                <span id="label-speed">1.0x</span>
+                            </div>
+                            <input type="range" id="setting-speed" min="0.75" max="1.5" step="0.25" value="1.0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information guide -->
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900 space-y-3">
+                    <h4 class="text-sm font-bold text-indigo-400 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i> Foydalanish bo'yicha qo'llanma
+                    </h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Ilovadan maksimal darajada professional foydalanish uchun rasmlarni yorug'lik yaxshi bo'lgan joylarda oling. Iyeroglif va eski bitiklarni o'qishda kamerani yaqinroq olib keling va fokus to'g'rilanganiga ishonch hosil qiling.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. EXPLORATION HISTORY VIEW (Dashboard) -->
+        <section id="view-history" class="absolute inset-0 bg-slate-950/95 z-45 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-black tracking-wide text-white">Skanerlash Tarixi</h3>
+                <div class="flex gap-2">
+                    <button id="btn-clear-history" class="px-3 py-1.5 rounded-lg bg-red-950/50 border border-red-900/45 text-red-400 text-xs font-bold active:scale-95">Tozalash</button>
+                    <button id="btn-close-history" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-95">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- List container -->
+            <div id="history-container" class="space-y-3">
+                <div class="text-center py-12 text-slate-500 text-xs">
+                    <i class="fa-solid fa-box-open text-3xl mb-3 block text-slate-600"></i>
+                    Skanerlangan buyumlar mavjud emas
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Custom Premium Toast Notification Box -->
+    <div id="toast" class="absolute top-6 left-6 right-6 glass-dark p-4 rounded-2xl shadow-2xl z-50 transform -translate-y-32 transition-transform duration-300 opacity-0 flex items-start gap-3 border border-slate-800">
+        <div id="toast-indicator" class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400 mt-0.5">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="flex-1">
+            <h5 id="toast-title" class="text-xs font-extrabold text-white uppercase tracking-wider">Xabar</h5>
+            <p id="toast-body" class="text-xs text-slate-300 mt-0.5">Xato yuz berdi.</p>
+        </div>
+        <button onclick="hideToast()" class="text-slate-500 hover:text-white transition-all"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Hidden audio element for premium TTS -->
+    <audio id="tts-audio" class="hidden" preload="auto" crossorigin="anonymous"></audio>
+
+    <script>
+        /**
+         * ==========================================
+         * APPLICATION GLOBAL STATE & SCHEMAS
+         * ==========================================
+         */
+        const apiKey = ""; // Runtime provides the key automatically
+        
+        const AppState = {
+            activeFacingMode: 'environment',
+            videoStream: null,
+            scannedBase64: null,
+            scannedResult: null, 
+            audioPlaying: false,
+            audioUrl: null,
+            audioEngine: 'gemini', // 'gemini' or 'webspeech'
+            selectedVoice: 'Zephyr',
+            speechSpeed: 1.0,
+            history: []
+        };
+
+        const ArtifactSchema = {
+            type: "OBJECT",
+            properties: {
+                title: { type: "STRING" },
+                era: { type: "STRING" },
+                origin: { type: "STRING" },
+                material: { type: "STRING" },
+                confidence_score: { type: "STRING" },
+                short_summary: { type: "STRING" },
+                description: { type: "STRING" },
+                inscriptions_decoded: { type: "STRING" },
+                historical_context: { type: "STRING" },
+                did_you_know: { type: "STRING" }
+            },
+            required: [
+                "title", "era", "origin", "material", "confidence_score", 
+                "short_summary", "description", "inscriptions_decoded", 
+                "historical_context", "did_you_know"
+            ]
+        };
+
+        const UI = {
+            video: document.getElementById('camera-stream'),
+            canvas: document.createElement('canvas'),
+            laserLine: document.getElementById('laser-line'),
+            loaderStatus: document.getElementById('loader-status'),
+            loaderProgress: document.getElementById('loader-progress'),
+            toast: document.getElementById('toast'),
+            toastTitle: document.getElementById('toast-title'),
+            toastBody: document.getElementById('toast-body'),
+            toastIndicator: document.getElementById('toast-indicator'),
+            audioPlayer: document.getElementById('tts-audio'),
+            audioVisualizer: document.getElementById('audio-visualizer'),
+            audioStatusLabel: document.getElementById('audio-status-label'),
+            audioVoiceUsed: document.getElementById('audio-voice-used'),
+
+            // Views
+            viewStudio: document.getElementById('view-studio'),
+            viewAnalyzing: document.getElementById('view-analyzing'),
+            viewResults: document.getElementById('view-results'),
+            viewSettings: document.getElementById('view-settings'),
+            viewHistory: document.getElementById('view-history'),
+
+            // Capture Controls
+            btnTriggerCapture: document.getElementById('btn-trigger-capture'),
+            btnFlip: document.getElementById('btn-flip'),
+            btnOpenGallery: document.getElementById('btn-open-gallery'),
+            filePicker: document.getElementById('file-picker'),
+
+            // Result fields
+            analyzedPhoto: document.getElementById('analyzed-photo'),
+            badgeEra: document.getElementById('badge-era'),
+            badgeConfidence: document.getElementById('badge-confidence'),
+            resultTitle: document.getElementById('result-title'),
+            valOrigin: document.getElementById('val-origin'),
+            valEra: document.getElementById('val-era'),
+            valMaterial: document.getElementById('val-material'),
+            valDidYouKnow: document.getElementById('val-didyouknow'),
+
+            // Tab contents
+            tabContentDesc: document.getElementById('tab-content-desc'),
+            tabContentInscription: document.getElementById('tab-content-inscription'),
+            tabContentContext: document.getElementById('tab-content-context'),
+
+            // Tab buttons
+            tabBtnDesc: document.getElementById('tab-btn-desc'),
+            tabBtnInsc: document.getElementById('tab-btn-inscription'),
+            tabBtnCont: document.getElementById('tab-btn-context'),
+
+            // Navigation Actions
+            btnShowSettings: document.getElementById('btn-show-settings'),
+            btnShowHistory: document.getElementById('btn-show-history'),
+            btnCloseSettings: document.getElementById('btn-close-settings'),
+            btnCloseHistory: document.getElementById('btn-close-history'),
+            btnClearHistory: document.getElementById('btn-clear-history'),
+            btnCloseResults: document.getElementById('btn-close-results'),
+            btnAudioAction: document.getElementById('btn-audio-action'),
+            btnExportPdf: document.getElementById('btn-export-pdf'),
+
+            // Settings Fields
+            settingEngine: document.getElementById('setting-engine'),
+            settingVoice: document.getElementById('setting-voice'),
+            containerVoiceSelect: document.getElementById('container-voice-select'),
+            settingSpeed: document.getElementById('setting-speed'),
+            labelSpeed: document.getElementById('label-speed'),
+            historyContainer: document.getElementById('history-container')
+        };
+
+        /**
+         * ==========================================
+         * BOOTSTRAPPING & INITIALIZATION
+         * ==========================================
+         */
+        window.addEventListener('load', () => {
+            initCamera();
+            loadHistory();
+            initSettings();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            UI.tabBtnDesc.addEventListener('click', () => switchTab('desc'));
+            UI.tabBtnInsc.addEventListener('click', () => switchTab('inscription'));
+            UI.tabBtnCont.addEventListener('click', () => switchTab('context'));
+
+            UI.btnShowSettings.addEventListener('click', () => toggleView(UI.viewSettings, true));
+            UI.btnCloseSettings.addEventListener('click', () => toggleView(UI.viewSettings, false));
+            UI.btnShowHistory.addEventListener('click', () => {
+                renderHistory();
+                toggleView(UI.viewHistory, true);
+            });
+            UI.btnCloseHistory.addEventListener('click', () => toggleView(UI.viewHistory, false));
+            UI.btnClearHistory.addEventListener('click', clearHistory);
+
+            UI.settingEngine.addEventListener('change', (e) => {
+                AppState.audioEngine = e.target.value;
+                if (AppState.audioEngine === 'webspeech') {
+                    UI.containerVoiceSelect.classList.add('hidden');
+                } else {
+                    UI.containerVoiceSelect.classList.remove('hidden');
+                }
+                resetAudioEngine();
+            });
+
+            UI.settingVoice.addEventListener('change', (e) => {
+                AppState.selectedVoice = e.target.value;
+                resetAudioEngine();
+            });
+
+            UI.settingSpeed.addEventListener('input', (e) => {
+                AppState.speechSpeed = parseFloat(e.target.value);
+                UI.labelSpeed.innerText = `${AppState.speechSpeed.toFixed(2)}x`;
+                if (AppState.audioPlaying) {
+                    if (AppState.audioEngine === 'gemini') {
+                        UI.audioPlayer.playbackRate = AppState.speechSpeed;
+                    } else {
+                        // For WebSpeech SpeechSynthesis, rate must be set before starting or restarted
+                        restartWebSpeechWithNewSpeed();
+                    }
+                }
+            });
         }
 
-        // Initialize and Mount React Application
-        const container = document.getElementById('root');
-        const root = ReactDOM.createRoot(container);
-        root.render(<App />);
+        /**
+         * ==========================================
+         * CAMERA MANAGEMENT ENGINE
+         * ==========================================
+         */
+        async function initCamera() {
+            if (AppState.videoStream) {
+                AppState.videoStream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: {
+                    facingMode: AppState.activeFacingMode,
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                },
+                audio: false
+            };
+
+            try {
+                AppState.videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                UI.video.srcObject = AppState.videoStream;
+            } catch (err) {
+                console.error("Camera access failed:", err);
+                showToast("Kamera ishga tushmadi. Ruxsat berilganini tekshiring yoki galereyadan rasm yuklang.", "error");
+            }
+        }
+
+        UI.btnFlip.addEventListener('click', () => {
+            AppState.activeFacingMode = AppState.activeFacingMode === 'environment' ? 'user' : 'environment';
+            initCamera();
+        });
+
+        UI.btnTriggerCapture.addEventListener('click', () => {
+            if (!AppState.videoStream) {
+                showToast("Faol video uzatish topilmadi.", "error");
+                return;
+            }
+
+            UI.laserLine.classList.remove('hidden');
+
+            setTimeout(() => {
+                const w = UI.video.videoWidth || 1280;
+                const h = UI.video.videoHeight || 720;
+                UI.canvas.width = w;
+                UI.canvas.height = h;
+                const context = UI.canvas.getContext('2d');
+                context.drawImage(UI.video, 0, 0, w, h);
+
+                const dataUrl = UI.canvas.toDataURL('image/jpeg', 0.85);
+                UI.laserLine.classList.add('hidden');
+                beginCognitiveAnalysis(dataUrl);
+            }, 600);
+        });
+
+        UI.filePicker.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    beginCognitiveAnalysis(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        /**
+         * ==========================================
+         * PROGRESSIVE COGNITIVE PIPELINE
+         * ==========================================
+         */
+        async function beginCognitiveAnalysis(base64Image) {
+            AppState.scannedBase64 = base64Image;
+            UI.analyzedPhoto.src = base64Image;
+
+            toggleView(UI.viewStudio, false);
+            toggleView(UI.viewAnalyzing, true);
+            
+            updateLoader(15, "Obraz tahlili boshlandi...");
+            
+            setTimeout(() => updateLoader(35, "Geometriya va ashyolar hisoblanmoqda..."), 800);
+            setTimeout(() => updateLoader(60, "Gemini xizmati so'rovni tahlil qilmoqda..."), 1500);
+
+            try {
+                const responseText = await requestArtifactAnalysis(base64Image);
+                const parsedResult = JSON.parse(responseText);
+                
+                updateLoader(90, "Bitiklar tarjimasi yakunlanmoqda...");
+                AppState.scannedResult = parsedResult;
+
+                saveItemToHistory(parsedResult, base64Image);
+                populateResults(parsedResult);
+
+                setTimeout(() => {
+                    toggleView(UI.viewAnalyzing, false);
+                    toggleView(UI.viewResults, true);
+                    resetAudioEngine();
+                }, 800);
+
+            } catch (err) {
+                console.error("AI analysis failure:", err);
+                toggleView(UI.viewAnalyzing, false);
+                toggleView(UI.viewStudio, true);
+                showToast("Obyekt tahlili to'xtadi. Internet yoki fayl sifatini tekshiring.", "error");
+            }
+        }
+
+        function updateLoader(percentage, statusText) {
+            UI.loaderProgress.style.width = `${percentage}%`;
+            UI.loaderStatus.innerText = statusText;
+        }
+
+        function populateResults(data) {
+            UI.resultTitle.innerText = data.title;
+            UI.badgeEra.innerText = data.era;
+            UI.badgeConfidence.innerText = `Ishonch: ${data.confidence_score}`;
+            UI.valOrigin.innerText = data.origin;
+            
+            UI.valEra.innerText = data.era;
+            UI.valMaterial.innerText = data.material;
+            UI.valDidYouKnow.innerText = data.did_you_know;
+
+            UI.tabContentDesc.innerHTML = `<p>${data.short_summary}</p><p class="mt-4 text-slate-400 font-light leading-relaxed">${data.description}</p>`;
+            UI.tabContentInscription.innerHTML = `<div class="bg-slate-900/40 p-4 rounded-xl border border-slate-900/80 mb-4 font-mono text-amber-300 text-center leading-relaxed">${data.inscriptions_decoded ? data.inscriptions_decoded : "Hech qanday qadimgi yozuvlar yoki iyerogliflar topilmadi."}</div>`;
+            UI.tabContentContext.innerHTML = `<p class="leading-relaxed text-slate-400 font-light">${data.historical_context}</p>`;
+
+            switchTab('desc');
+        }
+
+        function switchTab(tabKey) {
+            const tabs = {
+                desc: { btn: UI.tabBtnDesc, panel: UI.tabContentDesc },
+                inscription: { btn: UI.tabBtnInsc, panel: UI.tabContentInscription },
+                context: { btn: UI.tabBtnCont, panel: UI.tabContentContext }
+            };
+
+            Object.keys(tabs).forEach(k => {
+                if (k === tabKey) {
+                    tabs[k].btn.classList.add('border-amber-500', 'text-amber-400');
+                    tabs[k].btn.classList.remove('border-transparent', 'text-slate-400');
+                    tabs[k].panel.classList.remove('hidden');
+                } else {
+                    tabs[k].btn.classList.add('border-transparent', 'text-slate-400');
+                    tabs[k].btn.classList.remove('border-amber-500', 'text-amber-400');
+                    tabs[k].panel.classList.add('hidden');
+                }
+            });
+        }
+
+        UI.btnCloseResults.addEventListener('click', () => {
+            stopAudio();
+            toggleView(UI.viewResults, false);
+            toggleView(UI.viewStudio, true);
+        });
+
+        /**
+         * ==========================================
+         * GEMINI API DRIVER
+         * ==========================================
+         */
+        async function requestArtifactAnalysis(base64Img) {
+            const base64Clean = base64Img.includes(',') ? base64Img.split(',')[1] : base64Img;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const systemPrompt = "Siz O'zbekistondagi Buyuk Ipak yo'li muzeylari uchun yaratilgan mukammal, professional, ko'p tilli arxeolog va epigrafist-gid hisoblanasiz. Har doim to'liq o'zbek tilida ilmiy-ommabop, sayyohga tushunarli tilda javob bering.";
+            
+            const prompt = `Ushbu suratdagi obidani, eksponatni yoki uning ustidagi yozuvlarni/iyerogliflarni batafsil tahlil qiling va JSON formatida javob bering.
+            Tahlilingiz quyidagi strukturaga ega bo'lishi kerak:
+            1. title: Obyektning professional nomi
+            2. era: U mansub bo'lgan taxminiy tarixiy davr
+            3. origin: Kelib chiqishi/Topilgan hudud
+            4. material: Asosiy ashyosi/materiali (Loy, Sopol, Fil suyagi, Oltin, Granit va h.k.)
+            5. confidence_score: Tahlilingiz to'g'riligiga ishonch koeffitsiyenti (foizda, masalan, '92%')
+            6. short_summary: Ilova natijasida eng yuqorida turadigan qisqa, tushunarli va qiziqarli xulosa.
+            7. description: Buyumning tarixi, tuzilishi, topilish tarixi va uning ahamiyati haqida to'liq ilmiy tushuntirish.
+            8. inscriptions_decoded: Agar rasmda qadimgi yozuv, arab bitiklari, xitoy iyerogliflari, turkiy runlar bo'lsa, ularni aniqlang va so'zma-so'z o'zbek tiliga chiroyli tarjima qilib bering. Agar bo'lmasa, 'Ushbu eksponatda bitiklar yoki iyerogliflar aniqlanmadi' deb yozing.
+            9. historical_context: Obyekt davridagi ijtimoiy-siyosiy sharoit va u qanday maqsadda ishlatilganligi.
+            10. did_you_know: Buyum yoki uning davriga oid turistlarni hayratda qoldiradigan 1 ta qiziqarli fakt.`;
+
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        { inlineData: { mimeType: "image/jpeg", data: base64Clean } }
+                    ]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: ArtifactSchema
+                }
+            };
+
+            const responseText = await fetchWithRetry(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }, true);
+
+            const jsonResponse = JSON.parse(responseText);
+            return jsonResponse.candidates[0].content.parts[0].text;
+        }
+
+        /**
+         * ==========================================
+         * DUAL AUDIO DRIVER (Gemini & WebSpeech API)
+         * ==========================================
+         */
+        UI.btnAudioAction.addEventListener('click', async () => {
+            // Check browser audio state context
+            if (window.AudioContext || window.webkitAudioContext) {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+
+            if (AppState.audioPlaying) {
+                stopAudio();
+                return;
+            }
+
+            if (!AppState.scannedResult) return;
+
+            const textToSpeak = getSpeechText();
+
+            // ENGINE 1: Premium Gemini Voice
+            if (AppState.audioEngine === 'gemini') {
+                if (AppState.audioUrl) {
+                    playPremiumAudio();
+                    return;
+                }
+
+                try {
+                    UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Tayyorlanmoqda...`;
+                    UI.audioStatusLabel.innerText = "Premium ovoz yuklanmoqda...";
+                    
+                    const pcmBase64 = await generateSpeechWithGemini(textToSpeak);
+                    if (pcmBase64) {
+                        const wavBlob = pcmToWavBlob(pcmBase64, 24000);
+                        AppState.audioUrl = URL.createObjectURL(wavBlob);
+                        UI.audioPlayer.src = AppState.audioUrl;
+                        playPremiumAudio();
+                    } else {
+                        throw new Error("Bo'sh audio ma'lumoti keldi. Avtomatik tizim ovoziga o'tiladi.");
+                    }
+                } catch (err) {
+                    console.error("Gemini Premium TTS error, falling back:", err);
+                    showToast("Premium ovoz xizmatida uzilish bo'ldi. Mahalliy gid tizimi ishga tushirildi.", "info");
+                    
+                    // Instant Fallback to WebSpeech
+                    AppState.audioEngine = 'webspeech';
+                    UI.settingEngine.value = 'webspeech';
+                    UI.containerVoiceSelect.classList.add('hidden');
+                    playWebSpeech(textToSpeak);
+                }
+            } 
+            // ENGINE 2: Web Speech Synthesis Fallback (Client-side offline-friendly)
+            else {
+                playWebSpeech(textToSpeak);
+            }
+        });
+
+        function getSpeechText() {
+            const data = AppState.scannedResult;
+            let cleanInscriptions = data.inscriptions_decoded.replace(/Ushbu eksponatda bitiklar yoki iyerogliflar aniqlanmadi/gi, '');
+            let speech = `Eksponat nomi: ${data.title}. Davri: ${data.era}. Muallif va kelib chiqishi: ${data.origin}. Qisqacha tavsif: ${data.short_summary}. `;
+            if (cleanInscriptions.trim().length > 3) {
+                speech += `Obyektdagi bitiklar tarjimasi quyidagicha: ${cleanInscriptions}. `;
+            }
+            speech += `Qiziqarli fakt: ${data.did_you_know}`;
+            return speech;
+        }
+
+        async function generateSpeechWithGemini(text) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{
+                    parts: [{ text: text }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: AppState.selectedVoice }
+                        }
+                    }
+                }
+            };
+
+            const rawText = await fetchWithRetry(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }, true);
+
+            const data = JSON.parse(rawText);
+            return data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        }
+
+        // Play engine premium
+        function playPremiumAudio() {
+            UI.audioPlayer.playbackRate = AppState.speechSpeed;
+            UI.audioPlayer.play().then(() => {
+                AppState.audioPlaying = true;
+                UI.audioStatusLabel.innerText = "Premium gid gapirmoqda...";
+                setVisualizerActive(true);
+                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> To'xtatish`;
+            }).catch(e => {
+                console.error("Playback failed", e);
+                // Fallback direct
+                playWebSpeech(getSpeechText());
+            });
+        }
+
+        // Play engine fallback browser
+        let webSpeechUtterance = null;
+        function playWebSpeech(text) {
+            window.speechSynthesis.cancel(); // Stop any current speech
+
+            webSpeechUtterance = new SpeechSynthesisUtterance(text);
+            
+            // Search for Uzbek or fallback Latin voice
+            const voices = window.speechSynthesis.getVoices();
+            const uzVoice = voices.find(v => v.lang.startsWith('uz') || v.lang.startsWith('tr') || v.lang.startsWith('tr-TR'));
+            if (uzVoice) {
+                webSpeechUtterance.voice = uzVoice;
+            }
+            
+            webSpeechUtterance.lang = 'uz-UZ';
+            webSpeechUtterance.rate = AppState.speechSpeed;
+
+            webSpeechUtterance.onstart = () => {
+                AppState.audioPlaying = true;
+                UI.audioStatusLabel.innerText = "Tizim gidi gapirmoqda...";
+                setVisualizerActive(true);
+                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> To'xtatish`;
+            };
+
+            webSpeechUtterance.onend = () => {
+                stopAudio();
+            };
+
+            webSpeechUtterance.onerror = (e) => {
+                console.error("Speech Synthesis error", e);
+                stopAudio();
+            };
+
+            window.speechSynthesis.speak(webSpeechUtterance);
+        }
+
+        function restartWebSpeechWithNewSpeed() {
+            if (AppState.audioEngine === 'webspeech' && AppState.audioPlaying) {
+                stopAudio();
+                setTimeout(() => {
+                    playWebSpeech(getSpeechText());
+                }, 100);
+            }
+        }
+
+        function stopAudio() {
+            AppState.audioPlaying = false;
+            setVisualizerActive(false);
+            UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tinglash`;
+            
+            if (AppState.audioEngine === 'gemini') {
+                UI.audioPlayer.pause();
+                UI.audioStatusLabel.innerText = "Eshittirish to'xtatildi";
+            } else {
+                window.speechSynthesis.cancel();
+                UI.audioStatusLabel.innerText = "Eshittirish to'xtatildi";
+            }
+        }
+
+        UI.audioPlayer.addEventListener('ended', () => {
+            stopAudio();
+        });
+
+        function setVisualizerActive(active) {
+            const bars = UI.audioVisualizer.querySelectorAll('.wave-bar');
+            bars.forEach(bar => {
+                if (active) {
+                    bar.classList.add('wave-active');
+                } else {
+                    bar.classList.remove('wave-active');
+                }
+            });
+        }
+
+        function resetAudioEngine() {
+            stopAudio();
+            if (AppState.audioUrl) {
+                URL.revokeObjectURL(AppState.audioUrl);
+                AppState.audioUrl = null;
+            }
+            if (AppState.audioEngine === 'gemini') {
+                UI.audioVoiceUsed.innerText = `Ovoz: Premium (${AppState.selectedVoice})`;
+            } else {
+                UI.audioVoiceUsed.innerText = `Ovoz: Tizim ovozi (Uzbek)`;
+            }
+            UI.audioStatusLabel.innerText = "Tinglashga tayyor";
+        }
+
+
+        /**
+         * ==========================================
+         * HIGH-FIDELITY PDF EXPORT SERVICE
+         * ==========================================
+         */
+        UI.btnExportPdf.addEventListener('click', async () => {
+            if (!AppState.scannedResult || !AppState.scannedBase64) return;
+
+            try {
+                showToast("PDF tahlili va hujjati yuklanmoqda...", "info");
+                
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pWidth = pdf.internal.pageSize.getWidth();
+                const margin = 20;
+                const contentWidth = pWidth - (margin * 2);
+
+                // Background design
+                pdf.setFillColor(15, 23, 42); 
+                pdf.rect(0, 0, pWidth, 48, 'F');
+
+                // Accent Gold Bar
+                pdf.setFillColor(245, 158, 11); 
+                pdf.rect(0, 48, pWidth, 3, 'F');
+
+                // Header Title
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(20);
+                pdf.setTextColor(255, 255, 255);
+                pdf.text("TARIXIY KOSHIF SMART GID", margin, 22);
+
+                pdf.setFont("helvetica", "normal");
+                pdf.setFontSize(9);
+                pdf.setTextColor(217, 119, 6);
+                pdf.text("BUYUK IPAK YO'LI ELEKTRON ARXEOLOGIK JURNALI", margin, 30);
+
+                pdf.setFontSize(8);
+                pdf.setTextColor(148, 163, 184);
+                const currentStr = new Date().toLocaleString('uz-UZ');
+                pdf.text(`Sana: ${currentStr} | Silk Road Guide System v2.1`, margin, 38);
+
+                let nextY = 65;
+                try {
+                    const imgProps = pdf.getImageProperties(AppState.scannedBase64);
+                    const fitHeight = 75; 
+                    const fitWidth = (imgProps.width * fitHeight) / imgProps.height;
+                    const finalWidth = Math.min(fitWidth, contentWidth);
+                    const centerOffset = (pWidth - finalWidth) / 2;
+
+                    pdf.setDrawColor(226, 232, 240);
+                    pdf.setFillColor(248, 250, 252);
+                    pdf.rect(centerOffset - 2, nextY - 2, finalWidth + 4, fitHeight + 4, 'FD');
+
+                    pdf.addImage(AppState.scannedBase64, 'JPEG', centerOffset, nextY, finalWidth, fitHeight);
+                    nextY += fitHeight + 15;
+                } catch(e) {
+                    console.error("PDF image injection failure:", e);
+                    pdf.text("[Rasm biriktirishda xatolik yuz berdi]", margin, nextY);
+                    nextY += 10;
+                }
+
+                // METADATA TABLE
+                pdf.setFillColor(241, 245, 249);
+                pdf.rect(margin, nextY, contentWidth, 24, 'F');
+                pdf.setDrawColor(203, 213, 225);
+                pdf.rect(margin, nextY, contentWidth, 24, 'D');
+
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(9);
+                pdf.setTextColor(71, 85, 105);
+                pdf.text("EKSPONAT NOMI:", margin + 5, nextY + 7);
+                pdf.text("DAVRI / ERASI:", margin + 5, nextY + 15);
+                pdf.text("ASHLI / ASOS:", margin + 85, nextY + 7);
+                pdf.text("ISHONCH DARAJASI:", margin + 85, nextY + 15);
+
+                pdf.setFont("helvetica", "normal");
+                pdf.setTextColor(15, 23, 42);
+                pdf.text(AppState.scannedResult.title.toUpperCase(), margin + 40, nextY + 7);
+                pdf.text(AppState.scannedResult.era, margin + 40, nextY + 15);
+                pdf.text(AppState.scannedResult.material, margin + 125, nextY + 7);
+                pdf.text(AppState.scannedResult.confidence_score, margin + 125, nextY + 15);
+
+                nextY += 34;
+
+                const addParagraph = (title, bodyText) => {
+                    if (nextY > 260) {
+                        pdf.addPage();
+                        nextY = 25;
+                    }
+
+                    pdf.setFont("helvetica", "bold");
+                    pdf.setFontSize(12);
+                    pdf.setTextColor(217, 119, 6); 
+                    pdf.text(title, margin, nextY);
+                    
+                    pdf.setDrawColor(217, 119, 6);
+                    pdf.line(margin, nextY + 1.5, margin + 30, nextY + 1.5);
+                    nextY += 7;
+
+                    pdf.setFont("helvetica", "normal");
+                    pdf.setFontSize(9.5);
+                    pdf.setTextColor(51, 65, 85);
+                    
+                    const wrapped = pdf.splitTextToSize(bodyText, contentWidth);
+                    for(let i=0; i<wrapped.length; i++) {
+                        if (nextY > 280) {
+                            pdf.addPage();
+                            nextY = 25;
+                        }
+                        pdf.text(wrapped[i], margin, nextY);
+                        nextY += 5.5;
+                    }
+                    nextY += 10;
+                };
+
+                addParagraph("1. UMUMIY TAVSIF VA MA'LUMOT", AppState.scannedResult.description);
+                addParagraph("2. YAZUVLARNING DEKODLANISHI (TARJIMASI)", AppState.scannedResult.inscriptions_decoded);
+                addParagraph("3. TARIXIY DAVR SHAROITI (KONTEKST)", AppState.scannedResult.historical_context);
+                addParagraph("4. QIZIQARLI FAKT", AppState.scannedResult.did_you_know);
+
+                const pageCount = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(148, 163, 184);
+                    pdf.text(`Sahifa ${i} / ${pageCount}`, pWidth - margin - 15, 287);
+                    pdf.text(`"Tarixiy Koshif" avtomatlashtirilgan tadqiqot hisoboti`, margin, 287);
+                }
+
+                pdf.save(`koshif-tahlil-${AppState.scannedResult.title.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+                showToast("PDF muvaffaqiyatli saqlandi!", "success");
+
+            } catch (error) {
+                console.error("PDF engine failure:", error);
+                showToast("PDF yaratishda kutilmagan xatolik yuz berdi.", "error");
+            }
+        });
+
+        /**
+         * ==========================================
+         * PERSISTENT STORAGE (Dashboard Database)
+         * ==========================================
+         */
+        function loadHistory() {
+            try {
+                const raw = localStorage.getItem('silk_road_discoveries');
+                AppState.history = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                AppState.history = [];
+            }
+        }
+
+        function saveItemToHistory(artifact, imgBase64) {
+            const historyItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString('uz-UZ'),
+                image: imgBase64,
+                data: artifact
+            };
+
+            AppState.history.unshift(historyItem);
+            if (AppState.history.length > 20) {
+                AppState.history.pop();
+            }
+
+            try {
+                localStorage.setItem('silk_road_discoveries', JSON.stringify(AppState.history));
+            } catch (err) {
+                console.warn("Storage limits triggered", err);
+            }
+        }
+
+        function renderHistory() {
+            UI.historyContainer.innerHTML = '';
+            
+            if (AppState.history.length === 0) {
+                UI.historyContainer.innerHTML = `
+                    <div class="text-center py-12 text-slate-500 text-xs">
+                        <i class="fa-solid fa-box-open text-3xl mb-3 block text-slate-600"></i>
+                        Skanerlangan buyumlar mavjud emas
+                    </div>`;
+                return;
+            }
+
+            AppState.history.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'glass-dark p-3.5 rounded-xl border border-slate-900 hover:border-amber-500/20 transition-all flex items-center justify-between gap-3 cursor-pointer';
+                el.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                        <img class="w-12 h-12 rounded-lg object-cover bg-black shrink-0 border border-slate-800" src="${item.image}">
+                        <div class="overflow-hidden">
+                            <h5 class="text-xs font-extrabold text-slate-200 truncate">${item.data.title}</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5"><i class="fa-regular fa-clock mr-1"></i>${item.timestamp}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-amber-400 btn-view-hist-item">
+                            <i class="fa-solid fa-folder-open text-xs"></i>
+                        </button>
+                    </div>
+                `;
+
+                el.querySelector('.btn-view-hist-item').addEventListener('click', () => {
+                    AppState.scannedResult = item.data;
+                    AppState.scannedBase64 = item.image;
+                    UI.analyzedPhoto.src = item.image;
+                    
+                    populateResults(item.data);
+                    resetAudioEngine();
+
+                    toggleView(UI.viewHistory, false);
+                    toggleView(UI.viewStudio, false);
+                    toggleView(UI.viewResults, true);
+                });
+
+                UI.historyContainer.appendChild(el);
+            });
+        }
+
+        function clearHistory() {
+            if (confirm("Barcha kashfiyotlar tarixini o'chirishga rozimisiz?")) {
+                AppState.history = [];
+                localStorage.removeItem('silk_road_discoveries');
+                renderHistory();
+                showToast("Tarix muvaffaqiyatli tozalandi", "info");
+            }
+        }
+
+        function initSettings() {
+            UI.settingEngine.value = AppState.audioEngine;
+            UI.settingVoice.value = AppState.selectedVoice;
+            UI.settingSpeed.value = AppState.speechSpeed;
+            UI.labelSpeed.innerText = `${AppState.speechSpeed.toFixed(2)}x`;
+            
+            if (AppState.audioEngine === 'webspeech') {
+                UI.containerVoiceSelect.classList.add('hidden');
+            } else {
+                UI.containerVoiceSelect.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * ==========================================
+         * GENERAL INTERACTIVE UI HELPERS
+         * ==========================================
+         */
+        function toggleView(viewElement, show) {
+            if (show) {
+                viewElement.classList.remove('hidden');
+            } else {
+                viewElement.classList.add('hidden');
+            }
+        }
+
+        let toastTimeout;
+        function showToast(text, type = "info") {
+            UI.toastBody.innerText = text;
+            UI.toastTitle.innerText = type === "error" ? "Xatolik" : (type === "success" ? "Muvaffaqiyat" : "Ma'lumot");
+            
+            if (type === "error") {
+                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20 text-red-400 mt-0.5";
+                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-emerald-500/g, 'border-red-500');
+            } else if (type === "success") {
+                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400 mt-0.5";
+                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-red-500/g, 'border-emerald-500');
+            } else {
+                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400 mt-0.5";
+                UI.toast.className = UI.toast.className.replace(/border-red-500|border-emerald-500/g, 'border-slate-800');
+            }
+
+            UI.toast.classList.remove('opacity-0', '-translate-y-32');
+            UI.toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                hideToast();
+            }, 6000);
+        }
+
+        function hideToast() {
+            UI.toast.classList.remove('opacity-100', 'translate-y-0');
+            UI.toast.classList.add('opacity-0', '-translate-y-32');
+        }
+
+        /**
+         * PCM base64 formatidagi audioni standart WAV blobga o'girish funksiyasi
+         */
+        function pcmToWavBlob(base64Pcm, sampleRate = 24000) {
+            const binaryString = window.atob(base64Pcm);
+            const pcmLength = binaryString.length;
+            const buffer = new ArrayBuffer(pcmLength);
+            const view = new Uint8Array(buffer);
+            for (let i = 0; i < pcmLength; i++) {
+                view[i] = binaryString.charCodeAt(i);
+            }
+
+            const numChannels = 1;
+            const bitsPerSample = 16;
+            const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+            const blockAlign = numChannels * (bitsPerSample / 8);
+            const dataSize = buffer.byteLength;
+            const wavBuffer = new ArrayBuffer(44 + dataSize);
+            const dataView = new DataView(wavBuffer);
+
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    dataView.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(0, 'RIFF');
+            dataView.setUint32(4, 36 + dataSize, true);
+            writeString(8, 'WAVE');
+
+            writeString(12, 'fmt ');
+            dataView.setUint32(16, 16, true);
+            dataView.setUint16(20, 1, true); // PCM Format (Linear PCM)
+            dataView.setUint16(22, numChannels, true);
+            dataView.setUint32(24, sampleRate, true);
+            dataView.setUint32(28, byteRate, true);
+            dataView.setUint16(32, blockAlign, true);
+            dataView.setUint16(34, bitsPerSample, true);
+
+            writeString(36, 'data');
+            dataView.setUint32(40, dataSize, true);
+
+            const pcmView = new Uint8Array(buffer);
+            const outView = new Uint8Array(wavBuffer, 44);
+            outView.set(pcmView);
+
+            return new Blob([dataView], { type: 'audio/wav' });
+        }
+
+        async function fetchWithRetry(url, options, returnRaw = false, maxRetries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            let lastError;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP status: ${response.status}`);
+                    }
+                    
+                    if (returnRaw) {
+                         return await response.text();
+                    }
+
+                    const data = await response.json();
+                    if (data.candidates && data.candidates[0].content) {
+                        return data.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Invalid response");
+                    }
+                } catch (error) {
+                    lastError = error;
+                    if (i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, delays[i]));
+                    }
+                }
+            }
+            throw lastError;
+        }
+
     </script>
 </body>
 </html>

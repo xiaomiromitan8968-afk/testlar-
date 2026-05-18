@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tarixiy Koshif - Professional Smart Gid</title>
+    <title>Tarixiy Koshif - Smart Museum Guide</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -20,25 +20,14 @@
 
         /* Glassmorphism & Effects */
         .glass-dark {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        .glass-light {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .gold-glow {
             box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
-        }
-
-        .indigo-glow {
-            box-shadow: 0 0 25px rgba(99, 102, 241, 0.45);
         }
 
         /* Scan Overlay Line */
@@ -69,9 +58,9 @@
         .wave-active {
             animation: sound-bounce 0.6s ease-in-out infinite alternate;
         }
-        .wave-active:nth-child(2) { animation-delay: 0.1s; }
+        .wave-active:nth-child(2) { animation-delay: 0.1s; background-color: #fbbf24; }
         .wave-active:nth-child(3) { animation-delay: 0.2s; }
-        .wave-active:nth-child(4) { animation-delay: 0.3s; }
+        .wave-active:nth-child(4) { animation-delay: 0.3s; background-color: #fbbf24; }
         .wave-active:nth-child(5) { animation-delay: 0.4s; }
 
         @keyframes sound-bounce {
@@ -86,7 +75,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden no-select">
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden no-select text-slate-200">
 
     <!-- Top Premium Navigation Bar -->
     <header class="glass-dark border-b border-slate-900 px-6 py-4 flex justify-between items-center z-40 shrink-0">
@@ -96,15 +85,25 @@
             </div>
             <div>
                 <h1 class="text-lg font-extrabold tracking-wide bg-gradient-to-r from-amber-400 to-indigo-400 bg-clip-text text-transparent">Tarixiy Koshif</h1>
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">AI Silk Road Guide • Pro</p>
+                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">AI Silk Road Guide • Pro Ultimate</p>
             </div>
         </div>
+        
         <div class="flex items-center gap-2">
-            <button id="btn-show-history" class="w-10 h-10 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
-                <i class="fa-solid fa-clock-rotate-left"></i>
+            <!-- Language Quick Switcher -->
+            <select id="header-lang-switcher" class="bg-slate-900 border border-slate-800 text-xs rounded-lg px-2 py-1.5 font-bold focus:outline-none focus:border-amber-500 text-amber-400 cursor-pointer">
+                <option value="uz">UZB</option>
+                <option value="en">ENG</option>
+                <option value="ru">РУС</option>
+            </select>
+            
+            <!-- History Button -->
+            <button id="btn-show-history" class="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
+                <i class="fa-solid fa-clock-rotate-left text-sm"></i>
             </button>
-            <button id="btn-show-settings" class="w-10 h-10 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
-                <i class="fa-solid fa-sliders"></i>
+            <!-- Settings Button -->
+            <button id="btn-show-settings" class="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
+                <i class="fa-solid fa-sliders text-sm"></i>
             </button>
         </div>
     </header>
@@ -138,10 +137,10 @@
                 </div>
 
                 <!-- Instant Tip Bar -->
-                <div class="absolute top-6 left-6 right-6 z-20 pointer-events-none flex justify-center">
+                <div class="absolute top-6 left-6 right-6 z-20 pointer-events-none flex justify-center text-center">
                     <div class="glass-dark px-4 py-2 rounded-full flex items-center gap-2 border border-amber-500/20 shadow-md">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span class="text-xs font-semibold text-slate-200">Kamerani tarixiy buyum yoki bitikka to'g'rilang</span>
+                        <span id="ui-tip-text" class="text-xs font-semibold text-slate-200">Kamerani tarixiy buyum yoki bitikka to'g'rilang</span>
                     </div>
                 </div>
             </div>
@@ -151,7 +150,7 @@
                 <!-- Gallery Picker -->
                 <button id="btn-open-gallery" class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-slate-300 hover:text-amber-400 hover:border-amber-500/30 transition-all active:scale-90" onclick="document.getElementById('file-picker').click()">
                     <i class="fa-regular fa-image text-lg mb-1"></i>
-                    <span class="text-[9px] font-bold uppercase tracking-wider">Galereya</span>
+                    <span id="ui-gallery-lbl" class="text-[9px] font-bold uppercase tracking-wider">Galereya</span>
                 </button>
                 <input type="file" id="file-picker" accept="image/*" class="hidden">
 
@@ -165,7 +164,7 @@
                 <!-- Camera Rotator -->
                 <button id="btn-flip" class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-slate-300 hover:text-indigo-400 hover:border-indigo-500/30 transition-all active:scale-90">
                     <i class="fa-solid fa-camera-rotate text-lg mb-1"></i>
-                    <span class="text-[9px] font-bold uppercase tracking-wider">Kamera</span>
+                    <span id="ui-camera-lbl" class="text-[9px] font-bold uppercase tracking-wider">Kamera</span>
                 </button>
             </div>
         </section>
@@ -180,8 +179,8 @@
                 </div>
             </div>
             
-            <h2 class="text-xl font-bold tracking-wider text-center text-white px-8">Kognitiv Tahlil Jarayoni</h2>
-            <div id="loader-status" class="text-sm text-slate-400 mt-2 font-medium tracking-wide min-h-[20px] text-center">
+            <h2 id="ui-analyzing-title" class="text-xl font-bold tracking-wider text-center text-white px-8">Kognitiv Tahlil Jarayoni</h2>
+            <div id="loader-status" class="text-sm text-slate-400 mt-2 font-medium tracking-wide min-h-[20px] text-center px-4">
                 Buyum parametrlari tekshirilmoqda...
             </div>
             
@@ -198,7 +197,7 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-black/60"></div>
                 
                 <!-- Quick Controls on Photo -->
-                <button id="btn-close-results" class="absolute top-6 left-6 w-11 h-11 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-90 transition-all">
+                <button id="btn-close-results" class="absolute top-6 left-6 w-11 h-11 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-90 transition-all z-20">
                     <i class="fa-solid fa-chevron-left text-sm"></i>
                 </button>
                 
@@ -223,7 +222,7 @@
                                 <i class="fa-solid fa-circle-play text-indigo-400 text-lg"></i>
                             </div>
                             <div>
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Audio Gid</h4>
+                                <h4 id="ui-audiogid-lbl" class="text-xs font-bold uppercase tracking-wider text-slate-400">Audio Gid</h4>
                                 <p id="audio-status-label" class="text-sm font-semibold text-slate-200">Eshittirishga tayyor</p>
                             </div>
                         </div>
@@ -238,7 +237,7 @@
                             </div>
                             
                             <button id="btn-audio-action" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all shadow-md">
-                                <i class="fa-solid fa-volume-high"></i> Tinglash
+                                <i class="fa-solid fa-volume-high"></i> <span id="ui-tinglash-lbl">Tinglash</span>
                             </button>
                         </div>
                     </div>
@@ -247,7 +246,7 @@
                     <div class="flex items-center justify-between border-t border-slate-900 pt-3 text-xs text-slate-400">
                         <span id="audio-voice-used">Ovoz turi: Yuklanmoqda...</span>
                         <button id="btn-export-pdf" class="flex items-center gap-1 text-emerald-400 font-bold hover:text-emerald-300">
-                            <i class="fa-solid fa-file-pdf"></i> PDF Yuklash
+                            <i class="fa-solid fa-file-pdf"></i> <span id="ui-pdfdownload-lbl">PDF Yuklash</span>
                         </button>
                     </div>
                 </div>
@@ -255,11 +254,11 @@
                 <!-- Artifact Spec Sheet (Grid Details) -->
                 <div class="grid grid-cols-2 gap-3 mb-6">
                     <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-900">
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Davri (Era)</span>
+                        <span id="ui-era-lbl" class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Davri (Era)</span>
                         <p id="val-era" class="text-sm font-bold text-slate-200">Noma'lum</p>
                     </div>
                     <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-900">
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Ashyosi (Material)</span>
+                        <span id="ui-material-lbl" class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Ashyosi (Material)</span>
                         <p id="val-material" class="text-sm font-bold text-slate-200">Loy</p>
                     </div>
                 </div>
@@ -287,7 +286,7 @@
                 <!-- Did You Know Block -->
                 <div class="mt-8 bg-indigo-950/30 rounded-2xl p-5 border border-indigo-500/15 relative overflow-hidden">
                     <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl"></div>
-                    <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <h4 id="ui-didyouknow-title" class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
                         <i class="fa-solid fa-lightbulb"></i> Bilib qo'ygan yaxshi!
                     </h4>
                     <p id="val-didyouknow" class="text-slate-300 text-xs leading-relaxed italic">...</p>
@@ -295,10 +294,10 @@
             </div>
         </section>
 
-        <!-- 4. SETTINGS MODAL VIEW -->
-        <section id="view-settings" class="absolute inset-0 bg-slate-950/95 z-45 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
+        <!-- 4. SETTINGS MODAL VIEW (Displays as beautiful overlay) -->
+        <section id="view-settings" class="absolute inset-0 bg-slate-950/95 z-50 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-black tracking-wide text-white">Ilova Sozlamalari</h3>
+                <h3 id="ui-settings-title" class="text-lg font-black tracking-wide text-white">Ilova Sozlamalari</h3>
                 <button id="btn-close-settings" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-95">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -307,13 +306,13 @@
             <div class="space-y-6">
                 <!-- Voice Settings -->
                 <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900">
-                    <h4 class="text-sm font-bold text-amber-400 mb-4 flex items-center gap-2">
+                    <h4 id="ui-voiceset-title" class="text-sm font-bold text-indigo-400 mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-volume-high"></i> Gid Ovozini Tanlash
                     </h4>
                     
                     <div class="space-y-4">
                         <div class="space-y-1">
-                            <label class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Texnologiyasi</label>
+                            <label id="ui-voice-engine-lbl" class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Texnologiyasi</label>
                             <select id="setting-engine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
                                 <option value="gemini" selected>Premium Sun'iy Intellekt Ovozi (Tavsiya etiladi)</option>
                                 <option value="webspeech">Tizim Tezkor Ovozi (Internet talab qilmaydi)</option>
@@ -321,19 +320,15 @@
                         </div>
 
                         <div id="container-voice-select" class="space-y-2">
-                            <label class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Personaji (Tembr)</label>
+                            <label id="ui-voice-persona-lbl" class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Personaji (Tembr)</label>
                             <select id="setting-voice" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                                <option value="Aoede">Aoede - Yoqimli va Mayin</option>
-                                <option value="Kore">Kore - Professional va Tushunarli</option>
-                                <option value="Zephyr" selected>Zephyr - Chuqur va Tafakkurli</option>
-                                <option value="Leda">Leda - Do'stona va Aniq</option>
-                                <option value="Fenrir">Fenrir - Kuchli va Vakolatli</option>
+                                <!-- Options populated dynamically by language in JS -->
                             </select>
                         </div>
 
                         <div class="space-y-2">
                             <div class="flex justify-between text-xs text-slate-400 font-semibold mb-1">
-                                <span>Ovoz Tezligi</span>
+                                <span id="ui-voice-speed-lbl">Ovoz Tezligi</span>
                                 <span id="label-speed">1.0x</span>
                             </div>
                             <input type="range" id="setting-speed" min="0.75" max="1.5" step="0.25" value="1.0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
@@ -341,22 +336,34 @@
                     </div>
                 </div>
 
+                <!-- Language Selection inside settings -->
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900">
+                    <h4 id="ui-langset-title" class="text-sm font-bold text-indigo-400 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-globe"></i> Tizim Tili (System Language)
+                    </h4>
+                    <select id="settings-lang-switcher" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="uz">O'zbekcha</option>
+                        <option value="en">English</option>
+                        <option value="ru">Русский</option>
+                    </select>
+                </div>
+
                 <!-- Information guide -->
                 <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900 space-y-3">
-                    <h4 class="text-sm font-bold text-indigo-400 flex items-center gap-2">
+                    <h4 id="ui-guide-lbl" class="text-sm font-bold text-indigo-400 flex items-center gap-2">
                         <i class="fa-solid fa-shield-halved"></i> Foydalanish bo'yicha qo'llanma
                     </h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">
+                    <p id="ui-guide-desc" class="text-xs text-slate-400 leading-relaxed">
                         Ilovadan maksimal darajada professional foydalanish uchun rasmlarni yorug'lik yaxshi bo'lgan joylarda oling. Iyeroglif va eski bitiklarni o'qishda kamerani yaqinroq olib keling va fokus to'g'rilanganiga ishonch hosil qiling.
                     </p>
                 </div>
             </div>
         </section>
 
-        <!-- 5. EXPLORATION HISTORY VIEW (Dashboard) -->
-        <section id="view-history" class="absolute inset-0 bg-slate-950/95 z-45 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
+        <!-- 5. EXPLORATION HISTORY VIEW (Dashboard Overlay) -->
+        <section id="view-history" class="absolute inset-0 bg-slate-950/95 z-50 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-black tracking-wide text-white">Skanerlash Tarixi</h3>
+                <h3 id="ui-history-title" class="text-lg font-black tracking-wide text-white">Skanerlash Tarixi</h3>
                 <div class="flex gap-2">
                     <button id="btn-clear-history" class="px-3 py-1.5 rounded-lg bg-red-950/50 border border-red-900/45 text-red-400 text-xs font-bold active:scale-95">Tozalash</button>
                     <button id="btn-close-history" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-95">
@@ -367,10 +374,7 @@
 
             <!-- List container -->
             <div id="history-container" class="space-y-3">
-                <div class="text-center py-12 text-slate-500 text-xs">
-                    <i class="fa-solid fa-box-open text-3xl mb-3 block text-slate-600"></i>
-                    Skanerlangan buyumlar mavjud emas
-                </div>
+                <!-- Dynamically filled inside JS -->
             </div>
         </section>
 
@@ -388,30 +392,31 @@
         <button onclick="hideToast()" class="text-slate-500 hover:text-white transition-all"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
+    <!-- Custom Confirm Modal Overlay (Completely avoids native confirm dialogs) -->
+    <div id="confirm-modal" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-6">
+        <div class="glass-dark border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-5">
+            <div class="flex items-center gap-3 text-amber-400">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-lg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h4 id="confirm-modal-title" class="text-sm font-extrabold uppercase tracking-wider text-slate-100">Tasdiqlang</h4>
+            </div>
+            <p id="confirm-modal-body" class="text-xs text-slate-300 leading-relaxed">Ushbu harakatni tasdiqlaysizmi?</p>
+            <div class="flex justify-end gap-3 text-xs font-bold">
+                <button id="btn-confirm-cancel" class="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white active:scale-95 transition-all">Bekor qilish</button>
+                <button id="btn-confirm-ok" class="px-5 py-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 active:scale-95 transition-all">Tasdiqlash</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden audio element for premium TTS -->
     <audio id="tts-audio" class="hidden" preload="auto" crossorigin="anonymous"></audio>
 
     <script>
-        /**
-         * ==========================================
-         * APPLICATION GLOBAL STATE & SCHEMAS
-         * ==========================================
-         */
-        const apiKey = ""; // Runtime provides the key automatically
-        
-        const AppState = {
-            activeFacingMode: 'environment',
-            videoStream: null,
-            scannedBase64: null,
-            scannedResult: null, 
-            audioPlaying: false,
-            audioUrl: null,
-            audioEngine: 'gemini', // 'gemini' or 'webspeech'
-            selectedVoice: 'Zephyr',
-            speechSpeed: 1.0,
-            history: []
-        };
+        // SECURELY HARDCODED SYSTEM FALLBACK KEY PROVIDED BY THE USER
+        const defaultPlatformKey = "AIzaSyCnZFjm9ejdDTCKKlZbA033jqutpYqc29g"; 
 
+        // JSON schema for structural response from Gemini 2.5
         const ArtifactSchema = {
             type: "OBJECT",
             properties: {
@@ -430,6 +435,235 @@
                 "title", "era", "origin", "material", "confidence_score", 
                 "short_summary", "description", "inscriptions_decoded", 
                 "historical_context", "did_you_know"
+            ]
+        };
+        
+        const AppState = {
+            language: 'uz',
+            activeFacingMode: 'environment',
+            videoStream: null,
+            scannedBase64: null,
+            scannedResult: null, 
+            audioPlaying: false,
+            audioUrl: null,
+            audioEngine: 'gemini', // 'gemini' or 'webspeech'
+            selectedVoice: 'Zephyr', 
+            speechSpeed: 1.0,
+            history: [],
+            apiKey: defaultPlatformKey
+        };
+
+        // Complete UI Translation Database
+        const Dictionary = {
+            uz: {
+                appName: "Tarixiy Koshif",
+                tipText: "Kamerani tarixiy buyum yoki bitikka to'g'rilang",
+                galleryLbl: "Galereya",
+                cameraLbl: "Kamera",
+                analyzingTitle: "Kognitiv Tahlil Jarayoni",
+                analyzingWait: "Buyum parametrlari tekshirilmoqda...",
+                analyzingGeom: "Geometriya va ashyolar hisoblanmoqda...",
+                analyzingService: "Gemini xizmati so'rovni tahlil qilmoqda...",
+                analyzingInscriptions: "Bitiklar tarjimasi yakunlanmoqda...",
+                audiogid: "Audio Gid",
+                tinglash: "Tinglash",
+                toxtatish: "To'xtatish",
+                pdfdownload: "PDF Yuklash",
+                era: "Davri (Era)",
+                material: "Ashyosi (Material)",
+                tavsif: "Tavsif",
+                bitiklar: "Iyerogliflar / Bitiklar",
+                kontekst: "Tarixiy Kontekst",
+                didyouknowTitle: "Bilib qo'ygan yaxshi!",
+                settingsTitle: "Ilova Sozlamalari",
+                voicesetTitle: "Gid Ovozini Tanlash",
+                voiceEngineLbl: "Ovoz Texnologiyasi",
+                voicePersonaLbl: "Ovoz Personaji (Tembr)",
+                voiceSpeedLbl: "Ovoz Tezligi",
+                langsetTitle: "Tizim Tili (System Language)",
+                guideLbl: "Foydalanish bo'yicha qo'llanma",
+                guideDesc: "Ilovadan maksimal darajada professional foydalanish uchun rasmlarni yorug'lik yaxshi bo'lgan joylarda oling. Iyeroglif va eski bitiklarni o'qishda kamerani yaqinroq olib keling va fokus to'g'rilanganiga ishonch hosil qiling.",
+                historyTitle: "Skanerlash Tarixi",
+                clearHistoryBtn: "Tozalash",
+                noHistoryText: "Skanerlangan buyumlar mavjud emas",
+                toastSuccess: "Muvaffaqiyat",
+                toastError: "Xatolik",
+                toastInfo: "Ma'lumot",
+                cameraErrorMsg: "Kamera ishga tushmadi. Ruxsat berilganini tekshiring yoki galereyadan rasm yuklang.",
+                analysisErrorMsg: "Obyekt tahlili to'xtadi. Internet yoki fild sifatini tekshiring.",
+                voiceChangeMsg: "Ovoz turi o'zgartirildi: ",
+                voiceStatusReady: "Eshittirishga tayyor",
+                voiceStatusPlaying: "Premium gid gapirmoqda...",
+                voiceStatusSysPlaying: "Tizim gidi gapirmoqda...",
+                voiceStatusStopped: "Eshittirish to'xtatildi",
+                confirmClearHistoryTitle: "Tarixni o'chirish",
+                confirmClearHistoryBody: "Haqiqatan ham barcha kashfiyotlar tarixini butunlay o'chirib tashlamoqchimisiz?",
+                confirmDeleteSingleTitle: "Kashfiyotni o'chirish",
+                confirmDeleteSingleBody: "Ushbu kashfiyotni tarixdan o'chirib tashlamoqchimisiz?",
+                pdfReportTitle: "TARIXIY KOSHIF SMART GID HISOBOTI",
+                pdfReportSub: "BUYUK IPAK YO'LI ELEKTRON ARXEOLOGIK JURNALI",
+                pdfPage: "Sahifa",
+                pdfEksponat: "EKSPONAT NOMI:",
+                pdfDavr: "DAVRI / ERASI:",
+                pdfAshyo: "ASHYOSI / MATERIALLI:",
+                pdfIshonch: "ISHONCH DARAJASI:",
+                pdfSec1: "1. UMUMIY TAVSIF VA MA'LUMOT",
+                pdfSec2: "2. YOZUVLARNING DEKODLANISHI (TARJIMASI)",
+                pdfSec3: "3. TARIXIY DAVR SHAROITI (KONTEKST)",
+                pdfSec4: "4. QIZIQARLI FAKT",
+                voiceEnginePremium: "Premium Sun'iy Intellekt Ovozi (Tavsiya etiladi)",
+                voiceEngineSystem: "Tizim Tezkor Ovozi (Internet talab qilmaydi)"
+            },
+            en: {
+                appName: "Historical Discoverer",
+                tipText: "Align the camera to a historical object or inscription",
+                galleryLbl: "Gallery",
+                cameraLbl: "Camera",
+                analyzingTitle: "Cognitive Analysis Process",
+                analyzingWait: "Scanning object parameters...",
+                analyzingGeom: "Analyzing geometry and materials...",
+                analyzingService: "Gemini engine calculating artifact metadata...",
+                analyzingInscriptions: "Completing inscription translations...",
+                audiogid: "Audio Guide",
+                tinglash: "Listen",
+                toxtatish: "Pause",
+                pdfdownload: "Export PDF",
+                era: "Era / Period",
+                material: "Material",
+                tavsif: "Description",
+                bitiklar: "Inscriptions / Glyphs",
+                kontekst: "Historical Context",
+                didyouknowTitle: "Did you know?",
+                settingsTitle: "App Settings",
+                voicesetTitle: "Select Guide Voice",
+                voiceEngineLbl: "Voice Engine",
+                voicePersonaLbl: "Voice Persona",
+                voiceSpeedLbl: "Voice Speed",
+                langsetTitle: "System Language",
+                guideLbl: "User Quick Guide",
+                guideDesc: "For optimal analysis, snap pictures in bright environments. Bring the camera closer and focus clearly when reading glyphs and ancient inscriptions.",
+                historyTitle: "Scan History",
+                clearHistoryBtn: "Clear All",
+                noHistoryText: "No scanned items found",
+                toastSuccess: "Success",
+                toastError: "Error",
+                toastInfo: "Info",
+                cameraErrorMsg: "Camera failed to start. Verify permissions or select a picture from your gallery.",
+                analysisErrorMsg: "AI analysis interrupted. Please check your connection or image quality.",
+                voiceChangeMsg: "Voice changed to: ",
+                voiceStatusReady: "Ready to narrate",
+                voiceStatusPlaying: "Premium guide is speaking...",
+                voiceStatusSysPlaying: "System TTS is speaking...",
+                voiceStatusStopped: "Narration stopped",
+                confirmClearHistoryTitle: "Clear History",
+                confirmClearHistoryBody: "Are you sure you want to clear your entire discovery history?",
+                confirmDeleteSingleTitle: "Delete Scanned Item",
+                confirmDeleteSingleBody: "Are you sure you want to delete this specific scanned item?",
+                pdfReportTitle: "HISTORICAL DISCOVERER GUIDE REPORT",
+                pdfReportSub: "SILK ROAD ARCHEOLOGICAL ELECTRONIC DIARY",
+                pdfPage: "Page",
+                pdfEksponat: "ARTIFACT NAME:",
+                pdfDavr: "ERA / PERIOD:",
+                pdfAshyo: "MATERIAL SPEC:",
+                pdfIshonch: "CONFIDENCE SCORE:",
+                pdfSec1: "1. OVERALL DESCRIPTION",
+                pdfSec2: "2. DECODED INSCRIPTIONS & TRANSLATION",
+                pdfSec3: "3. HISTORICAL TIMELINE & CONTEXT",
+                pdfSec4: "4. INTERESTING TRIVIA / FACT",
+                voiceEnginePremium: "Premium AI Voice (Recommended)",
+                voiceEngineSystem: "Local System Voice (Offline friendly)"
+            },
+            ru: {
+                appName: "Исторический Кошиф",
+                tipText: "Направьте камеру на исторический объект или надпись",
+                galleryLbl: "Галерея",
+                cameraLbl: "Камера",
+                analyzingTitle: "Процесс Когнитивного Анализа",
+                analyzingWait: "Проверка параметров экспоната...",
+                analyzingGeom: "Анализ геометрии и материала...",
+                analyzingService: "Нейросеть Gemini анализирует объект...",
+                analyzingInscriptions: "Завершение дешифровки древних письмен...",
+                audiogid: "Аудиогид",
+                tinglash: "Слушать",
+                toxtatish: "Пауза",
+                pdfdownload: "Скачать PDF",
+                era: "Период (Эра)",
+                material: "Материал",
+                tavsif: "Описание",
+                bitiklar: "Иероглифы / Надписи",
+                kontekst: "Исторический контекст",
+                didyouknowTitle: "А знаете ли вы?",
+                settingsTitle: "Настройки приложения",
+                voicesetTitle: "Выбор голоса гида",
+                voiceEngineLbl: "Технология звука",
+                voicePersonaLbl: "Персонаж голоса (Тембр)",
+                voiceSpeedLbl: "Скорость озвучки",
+                langsetTitle: "Язык Системы (System Language)",
+                guideLbl: "Руководство пользователя",
+                guideDesc: "Для максимальной точности дешифровки делайте снимки при хорошем освещении. Поднесите камеру ближе и сфокусируйтесь для распознавания древних надписей.",
+                historyTitle: "История сканирований",
+                clearHistoryBtn: "Очистить",
+                noHistoryText: "История сканирований пуста",
+                toastSuccess: "Успех",
+                toastError: "Ошибка",
+                toastInfo: "Информация",
+                cameraErrorMsg: "Не удалось запустить камеру. Проверьте разрешения или загрузите фото из галереи.",
+                analysisErrorMsg: "Анализ остановлен. Проверьте интернет-соединение или качество файла.",
+                voiceChangeMsg: "Голос изменен на: ",
+                voiceStatusReady: "Готов к воспроизведению",
+                voiceStatusPlaying: "Премиум-гид говорит...",
+                voiceStatusSysPlaying: "Системный гид говорит...",
+                voiceStatusStopped: "Воспроизведение остановлено",
+                confirmClearHistoryTitle: "Очистка истории",
+                confirmClearHistoryBody: "Вы уверены, что хотите полностью стереть историю сканирований?",
+                confirmDeleteSingleTitle: "Удалить запись",
+                confirmDeleteSingleBody: "Вы действительно хотите удалить эту запись из истории?",
+                pdfReportTitle: "ОТЧЕТ УМНОГО ГИДА ИСТОРИЧЕСКИЙ КОШИФ",
+                pdfReportSub: "ЭЛЕКТРОННЫЙ АРХЕОЛОГИЧЕСКИЙ ДНЕВНИК ШЕЛКОВОГО ПУТИ",
+                pdfPage: "Страница",
+                pdfEksponat: "НАЗВАНИЕ ЭКСПОНАТА:",
+                pdfDavr: "ЭРА / ПЕРИОД:",
+                pdfAshyo: "МАТЕРИАЛ:",
+                pdfIshonch: "УРОВЕНЬ ТОЧНОСТИ:",
+                pdfSec1: "1. ОБЩЕЕ ОБСЛУЖИВАНИЕ И СВЕДЕНИЯ",
+                pdfSec2: "2. ДЕШИФРОВКА И ПЕРЕВОД ПИСЬМЕННОСТИ",
+                pdfSec3: "3. ИСТОРИЧЕСКИЙ ИСТОРИЧЕСКИЙ КОНТЕКСТ ЭПОХИ",
+                pdfSec4: "4. ИНТЕРЕСНЫЙ ФАКТ",
+                voiceEnginePremium: "Премиальный голос ИИ (Рекомендуется)",
+                voiceEngineSystem: "Быстрый системный голос (Без интернета)"
+            }
+        };
+
+        const VoicePersonas = {
+            uz: [
+                { id: "Leda", label: "Yosh bola (Leda) - Quvnoq", type: "child" },
+                { id: "Puck", label: "Yosh bola (Puck) - Shaddod", type: "child" },
+                { id: "Aoede", label: "Ayol kishi (Aoede) - Melodik", type: "female" },
+                { id: "Callirrhoe", label: "Ayol kishi (Callirrhoe) - Muloyim", type: "female" },
+                { id: "Fenrir", label: "Erkak kishi (Fenrir) - Kuchli", type: "male" },
+                { id: "Charon", label: "Erkak kishi (Charon) - Ma'lumotli", type: "male" },
+                { id: "Gacrux", label: "Katta yoshli odam (Gacrux) - Donishmand", type: "senior" },
+                { id: "Algenib", label: "Katta yoshli odam (Algenib) - Salmoqli", type: "senior" }
+            ],
+            en: [
+                { id: "Leda", label: "Young Child (Leda) - Upbeat", type: "child" },
+                { id: "Puck", label: "Young Child (Puck) - Lively", type: "child" },
+                { id: "Aoede", label: "Adult Female (Aoede) - Melodic", type: "female" },
+                { id: "Callirrhoe", label: "Adult Female (Callirrhoe) - Warm", type: "female" },
+                { id: "Fenrir", label: "Adult Male (Fenrir) - Energetic", type: "male" },
+                { id: "Charon", label: "Adult Male (Charon) - Informative", type: "male" },
+                { id: "Gacrux", label: "Senior Citizen (Gacrux) - Wise", type: "senior" },
+                { id: "Algenib", label: "Senior Citizen (Algenib) - Deep", type: "senior" }
+            ],
+            ru: [
+                { id: "Leda", label: "Ребенок (Leda) - Веселый", type: "child" },
+                { id: "Puck", label: "Ребенок (Puck) - Живой", type: "child" },
+                { id: "Aoede", label: "Женщина (Aoede) - Мелодичный", type: "female" },
+                { id: "Callirrhoe", label: "Женщина (Callirrhoe) - Нежный", type: "female" },
+                { id: "Fenrir", label: "Мужчина (Fenrir) - Энергичный", type: "male" },
+                { id: "Charon", label: "Мужчина (Charon) - Познавательный", type: "male" },
+                { id: "Gacrux", label: "Мудрый Старец (Gacrux) - Опытный", type: "senior" },
+                { id: "Algenib", label: "Мудрый Старец (Algenib) - Глубокий", type: "senior" }
             ]
         };
 
@@ -497,34 +731,114 @@
             containerVoiceSelect: document.getElementById('container-voice-select'),
             settingSpeed: document.getElementById('setting-speed'),
             labelSpeed: document.getElementById('label-speed'),
-            historyContainer: document.getElementById('history-container')
+            historyContainer: document.getElementById('history-container'),
+            
+            // Language switchers
+            headerLangSwitcher: document.getElementById('header-lang-switcher'),
+            settingsLangSwitcher: document.getElementById('settings-lang-switcher'),
+            
+            // Custom Confirm Dialog
+            confirmModal: document.getElementById('confirm-modal'),
+            confirmTitle: document.getElementById('confirm-modal-title'),
+            confirmBody: document.getElementById('confirm-modal-body'),
+            btnConfirmCancel: document.getElementById('btn-confirm-cancel'),
+            btnConfirmOk: document.getElementById('btn-confirm-ok')
         };
 
-        /**
-         * ==========================================
-         * BOOTSTRAPPING & INITIALIZATION
-         * ==========================================
-         */
-        window.addEventListener('load', () => {
-            initCamera();
-            loadHistory();
-            initSettings();
-            setupEventListeners();
-        });
+        function changeSystemLanguage(newLang) {
+            AppState.language = newLang;
+            
+            // Sync switchers
+            UI.headerLangSwitcher.value = newLang;
+            UI.settingsLangSwitcher.value = newLang;
+
+            const dict = Dictionary[newLang];
+            document.title = dict.appName;
+            document.getElementById('ui-tip-text').innerText = dict.tipText;
+            UI.btnOpenGallery.querySelector('span').innerText = dict.galleryLbl;
+            UI.btnFlip.querySelector('span').innerText = dict.cameraLbl;
+            document.getElementById('ui-analyzing-title').innerText = dict.analyzingTitle;
+            UI.loaderStatus.innerText = dict.analyzingWait;
+            
+            document.getElementById('ui-audiogid-lbl').innerText = dict.audiogid;
+            UI.btnAudioAction.querySelector('span').innerText = dict.tinglash;
+            document.getElementById('ui-pdfdownload-lbl').innerText = dict.pdfdownload;
+            
+            document.getElementById('ui-era-lbl').innerText = dict.era;
+            document.getElementById('ui-material-lbl').innerText = dict.material;
+            
+            UI.tabBtnDesc.innerText = dict.tavsif;
+            UI.tabBtnInsc.innerText = dict.bitiklar;
+            UI.tabBtnCont.innerText = dict.kontekst;
+            document.getElementById('ui-didyouknow-title').innerText = dict.didyouknowTitle;
+            
+            document.getElementById('ui-settings-title').innerText = dict.settingsTitle;
+            document.getElementById('ui-voiceset-title').innerText = dict.voicesetTitle;
+            document.getElementById('ui-voice-engine-lbl').innerText = dict.voiceEngineLbl;
+            document.getElementById('ui-voice-persona-lbl').innerText = dict.voicePersonaLbl;
+            document.getElementById('ui-voice-speed-lbl').innerText = dict.voiceSpeedLbl;
+            document.getElementById('ui-langset-title').innerText = dict.langsetTitle;
+            document.getElementById('ui-guide-lbl').innerText = dict.guideLbl;
+            document.getElementById('ui-guide-desc').innerText = dict.guideDesc;
+            
+            document.getElementById('ui-history-title').innerText = dict.historyTitle;
+            UI.btnClearHistory.innerText = dict.clearHistoryBtn;
+
+            populateVoiceOptions();
+
+            UI.settingEngine.options[0].text = dict.voiceEnginePremium;
+            UI.settingEngine.options[1].text = dict.voiceEngineSystem;
+
+            if (!UI.viewHistory.classList.contains('hidden')) {
+                renderHistory();
+            }
+
+            if (!UI.viewResults.classList.contains('hidden')) {
+                resetAudioEngine();
+            }
+        }
+
+        function populateVoiceOptions() {
+            const currentVoiceOptions = VoicePersonas[AppState.language];
+            UI.settingVoice.innerHTML = '';
+            
+            currentVoiceOptions.forEach(opt => {
+                const element = document.createElement('option');
+                element.value = opt.id;
+                element.text = opt.label;
+                if (opt.id === AppState.selectedVoice) {
+                    element.selected = true;
+                }
+                UI.settingVoice.appendChild(element);
+            });
+        }
 
         function setupEventListeners() {
             UI.tabBtnDesc.addEventListener('click', () => switchTab('desc'));
             UI.tabBtnInsc.addEventListener('click', () => switchTab('inscription'));
             UI.tabBtnCont.addEventListener('click', () => switchTab('context'));
 
-            UI.btnShowSettings.addEventListener('click', () => toggleView(UI.viewSettings, true));
-            UI.btnCloseSettings.addEventListener('click', () => toggleView(UI.viewSettings, false));
+            // Show Settings Overlay strictly when the button is clicked
+            UI.btnShowSettings.addEventListener('click', () => {
+                toggleView(UI.viewSettings, true);
+            });
+            UI.btnCloseSettings.addEventListener('click', () => {
+                toggleView(UI.viewSettings, false);
+            });
+
+            // Show History Overlay strictly when the button is clicked
             UI.btnShowHistory.addEventListener('click', () => {
                 renderHistory();
                 toggleView(UI.viewHistory, true);
             });
-            UI.btnCloseHistory.addEventListener('click', () => toggleView(UI.viewHistory, false));
+            UI.btnCloseHistory.addEventListener('click', () => {
+                toggleView(UI.viewHistory, false);
+            });
+
             UI.btnClearHistory.addEventListener('click', clearHistory);
+
+            UI.headerLangSwitcher.addEventListener('change', (e) => changeSystemLanguage(e.target.value));
+            UI.settingsLangSwitcher.addEventListener('change', (e) => changeSystemLanguage(e.target.value));
 
             UI.settingEngine.addEventListener('change', (e) => {
                 AppState.audioEngine = e.target.value;
@@ -539,27 +853,55 @@
             UI.settingVoice.addEventListener('change', (e) => {
                 AppState.selectedVoice = e.target.value;
                 resetAudioEngine();
+                showToast(Dictionary[AppState.language].voiceChangeMsg + AppState.selectedVoice, "info");
             });
 
             UI.settingSpeed.addEventListener('input', (e) => {
                 AppState.speechSpeed = parseFloat(e.target.value);
                 UI.labelSpeed.innerText = `${AppState.speechSpeed.toFixed(2)}x`;
+                
+                // Real-time speed adjustment during playback
                 if (AppState.audioPlaying) {
                     if (AppState.audioEngine === 'gemini') {
                         UI.audioPlayer.playbackRate = AppState.speechSpeed;
                     } else {
-                        // For WebSpeech SpeechSynthesis, rate must be set before starting or restarted
                         restartWebSpeechWithNewSpeed();
                     }
                 }
             });
+            
+            // Setup results close back-button strictly to close result screen
+            UI.btnCloseResults.addEventListener('click', () => {
+                stopAudio();
+                resetAudioEngine();
+                toggleView(UI.viewResults, false);
+                toggleView(UI.viewStudio, true);
+                initCamera(); // Re-activate camera stream cleanly
+            });
         }
 
-        /**
-         * ==========================================
-         * CAMERA MANAGEMENT ENGINE
-         * ==========================================
-         */
+        let confirmActionPromise = null;
+
+        function showConfirmModal(titleText, bodyText) {
+            UI.confirmTitle.innerText = titleText;
+            UI.confirmBody.innerText = bodyText;
+            UI.confirmModal.classList.remove('hidden');
+
+            return new Promise((resolve) => {
+                confirmActionPromise = resolve;
+            });
+        }
+
+        UI.btnConfirmCancel.addEventListener('click', () => {
+            UI.confirmModal.classList.add('hidden');
+            if (confirmActionPromise) confirmActionPromise(false);
+        });
+
+        UI.btnConfirmOk.addEventListener('click', () => {
+            UI.confirmModal.classList.add('hidden');
+            if (confirmActionPromise) confirmActionPromise(true);
+        });
+
         async function initCamera() {
             if (AppState.videoStream) {
                 AppState.videoStream.getTracks().forEach(track => track.stop());
@@ -569,7 +911,8 @@
                 video: {
                     facingMode: AppState.activeFacingMode,
                     width: { ideal: 1920 },
-                    height: { ideal: 1080 }
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
                 },
                 audio: false
             };
@@ -579,7 +922,7 @@
                 UI.video.srcObject = AppState.videoStream;
             } catch (err) {
                 console.error("Camera access failed:", err);
-                showToast("Kamera ishga tushmadi. Ruxsat berilganini tekshiring yoki galereyadan rasm yuklang.", "error");
+                showToast(Dictionary[AppState.language].cameraErrorMsg, "error");
             }
         }
 
@@ -590,7 +933,7 @@
 
         UI.btnTriggerCapture.addEventListener('click', () => {
             if (!AppState.videoStream) {
-                showToast("Faol video uzatish topilmadi.", "error");
+                showToast("Kamera tizimi faol emas.", "error");
                 return;
             }
 
@@ -621,28 +964,35 @@
             }
         });
 
-        /**
-         * ==========================================
-         * PROGRESSIVE COGNITIVE PIPELINE
-         * ==========================================
-         */
+        function cleanJsonMarkdown(text) {
+            let sanitized = text.trim();
+            if (sanitized.startsWith("```")) {
+                sanitized = sanitized.replace(/^```json\s*/i, "");
+                sanitized = sanitized.replace(/```$/s, "");
+            }
+            return sanitized.trim();
+        }
+
         async function beginCognitiveAnalysis(base64Image) {
             AppState.scannedBase64 = base64Image;
             UI.analyzedPhoto.src = base64Image;
 
+            // Instantly transition to scanning loader
             toggleView(UI.viewStudio, false);
             toggleView(UI.viewAnalyzing, true);
             
-            updateLoader(15, "Obraz tahlili boshlandi...");
+            const d = Dictionary[AppState.language];
+            updateLoader(15, d.analyzingWait);
             
-            setTimeout(() => updateLoader(35, "Geometriya va ashyolar hisoblanmoqda..."), 800);
-            setTimeout(() => updateLoader(60, "Gemini xizmati so'rovni tahlil qilmoqda..."), 1500);
+            setTimeout(() => updateLoader(35, d.analyzingGeom), 800);
+            setTimeout(() => updateLoader(60, d.analyzingService), 1500);
 
             try {
-                const responseText = await requestArtifactAnalysis(base64Image);
-                const parsedResult = JSON.parse(responseText);
+                const rawResponse = await requestArtifactAnalysis(base64Image);
+                const cleanedResponse = cleanJsonMarkdown(rawResponse);
+                const parsedResult = JSON.parse(cleanedResponse);
                 
-                updateLoader(90, "Bitiklar tarjimasi yakunlanmoqda...");
+                updateLoader(90, d.analyzingInscriptions);
                 AppState.scannedResult = parsedResult;
 
                 saveItemToHistory(parsedResult, base64Image);
@@ -658,7 +1008,7 @@
                 console.error("AI analysis failure:", err);
                 toggleView(UI.viewAnalyzing, false);
                 toggleView(UI.viewStudio, true);
-                showToast("Obyekt tahlili to'xtadi. Internet yoki fayl sifatini tekshiring.", "error");
+                showToast(Dictionary[AppState.language].analysisErrorMsg, "error");
             }
         }
 
@@ -670,7 +1020,7 @@
         function populateResults(data) {
             UI.resultTitle.innerText = data.title;
             UI.badgeEra.innerText = data.era;
-            UI.badgeConfidence.innerText = `Ishonch: ${data.confidence_score}`;
+            UI.badgeConfidence.innerText = `Confidence: ${data.confidence_score}`;
             UI.valOrigin.innerText = data.origin;
             
             UI.valEra.innerText = data.era;
@@ -678,7 +1028,7 @@
             UI.valDidYouKnow.innerText = data.did_you_know;
 
             UI.tabContentDesc.innerHTML = `<p>${data.short_summary}</p><p class="mt-4 text-slate-400 font-light leading-relaxed">${data.description}</p>`;
-            UI.tabContentInscription.innerHTML = `<div class="bg-slate-900/40 p-4 rounded-xl border border-slate-900/80 mb-4 font-mono text-amber-300 text-center leading-relaxed">${data.inscriptions_decoded ? data.inscriptions_decoded : "Hech qanday qadimgi yozuvlar yoki iyerogliflar topilmadi."}</div>`;
+            UI.tabContentInscription.innerHTML = `<div class="bg-slate-900/40 p-4 rounded-xl border border-slate-900/80 mb-4 font-mono text-amber-300 text-center leading-relaxed">${data.inscriptions_decoded ? data.inscriptions_decoded : "No inscriptions or ancient glyphs found on this artifact."}</div>`;
             UI.tabContentContext.innerHTML = `<p class="leading-relaxed text-slate-400 font-light">${data.historical_context}</p>`;
 
             switchTab('desc');
@@ -704,44 +1054,66 @@
             });
         }
 
-        UI.btnCloseResults.addEventListener('click', () => {
-            stopAudio();
-            toggleView(UI.viewResults, false);
-            toggleView(UI.viewStudio, true);
-        });
-
-        /**
-         * ==========================================
-         * GEMINI API DRIVER
-         * ==========================================
-         */
         async function requestArtifactAnalysis(base64Img) {
             const base64Clean = base64Img.includes(',') ? base64Img.split(',')[1] : base64Img;
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const systemPrompt = "Siz O'zbekistondagi Buyuk Ipak yo'li muzeylari uchun yaratilgan mukammal, professional, ko'p tilli arxeolog va epigrafist-gid hisoblanasiz. Har doim to'liq o'zbek tilida ilmiy-ommabop, sayyohga tushunarli tilda javob bering.";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AppState.apiKey}`;
             
-            const prompt = `Ushbu suratdagi obidani, eksponatni yoki uning ustidagi yozuvlarni/iyerogliflarni batafsil tahlil qiling va JSON formatida javob bering.
-            Tahlilingiz quyidagi strukturaga ega bo'lishi kerak:
-            1. title: Obyektning professional nomi
-            2. era: U mansub bo'lgan taxminiy tarixiy davr
-            3. origin: Kelib chiqishi/Topilgan hudud
-            4. material: Asosiy ashyosi/materiali (Loy, Sopol, Fil suyagi, Oltin, Granit va h.k.)
-            5. confidence_score: Tahlilingiz to'g'riligiga ishonch koeffitsiyenti (foizda, masalan, '92%')
-            6. short_summary: Ilova natijasida eng yuqorida turadigan qisqa, tushunarli va qiziqarli xulosa.
-            7. description: Buyumning tarixi, tuzilishi, topilish tarixi va uning ahamiyati haqida to'liq ilmiy tushuntirish.
-            8. inscriptions_decoded: Agar rasmda qadimgi yozuv, arab bitiklari, xitoy iyerogliflari, turkiy runlar bo'lsa, ularni aniqlang va so'zma-so'z o'zbek tiliga chiroyli tarjima qilib bering. Agar bo'lmasa, 'Ushbu eksponatda bitiklar yoki iyerogliflar aniqlanmadi' deb yozing.
-            9. historical_context: Obyekt davridagi ijtimoiy-siyosiy sharoit va u qanday maqsadda ishlatilganligi.
-            10. did_you_know: Buyum yoki uning davriga oid turistlarni hayratda qoldiradigan 1 ta qiziqarli fakt.`;
+            const systemPrompts = {
+                uz: "Siz Buyuk Ipak yo'lidagi muzeylar va obidalar uchun yaratilgan jahon darajasidagi arxeolog, tarixchi va epigrafist-gidsiz. Har doim to'liq O'ZBEK tilida, sayyohga tushunarli va professional muloqot qiling.",
+                en: "You are a world-class archeologist, historian, and epigraphist guide built for museums along the Silk Road. Always communicate fully in ENGLISH in an informative, engaging, and professional manner.",
+                ru: "Вы — первоклассный археолог, историк и эпиграфист, гид по музеям Великого шелкового пути. Всегда общайтесь полностью на РУССКОМ языке в познавательной, дружелюбной и профессиональной форме."
+            };
+
+            const prompts = {
+                uz: `Ushbu suratdagi obidani, eksponatni yoki uning ustidagi yozuvlarni/iyerogliflarni batafsil tahlil qiling va JSON formatida O'ZBEK tilida javob bering.
+                Tahlil strukturasi:
+                1. title: Obyektning professional nomi.
+                2. era: Tarixiy davr.
+                3. origin: Kelib chiqishi/Topilgan joy.
+                4. material: Ashyosi.
+                5. confidence_score: To'g'riligiga ishonch (masalan, '95%').
+                6. short_summary: Sayyoh uchun qisqa va qiziqarli xulosa.
+                7. description: Batafsil ilmiy va ommabop ta'rif.
+                8. inscriptions_decoded: Agar rasmda qadimgi yozuvlar bo'lsa, ularni aniqlab o'zbek tiliga tarjima qiling. Bo'lmasa: 'Ushbu eksponatda bitiklar yoki iyerogliflar aniqlanmadi'.
+                9. historical_context: Obyekt davridagi ijtimoiy-siyosiy vaziyat va uning roli.
+                10. did_you_know: Turistni hayratga soluvchi 1 ta qiziqarli fakt.`,
+                
+                en: `Analyze this historical artifact or inscription in the photo and respond in JSON format in ENGLISH language.
+                Structure:
+                1. title: Professional name of the artifact.
+                2. era: Historical epoch or century.
+                3. origin: Origin / Location found.
+                4. material: Material type.
+                5. confidence_score: Confidence level (e.g., '95%').
+                6. short_summary: Short, easy-to-read, engaging conclusion for tourists.
+                7. description: In-depth historical description.
+                8. inscriptions_decoded: If there are ancient scripts, decode and translate them into English. Otherwise write: 'No inscriptions or ancient glyphs found on this artifact'.
+                9. historical_context: Historical context of the epoch and its purpose.
+                10. did_you_know: 1 extremely fascinating fact to surprise tourists.`,
+                
+                ru: `Проанализируйте этот исторический артефакт или надпись на фотографии и ответьте в формате JSON на РУССКОМ языке.
+                Структура:
+                1. title: Профессиональное название экспоната.
+                2. era: Историческая эпоха или век.
+                3. origin: Происхождение / Место нахождения.
+                4. material: Материал.
+                5. confidence_score: Уровень точности.
+                6. short_summary: Краткое резюме для туристов.
+                7. description: Подробное историческое описание.
+                8. inscriptions_decoded: Если на изображении есть древние надписи, расшифруйте их и переведите на русский язык. Если нет: 'Древние надписи или иероглифы на данном экспонате не обнаружены'.
+                9. historical_context: Исторический контекст эпохи и назначение артефакта.
+                10. did_you_know: 1 удивительный факт для туриста.`
+            };
 
             const payload = {
                 contents: [{
                     parts: [
-                        { text: prompt },
+                        { text: prompts[AppState.language] },
                         { inlineData: { mimeType: "image/jpeg", data: base64Clean } }
                     ]
                 }],
                 systemInstruction: {
-                    parts: [{ text: systemPrompt }]
+                    parts: [{ text: systemPrompts[AppState.language] }]
                 },
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -759,13 +1131,7 @@
             return jsonResponse.candidates[0].content.parts[0].text;
         }
 
-        /**
-         * ==========================================
-         * DUAL AUDIO DRIVER (Gemini & WebSpeech API)
-         * ==========================================
-         */
         UI.btnAudioAction.addEventListener('click', async () => {
-            // Check browser audio state context
             if (window.AudioContext || window.webkitAudioContext) {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') {
@@ -790,8 +1156,8 @@
                 }
 
                 try {
-                    UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Tayyorlanmoqda...`;
-                    UI.audioStatusLabel.innerText = "Premium ovoz yuklanmoqda...";
+                    UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xs"></i>`;
+                    UI.audioStatusLabel.innerText = "Premium voice loading...";
                     
                     const pcmBase64 = await generateSpeechWithGemini(textToSpeak);
                     if (pcmBase64) {
@@ -800,20 +1166,19 @@
                         UI.audioPlayer.src = AppState.audioUrl;
                         playPremiumAudio();
                     } else {
-                        throw new Error("Bo'sh audio ma'lumoti keldi. Avtomatik tizim ovoziga o'tiladi.");
+                        throw new Error("No premium audio data returned");
                     }
                 } catch (err) {
-                    console.error("Gemini Premium TTS error, falling back:", err);
-                    showToast("Premium ovoz xizmatida uzilish bo'ldi. Mahalliy gid tizimi ishga tushirildi.", "info");
+                    console.error("Gemini TTS engine fallback:", err);
+                    showToast("Premium neural voice service interrupted. Fallback to native system voice triggered.", "info");
                     
-                    // Instant Fallback to WebSpeech
                     AppState.audioEngine = 'webspeech';
                     UI.settingEngine.value = 'webspeech';
                     UI.containerVoiceSelect.classList.add('hidden');
                     playWebSpeech(textToSpeak);
                 }
             } 
-            // ENGINE 2: Web Speech Synthesis Fallback (Client-side offline-friendly)
+            // ENGINE 2: Native WebSpeech
             else {
                 playWebSpeech(textToSpeak);
             }
@@ -821,17 +1186,24 @@
 
         function getSpeechText() {
             const data = AppState.scannedResult;
-            let cleanInscriptions = data.inscriptions_decoded.replace(/Ushbu eksponatda bitiklar yoki iyerogliflar aniqlanmadi/gi, '');
-            let speech = `Eksponat nomi: ${data.title}. Davri: ${data.era}. Muallif va kelib chiqishi: ${data.origin}. Qisqacha tavsif: ${data.short_summary}. `;
-            if (cleanInscriptions.trim().length > 3) {
-                speech += `Obyektdagi bitiklar tarjimasi quyidagicha: ${cleanInscriptions}. `;
+            let intro = "";
+            let trivia = "";
+            
+            if (AppState.language === 'uz') {
+                intro = `Eksponat nomi: ${data.title}. Davri: ${data.era}. Topilgan joy: ${data.origin}. Qisqacha xulosa: ${data.short_summary}. `;
+                trivia = `Qiziqarli fakt: ${data.did_you_know}`;
+            } else if (AppState.language === 'en') {
+                intro = `Artifact name: ${data.title}. Period: ${data.era}. Origin: ${data.origin}. Summary: ${data.short_summary}. `;
+                trivia = `Interesting fact: ${data.did_you_know}`;
+            } else {
+                intro = `Название экспоната: ${data.title}. Период: ${data.era}. Происхождение: ${data.origin}. Резюме: ${data.short_summary}. `;
+                trivia = `Интересный факт: ${data.did_you_know}`;
             }
-            speech += `Qiziqarli fakt: ${data.did_you_know}`;
-            return speech;
+            return intro + trivia;
         }
 
         async function generateSpeechWithGemini(text) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${AppState.apiKey}`;
             const payload = {
                 contents: [{
                     parts: [{ text: text }]
@@ -856,43 +1228,43 @@
             return data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
         }
 
-        // Play engine premium
         function playPremiumAudio() {
             UI.audioPlayer.playbackRate = AppState.speechSpeed;
             UI.audioPlayer.play().then(() => {
                 AppState.audioPlaying = true;
-                UI.audioStatusLabel.innerText = "Premium gid gapirmoqda...";
+                UI.audioStatusLabel.innerText = Dictionary[AppState.language].voiceStatusPlaying;
                 setVisualizerActive(true);
-                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> To'xtatish`;
+                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> ` + Dictionary[AppState.language].toxtatish;
             }).catch(e => {
-                console.error("Playback failed", e);
-                // Fallback direct
+                console.error("Narration failed:", e);
                 playWebSpeech(getSpeechText());
             });
         }
 
-        // Play engine fallback browser
         let webSpeechUtterance = null;
         function playWebSpeech(text) {
-            window.speechSynthesis.cancel(); // Stop any current speech
+            window.speechSynthesis.cancel();
 
             webSpeechUtterance = new SpeechSynthesisUtterance(text);
-            
-            // Search for Uzbek or fallback Latin voice
             const voices = window.speechSynthesis.getVoices();
-            const uzVoice = voices.find(v => v.lang.startsWith('uz') || v.lang.startsWith('tr') || v.lang.startsWith('tr-TR'));
-            if (uzVoice) {
-                webSpeechUtterance.voice = uzVoice;
+            
+            let voiceLang = 'en-US';
+            if (AppState.language === 'uz') voiceLang = 'tr-TR'; 
+            else if (AppState.language === 'ru') voiceLang = 'ru-RU';
+
+            const localVoice = voices.find(v => v.lang.startsWith(voiceLang));
+            if (localVoice) {
+                webSpeechUtterance.voice = localVoice;
             }
             
-            webSpeechUtterance.lang = 'uz-UZ';
+            webSpeechUtterance.lang = voiceLang;
             webSpeechUtterance.rate = AppState.speechSpeed;
 
             webSpeechUtterance.onstart = () => {
                 AppState.audioPlaying = true;
-                UI.audioStatusLabel.innerText = "Tizim gidi gapirmoqda...";
+                UI.audioStatusLabel.innerText = Dictionary[AppState.language].voiceStatusSysPlaying;
                 setVisualizerActive(true);
-                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> To'xtatish`;
+                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> ` + Dictionary[AppState.language].toxtatish;
             };
 
             webSpeechUtterance.onend = () => {
@@ -900,7 +1272,7 @@
             };
 
             webSpeechUtterance.onerror = (e) => {
-                console.error("Speech Synthesis error", e);
+                console.error("WebSpeech error:", e);
                 stopAudio();
             };
 
@@ -919,15 +1291,14 @@
         function stopAudio() {
             AppState.audioPlaying = false;
             setVisualizerActive(false);
-            UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tinglash`;
+            UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-volume-high"></i> ` + Dictionary[AppState.language].tinglash;
             
             if (AppState.audioEngine === 'gemini') {
                 UI.audioPlayer.pause();
-                UI.audioStatusLabel.innerText = "Eshittirish to'xtatildi";
             } else {
                 window.speechSynthesis.cancel();
-                UI.audioStatusLabel.innerText = "Eshittirish to'xtatildi";
             }
+            UI.audioStatusLabel.innerText = Dictionary[AppState.language].voiceStatusStopped;
         }
 
         UI.audioPlayer.addEventListener('ended', () => {
@@ -951,25 +1322,19 @@
                 URL.revokeObjectURL(AppState.audioUrl);
                 AppState.audioUrl = null;
             }
+            const dict = Dictionary[AppState.language];
             if (AppState.audioEngine === 'gemini') {
-                UI.audioVoiceUsed.innerText = `Ovoz: Premium (${AppState.selectedVoice})`;
+                UI.audioVoiceUsed.innerText = `Voice: ${AppState.selectedVoice}`;
             } else {
-                UI.audioVoiceUsed.innerText = `Ovoz: Tizim ovozi (Uzbek)`;
+                UI.audioVoiceUsed.innerText = `Voice: OS Fallback Speech`;
             }
-            UI.audioStatusLabel.innerText = "Tinglashga tayyor";
+            UI.audioStatusLabel.innerText = dict.voiceStatusReady;
         }
 
-
-        /**
-         * ==========================================
-         * HIGH-FIDELITY PDF EXPORT SERVICE
-         * ==========================================
-         */
-        UI.btnExportPdf.addEventListener('click', async () => {
-            if (!AppState.scannedResult || !AppState.scannedBase64) return;
-
+        async function exportPdfForArtifact(result, base64Img) {
             try {
-                showToast("PDF tahlili va hujjati yuklanmoqda...", "info");
+                const dict = Dictionary[AppState.language];
+                showToast("Generating Document...", "info");
                 
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
@@ -977,33 +1342,30 @@
                 const margin = 20;
                 const contentWidth = pWidth - (margin * 2);
 
-                // Background design
                 pdf.setFillColor(15, 23, 42); 
                 pdf.rect(0, 0, pWidth, 48, 'F');
 
-                // Accent Gold Bar
-                pdf.setFillColor(245, 158, 11); 
+                pdf.setFillColor(217, 119, 6); 
                 pdf.rect(0, 48, pWidth, 3, 'F');
 
-                // Header Title
                 pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(20);
+                pdf.setFontSize(16);
                 pdf.setTextColor(255, 255, 255);
-                pdf.text("TARIXIY KOSHIF SMART GID", margin, 22);
+                pdf.text(dict.pdfReportTitle, margin, 22);
 
                 pdf.setFont("helvetica", "normal");
-                pdf.setFontSize(9);
+                pdf.setFontSize(8.5);
                 pdf.setTextColor(217, 119, 6);
-                pdf.text("BUYUK IPAK YO'LI ELEKTRON ARXEOLOGIK JURNALI", margin, 30);
+                pdf.text(dict.pdfReportSub, margin, 30);
 
                 pdf.setFontSize(8);
                 pdf.setTextColor(148, 163, 184);
-                const currentStr = new Date().toLocaleString('uz-UZ');
-                pdf.text(`Sana: ${currentStr} | Silk Road Guide System v2.1`, margin, 38);
+                const currentStr = new Date().toLocaleString(AppState.language === 'uz' ? 'uz-UZ' : (AppState.language === 'ru' ? 'ru-RU' : 'en-US'));
+                pdf.text(`Sana/Date: ${currentStr} | Guide Engine v2.5`, margin, 38);
 
                 let nextY = 65;
                 try {
-                    const imgProps = pdf.getImageProperties(AppState.scannedBase64);
+                    const imgProps = pdf.getImageProperties(base64Img);
                     const fitHeight = 75; 
                     const fitWidth = (imgProps.width * fitHeight) / imgProps.height;
                     const finalWidth = Math.min(fitWidth, contentWidth);
@@ -1013,45 +1375,52 @@
                     pdf.setFillColor(248, 250, 252);
                     pdf.rect(centerOffset - 2, nextY - 2, finalWidth + 4, fitHeight + 4, 'FD');
 
-                    pdf.addImage(AppState.scannedBase64, 'JPEG', centerOffset, nextY, finalWidth, fitHeight);
+                    pdf.addImage(base64Img, 'JPEG', centerOffset, nextY, finalWidth, fitHeight);
                     nextY += fitHeight + 15;
                 } catch(e) {
-                    console.error("PDF image injection failure:", e);
-                    pdf.text("[Rasm biriktirishda xatolik yuz berdi]", margin, nextY);
+                    console.error("Image loading onto PDF failed:", e);
+                    pdf.text("[Image could not be embedded]", margin, nextY);
                     nextY += 10;
                 }
 
-                // METADATA TABLE
                 pdf.setFillColor(241, 245, 249);
                 pdf.rect(margin, nextY, contentWidth, 24, 'F');
                 pdf.setDrawColor(203, 213, 225);
                 pdf.rect(margin, nextY, contentWidth, 24, 'D');
 
                 pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(9);
+                pdf.setFontSize(8.5);
                 pdf.setTextColor(71, 85, 105);
-                pdf.text("EKSPONAT NOMI:", margin + 5, nextY + 7);
-                pdf.text("DAVRI / ERASI:", margin + 5, nextY + 15);
-                pdf.text("ASHLI / ASOS:", margin + 85, nextY + 7);
-                pdf.text("ISHONCH DARAJASI:", margin + 85, nextY + 15);
+                pdf.text(dict.pdfEksponat, margin + 5, nextY + 7);
+                pdf.text(dict.pdfDavr, margin + 5, nextY + 15);
+                pdf.text(dict.pdfAshyo, margin + 85, nextY + 7);
+                pdf.text(dict.pdfIshonch, margin + 85, nextY + 15);
 
                 pdf.setFont("helvetica", "normal");
                 pdf.setTextColor(15, 23, 42);
-                pdf.text(AppState.scannedResult.title.toUpperCase(), margin + 40, nextY + 7);
-                pdf.text(AppState.scannedResult.era, margin + 40, nextY + 15);
-                pdf.text(AppState.scannedResult.material, margin + 125, nextY + 7);
-                pdf.text(AppState.scannedResult.confidence_score, margin + 125, nextY + 15);
+                
+                // Safe checks to avoid undefined text generation crash
+                const titleStr = (result.title || "Noma'lum").toUpperCase();
+                const eraStr = result.era || "Noma'lum";
+                const materialStr = result.material || "Noma'lum";
+                const confidenceStr = result.confidence_score || "Noma'lum";
+
+                pdf.text(titleStr, margin + 40, nextY + 7);
+                pdf.text(eraStr, margin + 40, nextY + 15);
+                pdf.text(materialStr, margin + 125, nextY + 7);
+                pdf.text(confidenceStr, margin + 125, nextY + 15);
 
                 nextY += 34;
 
                 const addParagraph = (title, bodyText) => {
+                    const textContent = bodyText || "Ma'lumot mavjud emas.";
                     if (nextY > 260) {
                         pdf.addPage();
                         nextY = 25;
                     }
 
                     pdf.setFont("helvetica", "bold");
-                    pdf.setFontSize(12);
+                    pdf.setFontSize(11);
                     pdf.setTextColor(217, 119, 6); 
                     pdf.text(title, margin, nextY);
                     
@@ -1060,10 +1429,10 @@
                     nextY += 7;
 
                     pdf.setFont("helvetica", "normal");
-                    pdf.setFontSize(9.5);
+                    pdf.setFontSize(9);
                     pdf.setTextColor(51, 65, 85);
                     
-                    const wrapped = pdf.splitTextToSize(bodyText, contentWidth);
+                    const wrapped = pdf.splitTextToSize(textContent, contentWidth);
                     for(let i=0; i<wrapped.length; i++) {
                         if (nextY > 280) {
                             pdf.addPage();
@@ -1075,34 +1444,37 @@
                     nextY += 10;
                 };
 
-                addParagraph("1. UMUMIY TAVSIF VA MA'LUMOT", AppState.scannedResult.description);
-                addParagraph("2. YAZUVLARNING DEKODLANISHI (TARJIMASI)", AppState.scannedResult.inscriptions_decoded);
-                addParagraph("3. TARIXIY DAVR SHAROITI (KONTEKST)", AppState.scannedResult.historical_context);
-                addParagraph("4. QIZIQARLI FAKT", AppState.scannedResult.did_you_know);
+                addParagraph(dict.pdfSec1, result.description);
+                addParagraph(dict.pdfSec2, result.inscriptions_decoded);
+                addParagraph(dict.pdfSec3, result.historical_context);
+                addParagraph(dict.pdfSec4, result.did_you_know);
 
                 const pageCount = pdf.internal.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     pdf.setPage(i);
-                    pdf.setFontSize(8);
+                    pdf.setFontSize(7.5);
                     pdf.setTextColor(148, 163, 184);
-                    pdf.text(`Sahifa ${i} / ${pageCount}`, pWidth - margin - 15, 287);
-                    pdf.text(`"Tarixiy Koshif" avtomatlashtirilgan tadqiqot hisoboti`, margin, 287);
+                    pdf.text(`${dict.pdfPage} ${i} / ${pageCount}`, pWidth - margin - 15, 287);
+                    pdf.text(`Silk Road Guide Engine: "Tarixiy Koshif" Smart Guide Report`, margin, 287);
                 }
 
-                pdf.save(`koshif-tahlil-${AppState.scannedResult.title.replace(/\s+/g, '-').toLowerCase()}.pdf`);
-                showToast("PDF muvaffaqiyatli saqlandi!", "success");
+                pdf.save(`koshif-${(result.title || "export").replace(/\s+/g, '-').toLowerCase()}.pdf`);
+                showToast("PDF saved!", "success");
 
             } catch (error) {
-                console.error("PDF engine failure:", error);
-                showToast("PDF yaratishda kutilmagan xatolik yuz berdi.", "error");
+                console.error("PDF generator failure:", error);
+                showToast("Could not generate PDF.", "error");
             }
+        }
+
+        UI.btnExportPdf.addEventListener('click', () => {
+            if (!AppState.scannedResult || !AppState.scannedBase64) {
+                showToast("Ma'lumotlar yetarli emas.", "error");
+                return;
+            }
+            exportPdfForArtifact(AppState.scannedResult, AppState.scannedBase64);
         });
 
-        /**
-         * ==========================================
-         * PERSISTENT STORAGE (Dashboard Database)
-         * ==========================================
-         */
         function loadHistory() {
             try {
                 const raw = localStorage.getItem('silk_road_discoveries');
@@ -1121,7 +1493,7 @@
             };
 
             AppState.history.unshift(historyItem);
-            if (AppState.history.length > 20) {
+            if (AppState.history.length > 30) {
                 AppState.history.pop();
             }
 
@@ -1134,35 +1506,40 @@
 
         function renderHistory() {
             UI.historyContainer.innerHTML = '';
+            const dict = Dictionary[AppState.language];
             
             if (AppState.history.length === 0) {
                 UI.historyContainer.innerHTML = `
                     <div class="text-center py-12 text-slate-500 text-xs">
                         <i class="fa-solid fa-box-open text-3xl mb-3 block text-slate-600"></i>
-                        Skanerlangan buyumlar mavjud emas
+                        ${dict.noHistoryText}
                     </div>`;
                 return;
             }
 
             AppState.history.forEach(item => {
                 const el = document.createElement('div');
-                el.className = 'glass-dark p-3.5 rounded-xl border border-slate-900 hover:border-amber-500/20 transition-all flex items-center justify-between gap-3 cursor-pointer';
+                el.className = 'glass-dark p-3.5 rounded-xl border border-slate-900 hover:border-amber-500/20 transition-all flex items-center justify-between gap-3';
                 el.innerHTML = `
-                    <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                    <div class="flex items-center gap-3 flex-1 overflow-hidden cursor-pointer btn-open-hist">
                         <img class="w-12 h-12 rounded-lg object-cover bg-black shrink-0 border border-slate-800" src="${item.image}">
                         <div class="overflow-hidden">
-                            <h5 class="text-xs font-extrabold text-slate-200 truncate">${item.data.title}</h5>
+                            <h5 class="text-xs font-extrabold text-slate-200 truncate">${item.data.title || "Noma'lum"}</h5>
                             <p class="text-[10px] text-slate-400 mt-0.5"><i class="fa-regular fa-clock mr-1"></i>${item.timestamp}</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-amber-400 btn-view-hist-item">
-                            <i class="fa-solid fa-folder-open text-xs"></i>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-emerald-400 active:scale-90 transition-all btn-pdf-hist" title="${dict.pdfdownload}">
+                            <i class="fa-solid fa-file-pdf text-xs"></i>
+                        </button>
+                        <button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 active:scale-90 transition-all btn-delete-hist" title="O'chirish">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
                         </button>
                     </div>
                 `;
 
-                el.querySelector('.btn-view-hist-item').addEventListener('click', () => {
+                // Bind open record from history
+                el.querySelector('.btn-open-hist').addEventListener('click', () => {
                     AppState.scannedResult = item.data;
                     AppState.scannedBase64 = item.image;
                     UI.analyzedPhoto.src = item.image;
@@ -1175,16 +1552,36 @@
                     toggleView(UI.viewResults, true);
                 });
 
+                // Bind Download PDF
+                el.querySelector('.btn-pdf-hist').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    exportPdfForArtifact(item.data, item.image);
+                });
+
+                // Bind Individual Delete
+                el.querySelector('.btn-delete-hist').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const confirmed = await showConfirmModal(dict.confirmDeleteSingleTitle, dict.confirmDeleteSingleBody);
+                    if (confirmed) {
+                        AppState.history = AppState.history.filter(hist => hist.id !== item.id);
+                        localStorage.setItem('silk_road_discoveries', JSON.stringify(AppState.history));
+                        renderHistory();
+                        showToast("O'chirildi / Deleted", "info");
+                    }
+                });
+
                 UI.historyContainer.appendChild(el);
             });
         }
 
-        function clearHistory() {
-            if (confirm("Barcha kashfiyotlar tarixini o'chirishga rozimisiz?")) {
+        async function clearHistory() {
+            const dict = Dictionary[AppState.language];
+            const confirmed = await showConfirmModal(dict.confirmClearHistoryTitle, dict.confirmClearHistoryBody);
+            if (confirmed) {
                 AppState.history = [];
                 localStorage.removeItem('silk_road_discoveries');
                 renderHistory();
-                showToast("Tarix muvaffaqiyatli tozalandi", "info");
+                showToast("Tarix tozalandi", "info");
             }
         }
 
@@ -1201,52 +1598,6 @@
             }
         }
 
-        /**
-         * ==========================================
-         * GENERAL INTERACTIVE UI HELPERS
-         * ==========================================
-         */
-        function toggleView(viewElement, show) {
-            if (show) {
-                viewElement.classList.remove('hidden');
-            } else {
-                viewElement.classList.add('hidden');
-            }
-        }
-
-        let toastTimeout;
-        function showToast(text, type = "info") {
-            UI.toastBody.innerText = text;
-            UI.toastTitle.innerText = type === "error" ? "Xatolik" : (type === "success" ? "Muvaffaqiyat" : "Ma'lumot");
-            
-            if (type === "error") {
-                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20 text-red-400 mt-0.5";
-                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-emerald-500/g, 'border-red-500');
-            } else if (type === "success") {
-                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400 mt-0.5";
-                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-red-500/g, 'border-emerald-500');
-            } else {
-                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400 mt-0.5";
-                UI.toast.className = UI.toast.className.replace(/border-red-500|border-emerald-500/g, 'border-slate-800');
-            }
-
-            UI.toast.classList.remove('opacity-0', '-translate-y-32');
-            UI.toast.classList.add('opacity-100', 'translate-y-0');
-
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                hideToast();
-            }, 6000);
-        }
-
-        function hideToast() {
-            UI.toast.classList.remove('opacity-100', 'translate-y-0');
-            UI.toast.classList.add('opacity-0', '-translate-y-32');
-        }
-
-        /**
-         * PCM base64 formatidagi audioni standart WAV blobga o'girish funksiyasi
-         */
         function pcmToWavBlob(base64Pcm, sampleRate = 24000) {
             const binaryString = window.atob(base64Pcm);
             const pcmLength = binaryString.length;
@@ -1276,7 +1627,7 @@
 
             writeString(12, 'fmt ');
             dataView.setUint32(16, 16, true);
-            dataView.setUint16(20, 1, true); // PCM Format (Linear PCM)
+            dataView.setUint16(20, 1, true); 
             dataView.setUint16(22, numChannels, true);
             dataView.setUint32(24, sampleRate, true);
             dataView.setUint32(28, byteRate, true);
@@ -1293,15 +1644,57 @@
             return new Blob([dataView], { type: 'audio/wav' });
         }
 
-        async function fetchWithRetry(url, options, returnRaw = false, maxRetries = 5) {
-            const delays = [1000, 2000, 4000, 8000, 16000];
+        function toggleView(viewElement, show) {
+            if (show) {
+                viewElement.classList.remove('hidden');
+                viewElement.classList.add('flex');
+            } else {
+                viewElement.classList.remove('flex');
+                viewElement.classList.add('hidden');
+            }
+        }
+
+        let toastTimeout;
+        function showToast(text, type = "info") {
+            const dict = Dictionary[AppState.language];
+            UI.toastBody.innerText = text;
+            UI.toastTitle.innerText = type === "error" ? dict.toastError : (type === "success" ? dict.toastSuccess : dict.toastInfo);
+            
+            if (type === "error") {
+                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20 text-red-400 mt-0.5";
+                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-emerald-500/g, 'border-red-500');
+            } else if (type === "success") {
+                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400 mt-0.5";
+                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-red-500/g, 'border-emerald-500');
+            } else {
+                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400 mt-0.5";
+                UI.toast.className = UI.toast.className.replace(/border-red-500|border-emerald-500/g, 'border-slate-800');
+            }
+
+            UI.toast.classList.remove('opacity-0', '-translate-y-32');
+            UI.toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                hideToast();
+            }, 5000);
+        }
+
+        function hideToast() {
+            UI.toast.classList.remove('opacity-100', 'translate-y-0');
+            UI.toast.classList.add('opacity-0', '-translate-y-32');
+        }
+
+        async function fetchWithRetry(url, options, returnRaw = false, maxRetries = 4) {
+            const delays = [1000, 2000, 4000, 8000];
             let lastError;
 
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const response = await fetch(url, options);
                     if (!response.ok) {
-                        throw new Error(`HTTP status: ${response.status}`);
+                        const errBody = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errBody}`);
                     }
                     
                     if (returnRaw) {
@@ -1312,7 +1705,7 @@
                     if (data.candidates && data.candidates[0].content) {
                         return data.candidates[0].content.parts[0].text;
                     } else {
-                        throw new Error("Invalid response");
+                        throw new Error("Invalid schema structure returned.");
                     }
                 } catch (error) {
                     lastError = error;
@@ -1323,6 +1716,16 @@
             }
             throw lastError;
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCamera();
+            loadHistory();
+            initSettings();
+            setupEventListeners();
+            changeSystemLanguage('uz');
+            
+            showToast("Smart Gid tizimi tayyor va faol!", "success");
+        });
 
     </script>
 </body>

@@ -414,7 +414,7 @@
 
     <script>
         // SECURELY HARDCODED SYSTEM FALLBACK KEY PROVIDED BY THE USER
-        const defaultPlatformKey = "AIzaSyCnZFjm9ejdDTCKKlZbA033jqutpYqc29g"; 
+        const defaultPlatformKey = "AIzaSyBTI0xjz1NL9WJ_SQerw5m15TT4cvxz4So"; 
 
         // JSON schema for structural response from Gemini 2.5
         const ArtifactSchema = {
@@ -490,7 +490,7 @@
                 toastError: "Xatolik",
                 toastInfo: "Ma'lumot",
                 cameraErrorMsg: "Kamera ishga tushmadi. Ruxsat berilganini tekshiring yoki galereyadan rasm yuklang.",
-                analysisErrorMsg: "Obyekt tahlili to'xtadi. Internet yoki fild sifatini tekshiring.",
+                analysisErrorMsg: "Obyekt tahlili to'xtadi. Cheklov (quota) oshgan bo'lishi mumkin. Iltimos qayta urinib ko'ring.",
                 voiceChangeMsg: "Ovoz turi o'zgartirildi: ",
                 voiceStatusReady: "Eshittirishga tayyor",
                 voiceStatusPlaying: "Premium gid gapirmoqda...",
@@ -512,7 +512,8 @@
                 pdfSec3: "3. TARIXIY DAVR SHAROITI (KONTEKST)",
                 pdfSec4: "4. QIZIQARLI FAKT",
                 voiceEnginePremium: "Premium Sun'iy Intellekt Ovozi (Tavsiya etiladi)",
-                voiceEngineSystem: "Tizim Tezkor Ovozi (Internet talab qilmaydi)"
+                voiceEngineSystem: "Tizim Tezkor Ovozi (Internet talab qilmaydi)",
+                quotaToast: "API so'rovlar limiti tugadi. Avtomatik kutish va qayta urinish amalga oshirilmoqda..."
             },
             en: {
                 appName: "Historical Discoverer",
@@ -549,7 +550,7 @@
                 toastError: "Error",
                 toastInfo: "Info",
                 cameraErrorMsg: "Camera failed to start. Verify permissions or select a picture from your gallery.",
-                analysisErrorMsg: "AI analysis interrupted. Please check your connection or image quality.",
+                analysisErrorMsg: "AI analysis interrupted. Quota exceeded, retrying automatically...",
                 voiceChangeMsg: "Voice changed to: ",
                 voiceStatusReady: "Ready to narrate",
                 voiceStatusPlaying: "Premium guide is speaking...",
@@ -571,7 +572,8 @@
                 pdfSec3: "3. HISTORICAL TIMELINE & CONTEXT",
                 pdfSec4: "4. INTERESTING TRIVIA / FACT",
                 voiceEnginePremium: "Premium AI Voice (Recommended)",
-                voiceEngineSystem: "Local System Voice (Offline friendly)"
+                voiceEngineSystem: "Local System Voice (Offline friendly)",
+                quotaToast: "API Rate limits hit. Auto-waiting and retrying connection..."
             },
             ru: {
                 appName: "Исторический Кошиф",
@@ -608,7 +610,7 @@
                 toastError: "Ошибка",
                 toastInfo: "Информация",
                 cameraErrorMsg: "Не удалось запустить камеру. Проверьте разрешения или загрузите фото из галереи.",
-                analysisErrorMsg: "Анализ остановлен. Проверьте интернет-соединение или качество файла.",
+                analysisErrorMsg: "Анализ остановлен. Лимит запросов исчерпан. Пожалуйста, подождите, мы пробуем снова...",
                 voiceChangeMsg: "Голос изменен на: ",
                 voiceStatusReady: "Готов к воспроизведению",
                 voiceStatusPlaying: "Премиум-гид говорит...",
@@ -630,7 +632,8 @@
                 pdfSec3: "3. ИСТОРИЧЕСКИЙ ИСТОРИЧЕСКИЙ КОНТЕКСТ ЭПОХИ",
                 pdfSec4: "4. ИНТЕРЕСНЫЙ ФАКТ",
                 voiceEnginePremium: "Премиальный голос ИИ (Рекомендуется)",
-                voiceEngineSystem: "Быстрый системный голос (Без интернета)"
+                voiceEngineSystem: "Быстрый системный голос (Без интернета)",
+                quotaToast: "Лимит API исчерпан. Ожидайте, система автоматически пробует повторно..."
             }
         };
 
@@ -1018,18 +1021,18 @@
         }
 
         function populateResults(data) {
-            UI.resultTitle.innerText = data.title;
-            UI.badgeEra.innerText = data.era;
-            UI.badgeConfidence.innerText = `Confidence: ${data.confidence_score}`;
-            UI.valOrigin.innerText = data.origin;
+            UI.resultTitle.innerText = data.title || "Noma'lum";
+            UI.badgeEra.innerText = data.era || "Noma'lum";
+            UI.badgeConfidence.innerText = `Confidence: ${data.confidence_score || "0%"}`;
+            UI.valOrigin.innerText = data.origin || "Noma'lum";
             
-            UI.valEra.innerText = data.era;
-            UI.valMaterial.innerText = data.material;
-            UI.valDidYouKnow.innerText = data.did_you_know;
+            UI.valEra.innerText = data.era || "Noma'lum";
+            UI.valMaterial.innerText = data.material || "Noma'lum";
+            UI.valDidYouKnow.innerText = data.did_you_know || "Ma'lumot yo'q";
 
-            UI.tabContentDesc.innerHTML = `<p>${data.short_summary}</p><p class="mt-4 text-slate-400 font-light leading-relaxed">${data.description}</p>`;
+            UI.tabContentDesc.innerHTML = `<p>${data.short_summary || ""}</p><p class="mt-4 text-slate-400 font-light leading-relaxed">${data.description || ""}</p>`;
             UI.tabContentInscription.innerHTML = `<div class="bg-slate-900/40 p-4 rounded-xl border border-slate-900/80 mb-4 font-mono text-amber-300 text-center leading-relaxed">${data.inscriptions_decoded ? data.inscriptions_decoded : "No inscriptions or ancient glyphs found on this artifact."}</div>`;
-            UI.tabContentContext.innerHTML = `<p class="leading-relaxed text-slate-400 font-light">${data.historical_context}</p>`;
+            UI.tabContentContext.innerHTML = `<p class="leading-relaxed text-slate-400 font-light">${data.historical_context || ""}</p>`;
 
             switchTab('desc');
         }
@@ -1101,7 +1104,7 @@
                 6. short_summary: Краткое резюме для туристов.
                 7. description: Подробное историческое описание.
                 8. inscriptions_decoded: Если на изображении есть древние надписи, расшифруйте их и переведите на русский язык. Если нет: 'Древние надписи или иероглифы на данном экспонате не обнаружены'.
-                9. historical_context: Исторический контекст эпохи и назначение артефакта.
+                9. historical_context: Иисторический контекст эпохи и назначение артефакта.
                 10. did_you_know: 1 удивительный факт для туриста.`
             };
 
@@ -1170,8 +1173,8 @@
                     }
                 } catch (err) {
                     console.error("Gemini TTS engine fallback:", err);
-                    showToast("Premium neural voice service interrupted. Fallback to native system voice triggered.", "info");
                     
+                    // Fallback instantly without breaking the user experience
                     AppState.audioEngine = 'webspeech';
                     UI.settingEngine.value = 'webspeech';
                     UI.containerVoiceSelect.classList.add('hidden');
@@ -1190,14 +1193,14 @@
             let trivia = "";
             
             if (AppState.language === 'uz') {
-                intro = `Eksponat nomi: ${data.title}. Davri: ${data.era}. Topilgan joy: ${data.origin}. Qisqacha xulosa: ${data.short_summary}. `;
-                trivia = `Qiziqarli fakt: ${data.did_you_know}`;
+                intro = `Eksponat nomi: ${data.title || "Noma'lum"}. Davri: ${data.era || "Noma'lum"}. Topilgan joy: ${data.origin || "Noma'lum"}. Qisqacha xulosa: ${data.short_summary || ""}. `;
+                trivia = `Qiziqarli fakt: ${data.did_you_know || ""}`;
             } else if (AppState.language === 'en') {
-                intro = `Artifact name: ${data.title}. Period: ${data.era}. Origin: ${data.origin}. Summary: ${data.short_summary}. `;
-                trivia = `Interesting fact: ${data.did_you_know}`;
+                intro = `Artifact name: ${data.title || "Unknown"}. Period: ${data.era || "Unknown"}. Origin: ${data.origin || "Unknown"}. Summary: ${data.short_summary || ""}. `;
+                trivia = `Interesting fact: ${data.did_you_know || ""}`;
             } else {
-                intro = `Название экспоната: ${data.title}. Период: ${data.era}. Происхождение: ${data.origin}. Резюме: ${data.short_summary}. `;
-                trivia = `Интересный факт: ${data.did_you_know}`;
+                intro = `Название экспоната: ${data.title || "Неизвестно"}. Период: ${data.era || "Неизвестно"}. Происхождение: ${data.origin || "Неизвестно"}. Резюме: ${data.short_summary || ""}. `;
+                trivia = `Интересный факт: ${data.did_you_know || ""}`;
             }
             return intro + trivia;
         }
@@ -1685,15 +1688,35 @@
             UI.toast.classList.add('opacity-0', '-translate-y-32');
         }
 
-        async function fetchWithRetry(url, options, returnRaw = false, maxRetries = 4) {
-            const delays = [1000, 2000, 4000, 8000];
+        async function fetchWithRetry(url, options, returnRaw = false, maxRetries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
             let lastError;
 
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const response = await fetch(url, options);
+                    
                     if (!response.ok) {
                         const errBody = await response.text();
+                        let parsedErr = null;
+                        try { parsedErr = JSON.parse(errBody); } catch(e){}
+                        
+                        // Handle Rate Limits / Quotas (HTTP 429) smoothly
+                        if (response.status === 429) {
+                            showToast(Dictionary[AppState.language].quotaToast, "info");
+                            
+                            // Dynamically read retry delay recommended by API (default: 2 seconds)
+                            let waitTime = 2000;
+                            if (parsedErr && parsedErr.error && parsedErr.error.message) {
+                                const match = parsedErr.error.message.match(/retry in ([0-9.]+)/i);
+                                if (match && match[1]) {
+                                    waitTime = Math.ceil(parseFloat(match[1]) * 1000) + 200; // Add safe margin
+                                }
+                            }
+                            await new Promise(resolve => setTimeout(resolve, waitTime));
+                            continue; // Retry after delay
+                        }
+                        
                         throw new Error(`HTTP ${response.status}: ${errBody}`);
                     }
                     

@@ -382,4 +382,644 @@
                         renderUI();
                     };
                     
+                    await audio.play();
+                } else {
+                    throw new Error("Ovoz ma'lumoti olinmadi");
+                }
+            } catch (err) {
+                console.error("Insoniy ovozni o'qishda xatolik:", err);
+                fallbackAudio(text, id);
+            }
+        }
+
+        function fallbackAudio(text, id) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.onend = () => {
+                    state.playingAudioId = null;
+                    renderUI();
+                };
+                utterance.onerror = () => {
+                    state.playingAudioId = null;
+                    renderUI();
+                }
+                window.speechSynthesis.speak(utterance);
+            } else {
+                state.playingAudioId = null;
+                renderUI();
+            }
+        }
+
+        // ==========================================
+        // 4. ASOSIY MANTIQ (Tahlil, Saqlash)
+        // ==========================================
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    document.getElementById('image-preview').src = reader.result;
+                    document.getElementById('image-preview-container').classList.remove('hidden');
                     
+                    const base64String = reader.result.split(',')[1];
+                    state.imageBase64 = base64String;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('image-preview').src = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+            state.imageBase64 = null;
+        }
+
+        function showError(msg) {
+            const errDiv = document.getElementById('error-message');
+            document.getElementById('error-text').innerText = msg;
+            if(msg) {
+                errDiv.classList.remove('hidden');
+            } else {
+                errDiv.classList.add('hidden');
+            }
+        }
+
+        async function handleExtract() {
+            const inputText = document.getElementById('input-text').value;
+            
+            if (!inputText.trim() && !state.imageBase64) {
+                showError("Iltimos, matn kiriting yoki rasm yuklang.");
+                return;
+            }
+
+            if(!API_KEY || API_KEY === "AIzaSyCVoV1cPOY4fiJOjEzSzX9a68dfCrCxaZE") {
+                showError("So'zlarni tahlil qilish uchun API kalit talab qilinadi.");
+                return;
+            }
+
+            state.isLoading = true;
+            showError('');
+            state.extractedWords = [];
+            renderUI(); // Loading holatini ko'rsatish
+
+            try {
+                const prompt = `Extract useful and important English words from the provided text or image. Translate them to Uzbek. 
+                Also, for EACH word, generate a very short, simple English example sentence (max 5 words) and its Uzbek translation.
+                Return ONLY a valid JSON array of objects with exact keys: 'en' (English word), 'uz' (Uzbek translation), 'ex' (English example sentence), 'ex_uz' (Uzbek translation of the sentence). 
+                Example: [{"en": "apple", "uz": "olma", "ex": "I eat an apple.", "ex_uz": "Men olma yeyman."}]. 
+                Do not include any markdown formatting, backticks, or extra text. Max 10 words.`;
+
+                let parts = [{ text: prompt }];
+                
+                if (inputText.trim()) {
+                    parts.push({ text: `Text to analyze: ${inputText}` });
+                }
+                
+                if (state.imageBase64) {
+                    parts.push({
+                        inlineData: { mimeType: "image/jpeg", data: state.imageBase64 }
+                    });
+                }
+
+                const payload = {
+                    contents: [{ role: "user", parts: parts }],
+                    generationConfig: { responseMimeType: "application/json" }
+                };
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+                
+                const response = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (responseText) {
+                    try {
+                        const cleanText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+                        const wordsList = JSON.parse(cleanText);
+                        
+                        if (Array.isArray(wordsList)) {
+                            state.extractedWords = wordsList;
+                            if (wordsList.length === 0) {
+                                showError("Matn yoki rasmdan inglizcha so'z topilmadi.");
+                            }
+                        }
+                    } catch (e) {
+                        console.error("JSON Parsing xatosi:", e);
+                        showError("Ma'lumotni tahlil qilishda xatolik yuz berdi.");
+                    }
+                } else {
+                    showError("Javob olinmadi. Iltimos qaytadan urinib ko'ring.");
+                }
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                state.isLoading = false;
+                renderUI();
+            }
+        }
+
+        function toggleSaveWord(wordEn) {
+            // Find word details from extracted or already saved
+            let wordObj = state.extractedWords.find(w => w.en === wordEn) || state.savedWords.find(w => w.en === wordEn);
+            
+            const isSaved = state.savedWords.some(w => w.en === wordEn);
+            if (isSaved) {
+                state.savedWords = state.savedWords.filter(w => w.en !== wordEn);
+            } else if (wordObj) {
+                state.savedWords.push(wordObj);
+            }
+            saveToLocal();
+            renderUI();
+        }
+
+        function saveToLocal() {
+            // LocalStorage ga saqlash (ixtiyoriy)
+            // localStorage.setItem('elation_words', JSON.stringify(state.savedWords));
+        }
+
+        function loadSavedWords() {
+            // const saved = localStorage.getItem('elation_words');
+            // if(saved) state.savedWords = JSON.parse(saved);
+        }
+
+        // ==========================================
+        // 5. O'YINLAR MANTIGI
+        // ==========================================
+        
+        function prevCard() {
+            state.isCardFlipped = false;
+            renderUI();
+            setTimeout(() => {
+                state.cardIndex = (state.cardIndex - 1 + state.savedWords.length) % state.savedWords.length;
+                renderUI();
+            }, 200);
+        }
+
+        function nextCard() {
+            state.isCardFlipped = false;
+            renderUI();
+            setTimeout(() => {
+                state.cardIndex = (state.cardIndex + 1) % state.savedWords.length;
+                renderUI();
+            }, 200);
+        }
+
+        function toggleCardFlip(event) {
+            // Audio tugmasi bosilsa aylantirmaslik uchun
+            if(event.target.closest('button')) return;
+            state.isCardFlipped = !state.isCardFlipped;
+            renderUI();
+        }
+
+        function startQuiz() {
+            const shuffled = [...state.savedWords].sort(() => 0.5 - Math.random());
+            state.quizShuffledWords = shuffled;
+            state.quizQuestionIndex = 0;
+            state.quizScore = 0;
+            state.quizShowResult = false;
+            generateQuizOptions(shuffled[0], shuffled);
+            renderUI();
+        }
+
+        function generateQuizOptions(correctWord, allWords) {
+            const distractors = allWords.filter(w => w.en !== correctWord.en).sort(() => 0.5 - Math.random()).slice(0, 3);
+            const optionsList = [correctWord, ...distractors].sort(() => 0.5 - Math.random());
+            state.quizOptions = optionsList;
+            state.quizSelectedOption = null;
+        }
+
+        function handleQuizOptionSelect(optionEn) {
+            if (state.quizSelectedOption) return;
+            
+            const selectedOpt = state.quizOptions.find(o => o.en === optionEn);
+            state.quizSelectedOption = selectedOpt;
+            
+            const isCorrect = selectedOpt.en === state.quizShuffledWords[state.quizQuestionIndex].en;
+            if (isCorrect) state.quizScore++;
+            
+            renderUI();
+
+            setTimeout(() => {
+                if (state.quizQuestionIndex + 1 < state.quizShuffledWords.length) {
+                    state.quizQuestionIndex++;
+                    generateQuizOptions(state.quizShuffledWords[state.quizQuestionIndex], state.quizShuffledWords);
+                } else {
+                    state.quizShowResult = true;
+                }
+                renderUI();
+            }, 1200);
+        }
+
+
+        // ==========================================
+        // 6. UI RENDER FUNKSIYALARI
+        // ==========================================
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            
+            // Tablarni yashirish/ko'rsatish
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Agar o'yin tablari ochilsa va kerakli shartlar bo'lsa
+            if (tabId === 'quiz' && state.savedWords.length >= 4 && state.quizShuffledWords.length === 0) {
+                startQuiz();
+            }
+
+            renderNavs();
+            renderUI();
+        }
+
+        function renderNavs() {
+            // Desktop Nav
+            const desktopIds = ['home', 'saved', 'flashcards', 'quiz'];
+            desktopIds.forEach(id => {
+                const btn = document.getElementById(`nav-desktop-${id}`);
+                if(!btn) return;
+                
+                if (id === state.activeTab) {
+                    btn.className = "nav-btn-desktop flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm bg-white text-indigo-700 shadow-sm border border-gray-200/50 scale-105";
+                } else {
+                    btn.className = "nav-btn-desktop flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm text-gray-500 hover:text-indigo-600 hover:bg-gray-200/50";
+                }
+            });
+
+            // Mobile Nav
+            desktopIds.forEach(id => {
+                const btn = document.getElementById(`nav-mobile-${id}`);
+                if(!btn) return;
+                const icon = btn.querySelector('i');
+                const text = btn.querySelector('span:last-child');
+                
+                if (id === state.activeTab) {
+                    btn.className = "nav-btn-mobile flex-1 flex flex-col items-center justify-center gap-1.5 p-2 relative transition-all duration-300 text-indigo-600 transform -translate-y-1.5";
+                    icon.classList.add('fill-indigo-100');
+                    text.classList.replace('font-bold', 'font-black');
+                } else {
+                    btn.className = "nav-btn-mobile flex-1 flex flex-col items-center justify-center gap-1.5 p-2 relative transition-all duration-300 text-gray-400 hover:text-indigo-500";
+                    icon.classList.remove('fill-indigo-100');
+                    text.classList.replace('font-black', 'font-bold');
+                }
+            });
+
+            // Badges
+            document.getElementById('saved-count-desktop').innerText = state.savedWords.length;
+            const mobileBadge = document.getElementById('mobile-saved-badge');
+            if(state.savedWords.length > 0) {
+                mobileBadge.innerText = state.savedWords.length > 9 ? '9+' : state.savedWords.length;
+                mobileBadge.classList.remove('hidden');
+            } else {
+                mobileBadge.classList.add('hidden');
+            }
+        }
+
+        function renderUI() {
+            renderHomeUI();
+            if(state.activeTab === 'saved') renderSavedUI();
+            if(state.activeTab === 'flashcards') renderFlashcardsUI();
+            if(state.activeTab === 'quiz') renderQuizUI();
+            
+            // Yangi qo'shilgan elementlar uchun ikonkalarni yangilash
+            lucide.createIcons();
+        }
+
+        function getAudioBtnHTML(id, isPlaying, extraClasses = '') {
+            return `
+                <button onclick="playHumanAudio('${id.split('||')[1]}', '${id}', event)" 
+                        ${state.playingAudioId !== null && state.playingAudioId !== id ? 'disabled' : ''}
+                        class="${extraClasses} ${isPlaying ? 'animate-pulse' : ''} disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                        title="Tinglash">
+                    <i data-lucide="${isPlaying ? 'loader-2' : 'volume-2'}" class="${isPlaying ? 'animate-spin' : ''}"></i>
+                </button>
+            `;
+        }
+
+        function renderHomeUI() {
+            // Button state
+            const btn = document.getElementById('extract-btn');
+            const icon = document.getElementById('extract-icon');
+            const textSpan = document.getElementById('extract-text');
+            
+            if (state.isLoading) {
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                icon.setAttribute('data-lucide', 'loader-2');
+                icon.classList.add('animate-spin');
+                textSpan.innerText = "Sehrli tahlil qilinmoqda...";
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                icon.setAttribute('data-lucide', 'sparkles');
+                icon.classList.remove('animate-spin');
+                textSpan.innerText = "So'zlarni topib ber!";
+            }
+
+            // Extracted list
+            const container = document.getElementById('extracted-words-container');
+            const list = document.getElementById('extracted-words-list');
+            const count = document.getElementById('extracted-count');
+
+            if (state.extractedWords.length > 0) {
+                container.classList.remove('hidden');
+                count.innerText = `${state.extractedWords.length} ta`;
+                
+                let html = '';
+                state.extractedWords.forEach((word, idx) => {
+                    const isSaved = state.savedWords.some(w => w.en === word.en);
+                    const audioId = `extract-${idx}||${word.en.replace(/'/g, "\\'")}`;
+                    const isPlaying = state.playingAudioId === audioId;
+
+                    const audioBtnClass = isPlaying 
+                        ? 'w-12 h-12 rounded-full shadow-sm bg-indigo-600 text-white border-indigo-600'
+                        : 'w-12 h-12 rounded-full shadow-sm bg-white text-indigo-600 border border-indigo-50 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transform active:scale-95';
+
+                    const saveBtnClass = isSaved
+                        ? 'p-3 rounded-xl transition-all transform active:scale-90 text-white bg-indigo-500 shadow-md'
+                        : 'p-3 rounded-xl transition-all transform active:scale-90 text-gray-400 bg-white shadow-sm hover:text-indigo-600';
+
+                    html += `
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border-2 border-transparent hover:border-indigo-100 transition-all group shadow-sm">
+                            <div class="flex items-center gap-4">
+                                ${getAudioBtnHTML(audioId, isPlaying, audioBtnClass)}
+                                <div>
+                                    <p class="font-black text-gray-900 text-lg">${word.en}</p>
+                                    <p class="text-sm text-gray-600 font-medium">${word.uz}</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleSaveWord('${word.en.replace(/'/g, "\\'")}')" class="${saveBtnClass}">
+                                <i data-lucide="${isSaved ? 'bookmark-check' : 'bookmark'}" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function renderSavedUI() {
+            const emptyState = document.getElementById('empty-saved-state');
+            const listContainer = document.getElementById('saved-words-list');
+            const badge = document.getElementById('saved-count-badge');
+
+            if (state.savedWords.length === 0) {
+                emptyState.classList.remove('hidden');
+                listContainer.classList.add('hidden');
+                badge.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                listContainer.classList.remove('hidden');
+                badge.classList.remove('hidden');
+                badge.innerText = `${state.savedWords.length} ta`;
+
+                let html = '';
+                state.savedWords.forEach((word, idx) => {
+                    const wordAudioId = `saved-word-${idx}||${word.en.replace(/'/g, "\\'")}`;
+                    const exAudioId = `saved-ex-${idx}||${word.ex ? word.ex.replace(/'/g, "\\'") : ''}`;
+                    
+                    const isWordPlaying = state.playingAudioId === wordAudioId;
+                    const isExPlaying = state.playingAudioId === exAudioId;
+
+                    const wordBtnClass = `w-10 h-10 rounded-full ${isWordPlaying ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-500 hover:text-white'} shadow-sm`;
+                    const exBtnClass = `p-1.5 rounded-full flex-shrink-0 ${isExPlaying ? 'bg-indigo-500 text-white' : 'text-indigo-400 bg-indigo-50 hover:bg-indigo-100'}`;
+
+                    html += `
+                        <div class="flex flex-col p-5 bg-gradient-to-br from-white to-indigo-50/30 rounded-2xl border-2 border-indigo-50 shadow-sm relative group overflow-hidden hover:border-indigo-200 transition-colors">
+                            <div class="flex items-center justify-between mb-3 relative z-10">
+                                <div class="flex items-center gap-3">
+                                    ${getAudioBtnHTML(wordAudioId, isWordPlaying, wordBtnClass)}
+                                    <h3 class="font-black text-indigo-950 text-xl">${word.en}</h3>
+                                </div>
+                                <button onclick="toggleSaveWord('${word.en.replace(/'/g, "\\'")}')" class="text-gray-300 hover:text-red-500 bg-white p-2 rounded-lg hover:bg-red-50 transition-colors shadow-sm" title="O'chirish">
+                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="pl-[52px] relative z-10">
+                                <p class="text-gray-700 font-bold mb-3">${word.uz}</p>
+                                ${word.ex ? `
+                                    <div class="bg-white/80 p-3.5 rounded-xl border border-indigo-100/80 shadow-sm">
+                                        <div class="text-sm font-bold text-gray-800 italic mb-1.5 flex justify-between items-start gap-2">
+                                            <span>"${word.ex}"</span>
+                                            ${getAudioBtnHTML(exAudioId, isExPlaying, exBtnClass)}
+                                        </div>
+                                        <p class="text-xs text-gray-500 font-medium">"${word.ex_uz}"</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+            }
+        }
+
+        function renderFlashcardsUI() {
+            const container = document.getElementById('tab-flashcards');
+            
+            if (state.savedWords.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-white rounded-3xl p-6 shadow-sm border border-indigo-50">
+                        <i data-lucide="layers" class="w-16 h-16 mx-auto text-gray-200 mb-4"></i>
+                        <p class="text-gray-500 font-medium text-lg">Kartochkalar orqali yodlash uchun avval so'zlarni saqlang.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const word = state.savedWords[state.cardIndex];
+            const cardWordId = `card-word-${state.cardIndex}||${word.en.replace(/'/g, "\\'")}`;
+            const cardExId = `card-ex-${state.cardIndex}||${word.ex ? word.ex.replace(/'/g, "\\'") : ''}`;
+            
+            const isWordPlaying = state.playingAudioId === cardWordId;
+            const isExPlaying = state.playingAudioId === cardExId;
+
+            container.innerHTML = `
+                <div class="bg-white p-6 sm:p-10 rounded-3xl shadow-sm border border-indigo-50 flex flex-col items-center overflow-hidden">
+                    <div class="w-full flex justify-between items-center mb-8 relative z-10">
+                        <h2 class="text-xl sm:text-2xl font-black text-indigo-900 flex items-center gap-2">
+                            <i data-lucide="layers" class="w-6 h-6 text-indigo-500"></i>
+                            Kartochkalar
+                        </h2>
+                        <span class="text-sm font-black text-indigo-700 bg-indigo-100 px-4 py-2 rounded-full shadow-sm">
+                            ${state.cardIndex + 1} / ${state.savedWords.length}
+                        </span>
+                    </div>
+
+                    <div class="relative w-full max-w-md h-[24rem] perspective-1000 group z-10">
+                        <div class="w-full h-full absolute transition-transform preserve-3d shadow-2xl rounded-[2.5rem] ${state.isCardFlipped ? 'rotate-y-180' : ''}">
+                            
+                            <!-- Front -->
+                            <div onclick="toggleCardFlip(event)" class="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 rounded-[2.5rem] flex flex-col items-center justify-center p-8 text-white border-[6px] border-white/10 shadow-inner cursor-pointer">
+                                <span class="absolute top-6 px-4 py-1.5 bg-white/15 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md">Inglizcha</span>
+                                
+                                <h3 class="text-5xl sm:text-6xl font-black text-center break-words w-full drop-shadow-lg mb-8 px-4 leading-tight">${word.en}</h3>
+                                
+                                ${getAudioBtnHTML(cardWordId, isWordPlaying, `p-5 rounded-full backdrop-blur-md shadow-lg ${isWordPlaying ? 'bg-white text-indigo-600 scale-110' : 'bg-white/20 hover:bg-white text-white hover:text-indigo-600 hover:scale-110'}`)}
+
+                                <div class="absolute bottom-8 flex flex-col items-center opacity-60 group-hover:opacity-100 transition-opacity">
+                                    <span class="text-[10px] font-bold tracking-widest mb-2 uppercase">O'girish uchun bosing</span>
+                                    <div class="w-16 h-1.5 bg-white/40 rounded-full"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Back -->
+                            <div onclick="toggleCardFlip(event)" class="absolute w-full h-full backface-hidden rotate-y-180 bg-white rounded-[2.5rem] flex flex-col items-center justify-center p-8 border-[6px] border-indigo-50 shadow-xl cursor-pointer">
+                                <span class="absolute top-6 px-4 py-1.5 bg-indigo-50 text-indigo-500 rounded-full text-xs font-bold uppercase tracking-widest border border-indigo-100">O'zbekcha</span>
+                                
+                                <h3 class="text-4xl sm:text-5xl font-black text-indigo-950 text-center break-words w-full mb-8 leading-tight">${word.uz}</h3>
+                                
+                                ${word.ex ? `
+                                    <div class="w-full mt-2 p-6 bg-gradient-to-b from-indigo-50/80 to-white rounded-3xl text-center border border-indigo-100 shadow-sm relative overflow-hidden">
+                                        <div class="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-bl-full -mr-8 -mt-8 opacity-50"></div>
+                                        <div class="font-bold text-gray-800 text-lg mb-3 flex flex-col items-center gap-3 relative z-10">
+                                            <span class="italic leading-snug">"${word.ex}"</span>
+                                            ${getAudioBtnHTML(cardExId, isExPlaying, `p-3 rounded-full shadow-sm ${isExPlaying ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 border border-indigo-100 hover:bg-indigo-600 hover:text-white'}`)}
+                                        </div>
+                                        <p class="text-sm text-gray-500 font-medium relative z-10">"${word.ex_uz}"</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 sm:gap-6 mt-10 w-full max-w-md justify-center relative z-10">
+                        <button onclick="prevCard()" class="flex-1 py-4 sm:py-5 flex justify-center items-center gap-2 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 transition-colors shadow-sm font-black text-lg active:scale-95">
+                            <i data-lucide="chevron-left" class="w-6 h-6"></i> Orqaga
+                        </button>
+                        <button onclick="nextCard()" class="flex-1 py-4 sm:py-5 flex justify-center items-center gap-2 bg-indigo-100 text-indigo-700 rounded-2xl hover:bg-indigo-200 transition-colors shadow-sm font-black text-lg active:scale-95">
+                            Keyingisi <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuizUI() {
+            const container = document.getElementById('tab-quiz');
+
+            if (state.savedWords.length < 4) {
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-white rounded-3xl p-6 shadow-sm border border-indigo-50">
+                        <i data-lucide="gamepad-2" class="w-20 h-20 mx-auto text-indigo-100 mb-6"></i>
+                        <h3 class="text-2xl font-black text-gray-800 mb-3">Test uchun so'zlar yetarli emas</h3>
+                        <p class="text-gray-500 font-medium text-lg">O'yinni boshlash uchun lug'atga kamida 4 ta so'z saqlashingiz kerak.</p>
+                        <div class="mt-8 inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-6 py-3 rounded-full font-black text-xl border border-indigo-100 shadow-sm">
+                            Hozirda: <span class="text-indigo-800">${state.savedWords.length} / 4</span>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (state.quizShowResult) {
+                const isPerfect = state.quizScore === state.quizShuffledWords.length;
+                let confettiHtml = '';
+                
+                if (isPerfect) {
+                    let dots = '';
+                    const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6'];
+                    for(let i=0; i<40; i++){
+                        const left = Math.random() * 100;
+                        const delay = Math.random() * 2;
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        dots += `<div class="confetti" style="left: ${left}%; animation-delay: ${delay}s; background-color: ${color}"></div>`;
+                    }
+                    confettiHtml = `<div class="absolute inset-0 pointer-events-none z-0">${dots}</div>`;
+                }
+
+                container.innerHTML = `
+                    <div class="relative bg-white p-10 rounded-3xl shadow-sm border border-indigo-50 text-center overflow-hidden">
+                        ${confettiHtml}
+                        <div class="inline-flex items-center justify-center w-32 h-32 rounded-full mb-8 shadow-2xl relative z-10 ${isPerfect ? 'bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500' : 'bg-gradient-to-br from-green-400 to-emerald-600'}">
+                            <i data-lucide="${isPerfect ? 'trophy' : 'check-circle-2'}" class="w-16 h-16 text-white"></i>
+                        </div>
+                        
+                        <h2 class="text-4xl font-black text-gray-900 mb-4 relative z-10">
+                            ${isPerfect ? "Mukammal Natija! 🏆" : "Ajoyib Natija!"}
+                        </h2>
+                        
+                        <p class="text-gray-600 mb-10 text-xl font-medium relative z-10">
+                            Siz ${state.quizShuffledWords.length} ta so'zdan <span class="font-black text-4xl mx-2 ${isPerfect ? 'text-orange-500' : 'text-green-500'}">${state.quizScore}</span> tasini to'g'ri topdingiz.
+                        </p>
+                        
+                        <button onclick="startQuiz()" class="flex items-center justify-center gap-3 w-full sm:w-auto mx-auto px-10 py-5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 hover:shadow-xl hover:-translate-y-1 transition-all font-black text-xl relative z-10 active:scale-95">
+                            <i data-lucide="rotate-ccw" class="w-6 h-6"></i> Yana o'ynash
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const currentWord = state.quizShuffledWords[state.quizQuestionIndex];
+            const quizAudioId = `quiz-word||${currentWord.en.replace(/'/g, "\\'")}`;
+            const isPlaying = state.playingAudioId === quizAudioId;
+
+            let optionsHtml = '';
+            state.quizOptions.forEach((option, idx) => {
+                let btnClass = "p-6 rounded-2xl border-4 transition-all font-black text-2xl text-center relative overflow-hidden ";
+                
+                if (!state.quizSelectedOption) {
+                    btnClass += "border-gray-100 hover:border-indigo-400 hover:bg-indigo-50 hover:-translate-y-1 text-gray-800 bg-white shadow-sm cursor-pointer active:scale-95";
+                } else {
+                    if (option.en === currentWord.en) {
+                        btnClass += "border-green-500 bg-green-50 text-green-700 scale-[1.02] shadow-lg"; 
+                    } else if (state.quizSelectedOption.en === option.en) {
+                        btnClass += "border-red-500 bg-red-50 text-red-700"; 
+                    } else {
+                        btnClass += "border-gray-100 bg-gray-50 text-gray-300 opacity-40"; 
+                    }
+                }
+
+                optionsHtml += `
+                    <button onclick="handleQuizOptionSelect('${option.en.replace(/'/g, "\\'")}')" 
+                            class="${btnClass}" ${state.quizSelectedOption ? 'disabled' : ''}>
+                        ${option.uz}
+                    </button>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="bg-white p-6 sm:p-10 rounded-3xl shadow-sm border border-indigo-50">
+                    <div class="flex justify-between items-center mb-10 bg-gray-50/80 p-5 rounded-2xl border border-gray-100">
+                        <h2 class="text-xl font-black text-indigo-900 flex items-center gap-2">
+                            <i data-lucide="gamepad-2" class="w-7 h-7 text-indigo-500"></i>
+                            Topqirlik o'yini
+                        </h2>
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm font-bold text-gray-500 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-gray-100">
+                                Savo: <span class="text-gray-900">${state.quizQuestionIndex + 1}/${state.quizShuffledWords.length}</span>
+                            </div>
+                            <div class="text-sm font-black text-green-700 bg-green-100 px-4 py-1.5 rounded-lg shadow-sm">
+                                Baho: ${state.quizScore}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-12 relative">
+                        <span class="text-sm text-indigo-400 uppercase tracking-widest font-black mb-4 block">Shu so'zning tarjimasini toping</span>
+                        <div class="flex flex-col items-center justify-center gap-6 mt-2">
+                            <h3 class="text-5xl sm:text-7xl font-black text-gray-900 leading-tight">${currentWord.en}</h3>
+                            ${getAudioBtnHTML(quizAudioId, isPlaying, `w-16 h-16 rounded-full shadow-md transform ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white hover:scale-110'}`)}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+    </script>
+</body>
+</html>

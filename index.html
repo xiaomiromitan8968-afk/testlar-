@@ -2,1754 +2,384 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tarixiy Koshif - Smart Museum Guide</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elation - Ingliz tilini o'rganish</title>
+    <!-- Tailwind CSS (CDN orqali) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF for PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F4F8;
+            color: #1e293b;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Glassmorphism & Effects */
-        .glass-dark {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        /* 3D Kartochka effektlari */
+        .perspective-1000 { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .transition-transform { transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1); }
 
-        .gold-glow {
-            box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+        /* Konfetti animatsiyasi */
+        @keyframes confettiFall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            10% { opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
-
-        /* Scan Overlay Line */
-        @keyframes cyber-scan {
-            0% { top: 4%; }
-            50% { top: 96%; }
-            100% { top: 4%; }
-        }
-        .scan-line {
+        .confetti {
             position: absolute;
-            left: 2%;
-            width: 96%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #fbbf24, #6366f1, #fbbf24, transparent);
-            box-shadow: 0 0 12px #6366f1, 0 0 4px #fbbf24;
-            animation: cyber-scan 3.5s ease-in-out infinite;
+            top: -20px;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            opacity: 0;
+            animation: confettiFall 3.5s ease-in forwards;
         }
 
-        /* Audio Wave Animation */
-        .wave-bar {
-            width: 4px;
-            height: 8px;
-            background-color: #6366f1;
-            border-radius: 4px;
-            transition: height 0.1s ease;
-        }
-        
-        .wave-active {
-            animation: sound-bounce 0.6s ease-in-out infinite alternate;
-        }
-        .wave-active:nth-child(2) { animation-delay: 0.1s; background-color: #fbbf24; }
-        .wave-active:nth-child(3) { animation-delay: 0.2s; }
-        .wave-active:nth-child(4) { animation-delay: 0.3s; background-color: #fbbf24; }
-        .wave-active:nth-child(5) { animation-delay: 0.4s; }
+        /* Maxsus scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        @keyframes sound-bounce {
-            0% { height: 6px; transform: scaleY(0.8); }
-            100% { height: 26px; transform: scaleY(1.2); }
-        }
-
-        .no-select {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden no-select text-slate-200">
+<body class="pb-24 sm:pb-12 min-h-screen flex flex-col">
 
-    <!-- Top Premium Navigation Bar -->
-    <header class="glass-dark border-b border-slate-900 px-6 py-4 flex justify-between items-center z-40 shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                <i class="fa-solid fa-feather-pointed text-slate-950 text-lg"></i>
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('home')">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform">
+                    <span class="text-white font-black text-2xl font-serif">e</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-800 to-purple-700 tracking-tight">
+                    Elation
+                </h1>
             </div>
-            <div>
-                <h1 class="text-lg font-extrabold tracking-wide bg-gradient-to-r from-amber-400 to-indigo-400 bg-clip-text text-transparent">Tarixiy Koshif</h1>
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">AI Silk Road Guide • Pro Ultimate</p>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-2">
-            <!-- Language Quick Switcher -->
-            <select id="header-lang-switcher" class="bg-slate-900 border border-slate-800 text-xs rounded-lg px-2 py-1.5 font-bold focus:outline-none focus:border-amber-500 text-amber-400 cursor-pointer">
-                <option value="uz">UZB</option>
-                <option value="en">ENG</option>
-                <option value="ru">РУС</option>
-            </select>
             
-            <!-- History Button -->
-            <button id="btn-show-history" class="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
-                <i class="fa-solid fa-clock-rotate-left text-sm"></i>
-            </button>
-            <!-- Settings Button -->
-            <button id="btn-show-settings" class="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-300 transition-all active:scale-95">
-                <i class="fa-solid fa-sliders text-sm"></i>
-            </button>
+            <!-- Desktop Navigation -->
+            <div class="hidden sm:flex items-center gap-2 bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200/50">
+                <button onclick="switchTab('home')" id="nav-desktop-home" class="nav-btn-desktop flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm bg-white text-indigo-700 shadow-sm border border-gray-200/50 scale-105">
+                    <i data-lucide="type" class="w-4 h-4"></i> Kashfiyot
+                </button>
+                <button onclick="switchTab('saved')" id="nav-desktop-saved" class="nav-btn-desktop flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm text-gray-500 hover:text-indigo-600 hover:bg-gray-200/50">
+                    <i data-lucide="bookmark" class="w-4 h-4"></i> Lug'at (<span id="saved-count-desktop">0</span>)
+                </button>
+                <button onclick="switchTab('flashcards')" id="nav-desktop-flashcards" class="nav-btn-desktop flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm text-gray-500 hover:text-indigo-600 hover:bg-gray-200/50">
+                    <i data-lucide="layers" class="w-4 h-4"></i> Kartochkalar
+                </button>
+                <button onclick="switchTab('quiz')" id="nav-desktop-quiz" class="nav-btn-desktop flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm text-gray-500 hover:text-indigo-600 hover:bg-gray-200/50">
+                    <i data-lucide="gamepad-2" class="w-4 h-4"></i> O'yin
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Main View Switcher Area -->
-    <main class="flex-1 relative overflow-hidden bg-slate-950">
+    <!-- Main Content Area -->
+    <main class="max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 flex-grow">
+        
+        <!-- === HOME TAB (Kashfiyot) === -->
+        <section id="tab-home" class="tab-content block space-y-6 animate-[fadeIn_0.3s_ease-out]">
+            
+            <div class="bg-indigo-50 text-indigo-800 p-4 rounded-2xl flex items-start gap-3 border border-indigo-100 shadow-sm">
+                <i data-lucide="sparkles" class="w-5 h-5 mt-0.5 flex-shrink-0 text-indigo-500"></i>
+                <p class="text-sm font-medium">
+                    <strong>Yangi imkoniyat:</strong> Endi inglizcha so'zlar va gaplarni <span class="font-bold underline decoration-indigo-300">haqiqiy inson ovozida</span> tinglashingiz mumkin! 🎧
+                </p>
+            </div>
 
-        <!-- 1. STUDIO VIEW (Camera & Scanner) -->
-        <section id="view-studio" class="absolute inset-0 flex flex-col z-10 transition-all duration-300">
-            <!-- Camera Viewfinder -->
-            <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
-                <video id="camera-stream" class="w-full h-full object-cover" autoplay playsinline></video>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-indigo-50">
+                <h2 class="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-6 h-6 text-indigo-500"></i>
+                    Yangi so'zlarni kashf etish
+                </h2>
                 
-                <!-- Scanner Interface Elements -->
-                <div class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                    <div class="relative w-72 h-72 sm:w-96 sm:h-96 border border-white/10 rounded-3xl bg-black/10 backdrop-blur-[1px] flex items-center justify-center">
-                        <!-- Neon Bracket corners -->
-                        <div class="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-amber-500 rounded-tl-3xl"></div>
-                        <div class="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-amber-500 rounded-tr-3xl"></div>
-                        <div class="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-indigo-500 rounded-bl-3xl"></div>
-                        <div class="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-indigo-500 rounded-br-3xl"></div>
+                <div class="space-y-4">
+                    <div>
+                        <textarea id="input-text" class="w-full p-4 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-400 transition-all resize-none bg-gray-50/50 text-lg font-medium text-gray-800" rows="4" placeholder="Ingliz tilidagi matnni shu yerga yozing..."></textarea>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <button onclick="document.getElementById('file-input').click()" class="flex items-center justify-center gap-2 px-5 py-3 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-colors font-bold flex-1 sm:flex-none border border-indigo-100 shadow-sm">
+                            <i data-lucide="image" class="w-5 h-5"></i> Rasm yuklash
+                        </button>
+                        <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                         
-                        <!-- Pulse Target Center -->
-                        <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center animate-pulse">
-                            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                        </div>
-
-                        <!-- Active laser scanner line -->
-                        <div id="laser-line" class="scan-line hidden"></div>
-                    </div>
-                </div>
-
-                <!-- Instant Tip Bar -->
-                <div class="absolute top-6 left-6 right-6 z-20 pointer-events-none flex justify-center text-center">
-                    <div class="glass-dark px-4 py-2 rounded-full flex items-center gap-2 border border-amber-500/20 shadow-md">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span id="ui-tip-text" class="text-xs font-semibold text-slate-200">Kamerani tarixiy buyum yoki bitikka to'g'rilang</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Controller Bar -->
-            <div class="h-32 bg-slate-950 border-t border-slate-900 px-8 flex justify-between items-center z-20">
-                <!-- Gallery Picker -->
-                <button id="btn-open-gallery" class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-slate-300 hover:text-amber-400 hover:border-amber-500/30 transition-all active:scale-90" onclick="document.getElementById('file-picker').click()">
-                    <i class="fa-regular fa-image text-lg mb-1"></i>
-                    <span id="ui-gallery-lbl" class="text-[9px] font-bold uppercase tracking-wider">Galereya</span>
-                </button>
-                <input type="file" id="file-picker" accept="image/*" class="hidden">
-
-                <!-- Capture Trigger -->
-                <button id="btn-trigger-capture" class="w-20 h-20 rounded-full bg-slate-900 border-4 border-slate-800 flex items-center justify-center transition-all hover:border-amber-500 active:scale-90 relative group">
-                    <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center group-hover:scale-105 transition-all">
-                        <i class="fa-solid fa-camera text-slate-950 text-xl"></i>
-                    </div>
-                </button>
-
-                <!-- Camera Rotator -->
-                <button id="btn-flip" class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-slate-300 hover:text-indigo-400 hover:border-indigo-500/30 transition-all active:scale-90">
-                    <i class="fa-solid fa-camera-rotate text-lg mb-1"></i>
-                    <span id="ui-camera-lbl" class="text-[9px] font-bold uppercase tracking-wider">Kamera</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- 2. ANALYZING / PROCESSING VIEW -->
-        <section id="view-analyzing" class="absolute inset-0 bg-slate-950 z-35 flex flex-col items-center justify-center transition-all duration-300 hidden">
-            <div class="relative w-36 h-36 mb-8 flex items-center justify-center">
-                <div class="absolute inset-0 rounded-full border border-dashed border-amber-500/20 animate-spin" style="animation-duration: 15s"></div>
-                <div class="absolute inset-2 rounded-full border border-dashed border-indigo-500/40 animate-spin" style="animation-duration: 8s; animation-direction: reverse;"></div>
-                <div class="absolute inset-4 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
-                    <i class="fa-solid fa-brain-circuit text-3xl text-amber-400 animate-pulse"></i>
-                </div>
-            </div>
-            
-            <h2 id="ui-analyzing-title" class="text-xl font-bold tracking-wider text-center text-white px-8">Kognitiv Tahlil Jarayoni</h2>
-            <div id="loader-status" class="text-sm text-slate-400 mt-2 font-medium tracking-wide min-h-[20px] text-center px-4">
-                Buyum parametrlari tekshirilmoqda...
-            </div>
-            
-            <div class="w-48 bg-slate-900 h-1.5 rounded-full overflow-hidden mt-6 border border-slate-800">
-                <div id="loader-progress" class="h-full bg-gradient-to-r from-amber-500 to-indigo-500 rounded-full w-0 transition-all duration-500"></div>
-            </div>
-        </section>
-
-        <!-- 3. DETAILED ANALYSIS RESULTS VIEW -->
-        <section id="view-results" class="absolute inset-0 bg-slate-950 z-30 transition-all duration-300 hidden flex-col overflow-y-auto">
-            <!-- Header Result Card -->
-            <div class="relative w-full h-80 shrink-0 bg-black">
-                <img id="analyzed-photo" class="w-full h-full object-cover" src="" alt="Skanerlangan obyekt">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-black/60"></div>
-                
-                <!-- Quick Controls on Photo -->
-                <button id="btn-close-results" class="absolute top-6 left-6 w-11 h-11 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-90 transition-all z-20">
-                    <i class="fa-solid fa-chevron-left text-sm"></i>
-                </button>
-                
-                <!-- Main Header Metadata -->
-                <div class="absolute bottom-6 left-6 right-6">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span id="badge-era" class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-widest">...</span>
-                        <span id="badge-confidence" class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase tracking-widest">Ishonch: ...</span>
-                    </div>
-                    <h2 id="result-title" class="text-2xl font-black text-white leading-tight">Qadimgi buyum</h2>
-                    <p id="result-subtitle" class="text-xs text-slate-300 mt-1 font-medium"><i class="fa-solid fa-location-dot text-amber-500 mr-1"></i> <span id="val-origin">...</span></p>
-                </div>
-            </div>
-
-            <!-- Structured Results & Action Center -->
-            <div class="flex-1 px-6 pb-12">
-                <!-- Media / Audio Player Station -->
-                <div class="glass-dark rounded-2xl p-4 border border-slate-800 mb-6 flex flex-col gap-3 -mt-4 relative z-10 shadow-xl">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                                <i class="fa-solid fa-circle-play text-indigo-400 text-lg"></i>
-                            </div>
-                            <div>
-                                <h4 id="ui-audiogid-lbl" class="text-xs font-bold uppercase tracking-wider text-slate-400">Audio Gid</h4>
-                                <p id="audio-status-label" class="text-sm font-semibold text-slate-200">Eshittirishga tayyor</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <!-- Animated Waves -->
-                            <div id="audio-visualizer" class="flex gap-1 items-center h-6 px-2">
-                                <span class="wave-bar"></span>
-                                <span class="wave-bar"></span>
-                                <span class="wave-bar"></span>
-                                <span class="wave-bar"></span>
-                                <span class="wave-bar"></span>
-                            </div>
-                            
-                            <button id="btn-audio-action" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all shadow-md">
-                                <i class="fa-solid fa-volume-high"></i> <span id="ui-tinglash-lbl">Tinglash</span>
+                        <div id="image-preview-container" class="relative group hidden">
+                            <img id="image-preview" src="" alt="Preview" class="h-14 w-14 object-cover rounded-xl border-2 border-indigo-200 shadow-sm">
+                            <button onclick="removeImage()" class="absolute -top-2 -right-2 bg-white text-red-500 rounded-full p-0.5 shadow-md hover:text-red-700 hover:scale-110 transition-transform">
+                                <i data-lucide="x-circle" class="w-5 h-5"></i>
                             </button>
                         </div>
                     </div>
-                    
-                    <!-- Quick audio controls -->
-                    <div class="flex items-center justify-between border-t border-slate-900 pt-3 text-xs text-slate-400">
-                        <span id="audio-voice-used">Ovoz turi: Yuklanmoqda...</span>
-                        <button id="btn-export-pdf" class="flex items-center gap-1 text-emerald-400 font-bold hover:text-emerald-300">
-                            <i class="fa-solid fa-file-pdf"></i> <span id="ui-pdfdownload-lbl">PDF Yuklash</span>
-                        </button>
+
+                    <div id="error-message" class="hidden p-4 bg-red-50 text-red-600 rounded-xl text-sm font-bold border border-red-100 flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i> <span id="error-text"></span>
                     </div>
-                </div>
 
-                <!-- Artifact Spec Sheet (Grid Details) -->
-                <div class="grid grid-cols-2 gap-3 mb-6">
-                    <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-900">
-                        <span id="ui-era-lbl" class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Davri (Era)</span>
-                        <p id="val-era" class="text-sm font-bold text-slate-200">Noma'lum</p>
-                    </div>
-                    <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-900">
-                        <span id="ui-material-lbl" class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Ashyosi (Material)</span>
-                        <p id="val-material" class="text-sm font-bold text-slate-200">Loy</p>
-                    </div>
-                </div>
-
-                <!-- Tabbed Layout for Analysis -->
-                <div class="flex border-b border-slate-900 mb-4 gap-4">
-                    <button id="tab-btn-desc" class="py-2.5 font-bold text-sm border-b-2 border-amber-500 text-amber-400 transition-all">Tavsif</button>
-                    <button id="tab-btn-inscription" class="py-2.5 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">Iyerogliflar / Bitiklar</button>
-                    <button id="tab-btn-context" class="py-2.5 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">Tarixiy Kontekst</button>
-                </div>
-
-                <!-- Tab Contents -->
-                <div id="tab-content-desc" class="tab-panel prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-4">
-                    <!-- description -->
-                </div>
-
-                <div id="tab-content-inscription" class="tab-panel prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-4 hidden">
-                    <!-- Inscriptions content -->
-                </div>
-
-                <div id="tab-content-context" class="tab-panel prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-4 hidden">
-                    <!-- Historical Context -->
-                </div>
-
-                <!-- Did You Know Block -->
-                <div class="mt-8 bg-indigo-950/30 rounded-2xl p-5 border border-indigo-500/15 relative overflow-hidden">
-                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl"></div>
-                    <h4 id="ui-didyouknow-title" class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                        <i class="fa-solid fa-lightbulb"></i> Bilib qo'ygan yaxshi!
-                    </h4>
-                    <p id="val-didyouknow" class="text-slate-300 text-xs leading-relaxed italic">...</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. SETTINGS MODAL VIEW (Displays as beautiful overlay) -->
-        <section id="view-settings" class="absolute inset-0 bg-slate-950/95 z-50 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 id="ui-settings-title" class="text-lg font-black tracking-wide text-white">Ilova Sozlamalari</h3>
-                <button id="btn-close-settings" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-95">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="space-y-6">
-                <!-- Voice Settings -->
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900">
-                    <h4 id="ui-voiceset-title" class="text-sm font-bold text-indigo-400 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-volume-high"></i> Gid Ovozini Tanlash
-                    </h4>
-                    
-                    <div class="space-y-4">
-                        <div class="space-y-1">
-                            <label id="ui-voice-engine-lbl" class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Texnologiyasi</label>
-                            <select id="setting-engine" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                                <option value="gemini" selected>Premium Sun'iy Intellekt Ovozi (Tavsiya etiladi)</option>
-                                <option value="webspeech">Tizim Tezkor Ovozi (Internet talab qilmaydi)</option>
-                            </select>
-                        </div>
-
-                        <div id="container-voice-select" class="space-y-2">
-                            <label id="ui-voice-persona-lbl" class="block text-xs text-slate-400 font-semibold mb-1">Ovoz Personaji (Tembr)</label>
-                            <select id="setting-voice" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                                <!-- Options populated dynamically by language in JS -->
-                            </select>
-                        </div>
-
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-xs text-slate-400 font-semibold mb-1">
-                                <span id="ui-voice-speed-lbl">Ovoz Tezligi</span>
-                                <span id="label-speed">1.0x</span>
-                            </div>
-                            <input type="range" id="setting-speed" min="0.75" max="1.5" step="0.25" value="1.0" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Language Selection inside settings -->
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900">
-                    <h4 id="ui-langset-title" class="text-sm font-bold text-indigo-400 mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-globe"></i> Tizim Tili (System Language)
-                    </h4>
-                    <select id="settings-lang-switcher" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                        <option value="uz">O'zbekcha</option>
-                        <option value="en">English</option>
-                        <option value="ru">Русский</option>
-                    </select>
-                </div>
-
-                <!-- Information guide -->
-                <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-900 space-y-3">
-                    <h4 id="ui-guide-lbl" class="text-sm font-bold text-indigo-400 flex items-center gap-2">
-                        <i class="fa-solid fa-shield-halved"></i> Foydalanish bo'yicha qo'llanma
-                    </h4>
-                    <p id="ui-guide-desc" class="text-xs text-slate-400 leading-relaxed">
-                        Ilovadan maksimal darajada professional foydalanish uchun rasmlarni yorug'lik yaxshi bo'lgan joylarda oling. Iyeroglif va eski bitiklarni o'qishda kamerani yaqinroq olib keling va fokus to'g'rilanganiga ishonch hosil qiling.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. EXPLORATION HISTORY VIEW (Dashboard Overlay) -->
-        <section id="view-history" class="absolute inset-0 bg-slate-950/95 z-50 transition-all duration-300 hidden flex-col overflow-y-auto p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 id="ui-history-title" class="text-lg font-black tracking-wide text-white">Skanerlash Tarixi</h3>
-                <div class="flex gap-2">
-                    <button id="btn-clear-history" class="px-3 py-1.5 rounded-lg bg-red-950/50 border border-red-900/45 text-red-400 text-xs font-bold active:scale-95">Tozalash</button>
-                    <button id="btn-close-history" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-95">
-                        <i class="fa-solid fa-xmark"></i>
+                    <button id="extract-btn" onclick="handleExtract()" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-2xl hover:shadow-lg hover:shadow-indigo-500/40 transition-all font-black text-lg transform active:scale-[0.98]">
+                        <i data-lucide="sparkles" id="extract-icon" class="w-6 h-6"></i>
+                        <span id="extract-text">So'zlarni topib ber!</span>
                     </button>
                 </div>
             </div>
 
-            <!-- List container -->
-            <div id="history-container" class="space-y-3">
-                <!-- Dynamically filled inside JS -->
+            <div id="extracted-words-container" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-indigo-50 animate-[slideUp_0.5s_ease-out]">
+                <h3 class="text-lg font-black text-indigo-900 mb-4 flex items-center justify-between">
+                    Topilgan so'zlar:
+                    <span id="extracted-count" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">0 ta</span>
+                </h3>
+                <div id="extracted-words-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- So'zlar shu yerga tushadi -->
+                </div>
             </div>
+        </section>
+
+        <!-- === SAVED TAB (Lug'atim) === -->
+        <section id="tab-saved" class="tab-content hidden animate-[fadeIn_0.3s_ease-out]">
+            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-indigo-50">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-black text-indigo-900 flex items-center gap-3">
+                        <i data-lucide="bookmark" class="w-7 h-7 text-indigo-500"></i>
+                        Mening lug'atim
+                    </h2>
+                    <span id="saved-count-badge" class="hidden text-sm font-black bg-green-100 text-green-700 px-4 py-1.5 rounded-full shadow-inner">0 ta</span>
+                </div>
+                
+                <div id="empty-saved-state" class="text-center py-16 text-gray-500">
+                    <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                        <i data-lucide="bookmark" class="w-12 h-12 text-gray-300"></i>
+                    </div>
+                    <p class="text-lg font-medium">Hali hech qanday so'z saqlanmagan.</p>
+                    <button onclick="switchTab('home')" class="mt-6 px-8 py-3 bg-indigo-50 text-indigo-700 rounded-full font-bold hover:bg-indigo-100 transition-colors border border-indigo-100">
+                        Yangi so'zlar qidirish
+                    </button>
+                </div>
+
+                <div id="saved-words-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                    <!-- Saqlangan so'zlar shu yerga tushadi -->
+                </div>
+            </div>
+        </section>
+
+        <!-- === FLASHCARDS TAB === -->
+        <section id="tab-flashcards" class="tab-content hidden animate-[zoomIn_0.3s_ease-out]">
+            <!-- JS da to'ldiriladi -->
+        </section>
+
+        <!-- === QUIZ TAB === -->
+        <section id="tab-quiz" class="tab-content hidden animate-[slideRight_0.3s_ease-out]">
+             <!-- JS da to'ldiriladi -->
         </section>
 
     </main>
 
-    <!-- Custom Premium Toast Notification Box -->
-    <div id="toast" class="absolute top-6 left-6 right-6 glass-dark p-4 rounded-2xl shadow-2xl z-50 transform -translate-y-32 transition-transform duration-300 opacity-0 flex items-start gap-3 border border-slate-800">
-        <div id="toast-indicator" class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400 mt-0.5">
-            <i class="fa-solid fa-circle-exclamation"></i>
-        </div>
-        <div class="flex-1">
-            <h5 id="toast-title" class="text-xs font-extrabold text-white uppercase tracking-wider">Xabar</h5>
-            <p id="toast-body" class="text-xs text-slate-300 mt-0.5">Xato yuz berdi.</p>
-        </div>
-        <button onclick="hideToast()" class="text-slate-500 hover:text-white transition-all"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Mobile Bottom Navigation -->
+    <div class="sm:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-gray-200 px-2 py-3 flex justify-between items-center z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+        <button onclick="switchTab('home')" id="nav-mobile-home" class="nav-btn-mobile flex-1 flex flex-col items-center justify-center gap-1.5 p-2 relative transition-all duration-300 text-indigo-600 transform -translate-y-1.5">
+            <i data-lucide="type" class="w-6 h-6 fill-indigo-100"></i>
+            <span class="text-[11px] font-black">Asosiy</span>
+        </button>
+        <button onclick="switchTab('saved')" id="nav-mobile-saved" class="nav-btn-mobile flex-1 flex flex-col items-center justify-center gap-1.5 p-2 relative transition-all duration-300 text-gray-400 hover:text-indigo-500">
+            <div class="relative">
+                <i data-lucide="bookmark" class="w-6 h-6"></i>
+                <span id="mobile-saved-badge" class="hidden absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">0</span>
+            </div>
+            <span class="text-[11px] font-bold">Lug'at</span>
+        </button>
+        <button onclick="switchTab('flashcards')" id="nav-mobile-flashcards" class="nav-btn-mobile flex-1 flex flex-col items-center justify-center gap-1.5 p-2 relative transition-all duration-300 text-gray-400 hover:text-indigo-500">
+            <i data-lucide="layers" class="w-6 h-6"></i>
+            <span class="text-[11px] font-bold">Yodlash</span>
+        </button>
+        <button onclick="switchTab('quiz')" id="nav-mobile-quiz" class="nav-btn-mobile flex-1 flex flex-col items-center justify-center gap-1.5 p-2 relative transition-all duration-300 text-gray-400 hover:text-indigo-500">
+            <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+            <span class="text-[11px] font-bold">Test</span>
+        </button>
     </div>
 
-    <!-- Custom Confirm Modal Overlay (Completely avoids native confirm dialogs) -->
-    <div id="confirm-modal" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-6">
-        <div class="glass-dark border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-5">
-            <div class="flex items-center gap-3 text-amber-400">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-lg">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <h4 id="confirm-modal-title" class="text-sm font-extrabold uppercase tracking-wider text-slate-100">Tasdiqlang</h4>
-            </div>
-            <p id="confirm-modal-body" class="text-xs text-slate-300 leading-relaxed">Ushbu harakatni tasdiqlaysizmi?</p>
-            <div class="flex justify-end gap-3 text-xs font-bold">
-                <button id="btn-confirm-cancel" class="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white active:scale-95 transition-all">Bekor qilish</button>
-                <button id="btn-confirm-ok" class="px-5 py-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 active:scale-95 transition-all">Tasdiqlash</button>
-            </div>
-        </div>
-    </div>
+    <!-- Tailwind animatsiyalari uchun maxsus keyframelar -->
+    <style>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
 
-    <!-- Hidden audio element for premium TTS -->
-    <audio id="tts-audio" class="hidden" preload="auto" crossorigin="anonymous"></audio>
-
+    <!-- Asosiy JavaScript Mantig'i -->
     <script>
-        // SECURELY HARDCODED SYSTEM FALLBACK KEY PROVIDED BY THE USER
-        const defaultPlatformKey = "AIzaSyBfn9-nke8-Syj8k4jwWb6BqBF2X7CxJWI"; 
-
-        // JSON schema for structural response from Gemini 2.5
-        const ArtifactSchema = {
-            type: "OBJECT",
-            properties: {
-                title: { type: "STRING" },
-                era: { type: "STRING" },
-                origin: { type: "STRING" },
-                material: { type: "STRING" },
-                confidence_score: { type: "STRING" },
-                short_summary: { type: "STRING" },
-                description: { type: "STRING" },
-                inscriptions_decoded: { type: "STRING" },
-                historical_context: { type: "STRING" },
-                did_you_know: { type: "STRING" }
-            },
-            required: [
-                "title", "era", "origin", "material", "confidence_score", 
-                "short_summary", "description", "inscriptions_decoded", 
-                "historical_context", "did_you_know"
-            ]
-        };
+        // ==========================================
+        // 1. O'ZGARUVCHILAR VA SOZLAMALAR
+        // ==========================================
         
-        const AppState = {
-            language: 'uz',
-            activeFacingMode: 'environment',
-            videoStream: null,
-            scannedBase64: null,
-            scannedResult: null, 
-            audioPlaying: false,
-            audioUrl: null,
-            audioEngine: 'gemini', // 'gemini' or 'webspeech'
-            selectedVoice: 'Zephyr', 
-            speechSpeed: 1.0,
-            history: [],
-            apiKey: defaultPlatformKey
+        // DASTURCHI UCHUN: API kalitni shu yerga kiriting
+        const API_KEY = "AIzaSyCVoV1cPOY4fiJOjEzSzX9a68dfCrCxaZE"; 
+        
+        let state = {
+            activeTab: 'home',
+            extractedWords: [],
+            savedWords: [],
+            imageBase64: null,
+            isLoading: false,
+            playingAudioId: null,
+            // Flashcard holati
+            cardIndex: 0,
+            isCardFlipped: false,
+            // Quiz holati
+            quizQuestionIndex: 0,
+            quizScore: 0,
+            quizShowResult: false,
+            quizOptions: [],
+            quizSelectedOption: null,
+            quizShuffledWords: []
         };
 
-        // Complete UI Translation Database
-        const Dictionary = {
-            uz: {
-                appName: "Tarixiy Koshif",
-                tipText: "Kamerani tarixiy buyum yoki bitikka to'g'rilang",
-                galleryLbl: "Galereya",
-                cameraLbl: "Kamera",
-                analyzingTitle: "Kognitiv Tahlil Jarayoni",
-                analyzingWait: "Buyum parametrlari tekshirilmoqda...",
-                analyzingGeom: "Geometriya va ashyolar hisoblanmoqda...",
-                analyzingService: "Gemini xizmati so'rovni tahlil qilmoqda...",
-                analyzingInscriptions: "Bitiklar tarjimasi yakunlanmoqda...",
-                audiogid: "Audio Gid",
-                tinglash: "Tinglash",
-                toxtatish: "To'xtatish",
-                pdfdownload: "PDF Yuklash",
-                era: "Davri (Era)",
-                material: "Ashyosi (Material)",
-                tavsif: "Tavsif",
-                bitiklar: "Iyerogliflar / Bitiklar",
-                kontekst: "Tarixiy Kontekst",
-                didyouknowTitle: "Bilib qo'ygan yaxshi!",
-                settingsTitle: "Ilova Sozlamalari",
-                voicesetTitle: "Gid Ovozini Tanlash",
-                voiceEngineLbl: "Ovoz Texnologiyasi",
-                voicePersonaLbl: "Ovoz Personaji (Tembr)",
-                voiceSpeedLbl: "Ovoz Tezligi",
-                langsetTitle: "Tizim Tili (System Language)",
-                guideLbl: "Foydalanish bo'yicha qo'llanma",
-                guideDesc: "Ilovadan maksimal darajada professional foydalanish uchun rasmlarni yorug'lik yaxshi bo'lgan joylarda oling. Iyeroglif va eski bitiklarni o'qishda kamerani yaqinroq olib keling va fokus to'g'rilanganiga ishonch hosil qiling.",
-                historyTitle: "Skanerlash Tarixi",
-                clearHistoryBtn: "Tozalash",
-                noHistoryText: "Skanerlangan buyumlar mavjud emas",
-                toastSuccess: "Muvaffaqiyat",
-                toastError: "Xatolik",
-                toastInfo: "Ma'lumot",
-                cameraErrorMsg: "Kamera ishga tushmadi. Ruxsat berilganini tekshiring yoki galereyadan rasm yuklang.",
-                analysisErrorMsg: "Obyekt tahlili to'xtadi. Cheklov (quota) oshgan bo'lishi mumkin. Iltimos qayta urinib ko'ring.",
-                voiceChangeMsg: "Ovoz turi o'zgartirildi: ",
-                voiceStatusReady: "Eshittirishga tayyor",
-                voiceStatusPlaying: "Premium gid gapirmoqda...",
-                voiceStatusSysPlaying: "Tizim gidi gapirmoqda...",
-                voiceStatusStopped: "Eshittirish to'xtatildi",
-                confirmClearHistoryTitle: "Tarixni o'chirish",
-                confirmClearHistoryBody: "Haqiqatan ham barcha kashfiyotlar tarixini butunlay o'chirib tashlamoqchimisiz?",
-                confirmDeleteSingleTitle: "Kashfiyotni o'chirish",
-                confirmDeleteSingleBody: "Ushbu kashfiyotni tarixdan o'chirib tashlamoqchimisiz?",
-                pdfReportTitle: "TARIXIY KOSHIF SMART GID HISOBOTI",
-                pdfReportSub: "BUYUK IPAK YO'LI ELEKTRON ARXEOLOGIK JURNALI",
-                pdfPage: "Sahifa",
-                pdfEksponat: "EKSPONAT NOMI:",
-                pdfDavr: "DAVRI / ERASI:",
-                pdfAshyo: "ASHYOSI / MATERIALLI:",
-                pdfIshonch: "ISHONCH DARAJASI:",
-                pdfSec1: "1. UMUMIY TAVSIF VA MA'LUMOT",
-                pdfSec2: "2. YOZUVLARNING DEKODLANISHI (TARJIMASI)",
-                pdfSec3: "3. TARIXIY DAVR SHAROITI (KONTEKST)",
-                pdfSec4: "4. QIZIQARLI FAKT",
-                voiceEnginePremium: "Premium Sun'iy Intellekt Ovozi (Tavsiya etiladi)",
-                voiceEngineSystem: "Tizim Tezkor Ovozi (Internet talab qilmaydi)",
-                quotaToast: "API so'rovlar limiti tugadi. Avtomatik kutish va qayta urinish amalga oshirilmoqda..."
-            },
-            en: {
-                appName: "Historical Discoverer",
-                tipText: "Align the camera to a historical object or inscription",
-                galleryLbl: "Gallery",
-                cameraLbl: "Camera",
-                analyzingTitle: "Cognitive Analysis Process",
-                analyzingWait: "Scanning object parameters...",
-                analyzingGeom: "Analyzing geometry and materials...",
-                analyzingService: "Gemini engine calculating artifact metadata...",
-                analyzingInscriptions: "Completing inscription translations...",
-                audiogid: "Audio Guide",
-                tinglash: "Listen",
-                toxtatish: "Pause",
-                pdfdownload: "Export PDF",
-                era: "Era / Period",
-                material: "Material",
-                tavsif: "Description",
-                bitiklar: "Inscriptions / Glyphs",
-                kontekst: "Historical Context",
-                didyouknowTitle: "Did you know?",
-                settingsTitle: "App Settings",
-                voicesetTitle: "Select Guide Voice",
-                voiceEngineLbl: "Voice Engine",
-                voicePersonaLbl: "Voice Persona",
-                voiceSpeedLbl: "Voice Speed",
-                langsetTitle: "System Language",
-                guideLbl: "User Quick Guide",
-                guideDesc: "For optimal analysis, snap pictures in bright environments. Bring the camera closer and focus clearly when reading glyphs and ancient inscriptions.",
-                historyTitle: "Scan History",
-                clearHistoryBtn: "Clear All",
-                noHistoryText: "No scanned items found",
-                toastSuccess: "Success",
-                toastError: "Error",
-                toastInfo: "Info",
-                cameraErrorMsg: "Camera failed to start. Verify permissions or select a picture from your gallery.",
-                analysisErrorMsg: "AI analysis interrupted. Quota exceeded, retrying automatically...",
-                voiceChangeMsg: "Voice changed to: ",
-                voiceStatusReady: "Ready to narrate",
-                voiceStatusPlaying: "Premium guide is speaking...",
-                voiceStatusSysPlaying: "System TTS is speaking...",
-                voiceStatusStopped: "Narration stopped",
-                confirmClearHistoryTitle: "Clear History",
-                confirmClearHistoryBody: "Are you sure you want to clear your entire discovery history?",
-                confirmDeleteSingleTitle: "Delete Scanned Item",
-                confirmDeleteSingleBody: "Are you sure you want to delete this specific scanned item?",
-                pdfReportTitle: "HISTORICAL DISCOVERER GUIDE REPORT",
-                pdfReportSub: "SILK ROAD ARCHEOLOGICAL ELECTRONIC DIARY",
-                pdfPage: "Page",
-                pdfEksponat: "ARTIFACT NAME:",
-                pdfDavr: "ERA / PERIOD:",
-                pdfAshyo: "MATERIAL SPEC:",
-                pdfIshonch: "CONFIDENCE SCORE:",
-                pdfSec1: "1. OVERALL DESCRIPTION",
-                pdfSec2: "2. DECODED INSCRIPTIONS & TRANSLATION",
-                pdfSec3: "3. HISTORICAL TIMELINE & CONTEXT",
-                pdfSec4: "4. INTERESTING TRIVIA / FACT",
-                voiceEnginePremium: "Premium AI Voice (Recommended)",
-                voiceEngineSystem: "Local System Voice (Offline friendly)",
-                quotaToast: "API Rate limits hit. Auto-waiting and retrying connection..."
-            },
-            ru: {
-                appName: "Исторический Кошиф",
-                tipText: "Направьте камеру на исторический объект или надпись",
-                galleryLbl: "Галерея",
-                cameraLbl: "Камера",
-                analyzingTitle: "Процесс Когнитивного Анализа",
-                analyzingWait: "Проверка параметров экспоната...",
-                analyzingGeom: "Анализ геометрии и материала...",
-                analyzingService: "Нейросеть Gemini анализирует объект...",
-                analyzingInscriptions: "Завершение дешифровки древних письмен...",
-                audiogid: "Аудиогид",
-                tinglash: "Слушать",
-                toxtatish: "Пауза",
-                pdfdownload: "Скачать PDF",
-                era: "Период (Эра)",
-                material: "Материал",
-                tavsif: "Описание",
-                bitiklar: "Иероглифы / Надписи",
-                kontekst: "Исторический контекст",
-                didyouknowTitle: "А знаете ли вы?",
-                settingsTitle: "Настройки приложения",
-                voicesetTitle: "Выбор голоса гида",
-                voiceEngineLbl: "Технология звука",
-                voicePersonaLbl: "Персонаж голоса (Тембр)",
-                voiceSpeedLbl: "Скорость озвучки",
-                langsetTitle: "Язык Системы (System Language)",
-                guideLbl: "Руководство пользователя",
-                guideDesc: "Для максимальной точности дешифровки делайте снимки при хорошем освещении. Поднесите камеру ближе и сфокусируйтесь для распознавания древних надписей.",
-                historyTitle: "История сканирований",
-                clearHistoryBtn: "Очистить",
-                noHistoryText: "История сканирований пуста",
-                toastSuccess: "Успех",
-                toastError: "Ошибка",
-                toastInfo: "Информация",
-                cameraErrorMsg: "Не удалось запустить камеру. Проверьте разрешения или загрузите фото из галереи.",
-                analysisErrorMsg: "Анализ остановлен. Лимит запросов исчерпан. Пожалуйста, подождите, мы пробуем снова...",
-                voiceChangeMsg: "Голос изменен на: ",
-                voiceStatusReady: "Готов к воспроизведению",
-                voiceStatusPlaying: "Премиум-гид говорит...",
-                voiceStatusSysPlaying: "Системный гид говорит...",
-                voiceStatusStopped: "Воспроизведение остановлено",
-                confirmClearHistoryTitle: "Очистка истории",
-                confirmClearHistoryBody: "Вы уверены, что хотите полностью стереть историю сканирований?",
-                confirmDeleteSingleTitle: "Удалить запись",
-                confirmDeleteSingleBody: "Вы действительно хотите удалить эту запись из истории?",
-                pdfReportTitle: "ОТЧЕТ УМНОГО ГИДА ИСТОРИЧЕСКИЙ КОШИФ",
-                pdfReportSub: "ЭЛЕКТРОННЫЙ АРХЕОЛОГИЧЕСКИЙ ДНЕВНИК ШЕЛКОВОГО ПУТИ",
-                pdfPage: "Страница",
-                pdfEksponat: "НАЗВАНИЕ ЭКСПОНАТА:",
-                pdfDavr: "ЭРА / ПЕРИОД:",
-                pdfAshyo: "МАТЕРИАЛ:",
-                pdfIshonch: "УРОВЕНЬ ТОЧНОСТИ:",
-                pdfSec1: "1. ОБЩЕЕ ОБСЛУЖИВАНИЕ И СВЕДЕНИЯ",
-                pdfSec2: "2. ДЕШИФРОВКА И ПЕРЕВОД ПИСЬМЕННОСТИ",
-                pdfSec3: "3. ИСТОРИЧЕСКИЙ ИСТОРИЧЕСКИЙ КОНТЕКСТ ЭПОХИ",
-                pdfSec4: "4. ИНТЕРЕСНЫЙ ФАКТ",
-                voiceEnginePremium: "Премиальный голос ИИ (Рекомендуется)",
-                voiceEngineSystem: "Быстрый системный голос (Без интернета)",
-                quotaToast: "Лимит API исчерпан. Ожидайте, система автоматически пробует повторно..."
-            }
-        };
-
-        const VoicePersonas = {
-            uz: [
-                { id: "Leda", label: "Yosh bola (Leda) - Quvnoq", type: "child" },
-                { id: "Puck", label: "Yosh bola (Puck) - Shaddod", type: "child" },
-                { id: "Aoede", label: "Ayol kishi (Aoede) - Melodik", type: "female" },
-                { id: "Callirrhoe", label: "Ayol kishi (Callirrhoe) - Muloyim", type: "female" },
-                { id: "Fenrir", label: "Erkak kishi (Fenrir) - Kuchli", type: "male" },
-                { id: "Charon", label: "Erkak kishi (Charon) - Ma'lumotli", type: "male" },
-                { id: "Gacrux", label: "Katta yoshli odam (Gacrux) - Donishmand", type: "senior" },
-                { id: "Algenib", label: "Katta yoshli odam (Algenib) - Salmoqli", type: "senior" }
-            ],
-            en: [
-                { id: "Leda", label: "Young Child (Leda) - Upbeat", type: "child" },
-                { id: "Puck", label: "Young Child (Puck) - Lively", type: "child" },
-                { id: "Aoede", label: "Adult Female (Aoede) - Melodic", type: "female" },
-                { id: "Callirrhoe", label: "Adult Female (Callirrhoe) - Warm", type: "female" },
-                { id: "Fenrir", label: "Adult Male (Fenrir) - Energetic", type: "male" },
-                { id: "Charon", label: "Adult Male (Charon) - Informative", type: "male" },
-                { id: "Gacrux", label: "Senior Citizen (Gacrux) - Wise", type: "senior" },
-                { id: "Algenib", label: "Senior Citizen (Algenib) - Deep", type: "senior" }
-            ],
-            ru: [
-                { id: "Leda", label: "Ребенок (Leda) - Веселый", type: "child" },
-                { id: "Puck", label: "Ребенок (Puck) - Живой", type: "child" },
-                { id: "Aoede", label: "Женщина (Aoede) - Мелодичный", type: "female" },
-                { id: "Callirrhoe", label: "Женщина (Callirrhoe) - Нежный", type: "female" },
-                { id: "Fenrir", label: "Мужчина (Fenrir) - Энергичный", type: "male" },
-                { id: "Charon", label: "Мужчина (Charon) - Познавательный", type: "male" },
-                { id: "Gacrux", label: "Мудрый Старец (Gacrux) - Опытный", type: "senior" },
-                { id: "Algenib", label: "Мудрый Старец (Algenib) - Глубокий", type: "senior" }
-            ]
-        };
-
-        const UI = {
-            video: document.getElementById('camera-stream'),
-            canvas: document.createElement('canvas'),
-            laserLine: document.getElementById('laser-line'),
-            loaderStatus: document.getElementById('loader-status'),
-            loaderProgress: document.getElementById('loader-progress'),
-            toast: document.getElementById('toast'),
-            toastTitle: document.getElementById('toast-title'),
-            toastBody: document.getElementById('toast-body'),
-            toastIndicator: document.getElementById('toast-indicator'),
-            audioPlayer: document.getElementById('tts-audio'),
-            audioVisualizer: document.getElementById('audio-visualizer'),
-            audioStatusLabel: document.getElementById('audio-status-label'),
-            audioVoiceUsed: document.getElementById('audio-voice-used'),
-
-            // Views
-            viewStudio: document.getElementById('view-studio'),
-            viewAnalyzing: document.getElementById('view-analyzing'),
-            viewResults: document.getElementById('view-results'),
-            viewSettings: document.getElementById('view-settings'),
-            viewHistory: document.getElementById('view-history'),
-
-            // Capture Controls
-            btnTriggerCapture: document.getElementById('btn-trigger-capture'),
-            btnFlip: document.getElementById('btn-flip'),
-            btnOpenGallery: document.getElementById('btn-open-gallery'),
-            filePicker: document.getElementById('file-picker'),
-
-            // Result fields
-            analyzedPhoto: document.getElementById('analyzed-photo'),
-            badgeEra: document.getElementById('badge-era'),
-            badgeConfidence: document.getElementById('badge-confidence'),
-            resultTitle: document.getElementById('result-title'),
-            valOrigin: document.getElementById('val-origin'),
-            valEra: document.getElementById('val-era'),
-            valMaterial: document.getElementById('val-material'),
-            valDidYouKnow: document.getElementById('val-didyouknow'),
-
-            // Tab contents
-            tabContentDesc: document.getElementById('tab-content-desc'),
-            tabContentInscription: document.getElementById('tab-content-inscription'),
-            tabContentContext: document.getElementById('tab-content-context'),
-
-            // Tab buttons
-            tabBtnDesc: document.getElementById('tab-btn-desc'),
-            tabBtnInsc: document.getElementById('tab-btn-inscription'),
-            tabBtnCont: document.getElementById('tab-btn-context'),
-
-            // Navigation Actions
-            btnShowSettings: document.getElementById('btn-show-settings'),
-            btnShowHistory: document.getElementById('btn-show-history'),
-            btnCloseSettings: document.getElementById('btn-close-settings'),
-            btnCloseHistory: document.getElementById('btn-close-history'),
-            btnClearHistory: document.getElementById('btn-clear-history'),
-            btnCloseResults: document.getElementById('btn-close-results'),
-            btnAudioAction: document.getElementById('btn-audio-action'),
-            btnExportPdf: document.getElementById('btn-export-pdf'),
-
-            // Settings Fields
-            settingEngine: document.getElementById('setting-engine'),
-            settingVoice: document.getElementById('setting-voice'),
-            containerVoiceSelect: document.getElementById('container-voice-select'),
-            settingSpeed: document.getElementById('setting-speed'),
-            labelSpeed: document.getElementById('label-speed'),
-            historyContainer: document.getElementById('history-container'),
-            
-            // Language switchers
-            headerLangSwitcher: document.getElementById('header-lang-switcher'),
-            settingsLangSwitcher: document.getElementById('settings-lang-switcher'),
-            
-            // Custom Confirm Dialog
-            confirmModal: document.getElementById('confirm-modal'),
-            confirmTitle: document.getElementById('confirm-modal-title'),
-            confirmBody: document.getElementById('confirm-modal-body'),
-            btnConfirmCancel: document.getElementById('btn-confirm-cancel'),
-            btnConfirmOk: document.getElementById('btn-confirm-ok')
-        };
-
-        function changeSystemLanguage(newLang) {
-            AppState.language = newLang;
-            
-            // Sync switchers
-            UI.headerLangSwitcher.value = newLang;
-            UI.settingsLangSwitcher.value = newLang;
-
-            const dict = Dictionary[newLang];
-            document.title = dict.appName;
-            document.getElementById('ui-tip-text').innerText = dict.tipText;
-            UI.btnOpenGallery.querySelector('span').innerText = dict.galleryLbl;
-            UI.btnFlip.querySelector('span').innerText = dict.cameraLbl;
-            document.getElementById('ui-analyzing-title').innerText = dict.analyzingTitle;
-            UI.loaderStatus.innerText = dict.analyzingWait;
-            
-            document.getElementById('ui-audiogid-lbl').innerText = dict.audiogid;
-            UI.btnAudioAction.querySelector('span').innerText = dict.tinglash;
-            document.getElementById('ui-pdfdownload-lbl').innerText = dict.pdfdownload;
-            
-            document.getElementById('ui-era-lbl').innerText = dict.era;
-            document.getElementById('ui-material-lbl').innerText = dict.material;
-            
-            UI.tabBtnDesc.innerText = dict.tavsif;
-            UI.tabBtnInsc.innerText = dict.bitiklar;
-            UI.tabBtnCont.innerText = dict.kontekst;
-            document.getElementById('ui-didyouknow-title').innerText = dict.didyouknowTitle;
-            
-            document.getElementById('ui-settings-title').innerText = dict.settingsTitle;
-            document.getElementById('ui-voiceset-title').innerText = dict.voicesetTitle;
-            document.getElementById('ui-voice-engine-lbl').innerText = dict.voiceEngineLbl;
-            document.getElementById('ui-voice-persona-lbl').innerText = dict.voicePersonaLbl;
-            document.getElementById('ui-voice-speed-lbl').innerText = dict.voiceSpeedLbl;
-            document.getElementById('ui-langset-title').innerText = dict.langsetTitle;
-            document.getElementById('ui-guide-lbl').innerText = dict.guideLbl;
-            document.getElementById('ui-guide-desc').innerText = dict.guideDesc;
-            
-            document.getElementById('ui-history-title').innerText = dict.historyTitle;
-            UI.btnClearHistory.innerText = dict.clearHistoryBtn;
-
-            populateVoiceOptions();
-
-            UI.settingEngine.options[0].text = dict.voiceEnginePremium;
-            UI.settingEngine.options[1].text = dict.voiceEngineSystem;
-
-            if (!UI.viewHistory.classList.contains('hidden')) {
-                renderHistory();
-            }
-
-            if (!UI.viewResults.classList.contains('hidden')) {
-                resetAudioEngine();
-            }
-        }
-
-        function populateVoiceOptions() {
-            const currentVoiceOptions = VoicePersonas[AppState.language];
-            UI.settingVoice.innerHTML = '';
-            
-            currentVoiceOptions.forEach(opt => {
-                const element = document.createElement('option');
-                element.value = opt.id;
-                element.text = opt.label;
-                if (opt.id === AppState.selectedVoice) {
-                    element.selected = true;
-                }
-                UI.settingVoice.appendChild(element);
-            });
-        }
-
-        function setupEventListeners() {
-            UI.tabBtnDesc.addEventListener('click', () => switchTab('desc'));
-            UI.tabBtnInsc.addEventListener('click', () => switchTab('inscription'));
-            UI.tabBtnCont.addEventListener('click', () => switchTab('context'));
-
-            // Show Settings Overlay strictly when the button is clicked
-            UI.btnShowSettings.addEventListener('click', () => {
-                toggleView(UI.viewSettings, true);
-            });
-            UI.btnCloseSettings.addEventListener('click', () => {
-                toggleView(UI.viewSettings, false);
-            });
-
-            // Show History Overlay strictly when the button is clicked
-            UI.btnShowHistory.addEventListener('click', () => {
-                renderHistory();
-                toggleView(UI.viewHistory, true);
-            });
-            UI.btnCloseHistory.addEventListener('click', () => {
-                toggleView(UI.viewHistory, false);
-            });
-
-            UI.btnClearHistory.addEventListener('click', clearHistory);
-
-            UI.headerLangSwitcher.addEventListener('change', (e) => changeSystemLanguage(e.target.value));
-            UI.settingsLangSwitcher.addEventListener('change', (e) => changeSystemLanguage(e.target.value));
-
-            UI.settingEngine.addEventListener('change', (e) => {
-                AppState.audioEngine = e.target.value;
-                if (AppState.audioEngine === 'webspeech') {
-                    UI.containerVoiceSelect.classList.add('hidden');
-                } else {
-                    UI.containerVoiceSelect.classList.remove('hidden');
-                }
-                resetAudioEngine();
-            });
-
-            UI.settingVoice.addEventListener('change', (e) => {
-                AppState.selectedVoice = e.target.value;
-                resetAudioEngine();
-                showToast(Dictionary[AppState.language].voiceChangeMsg + AppState.selectedVoice, "info");
-            });
-
-            UI.settingSpeed.addEventListener('input', (e) => {
-                AppState.speechSpeed = parseFloat(e.target.value);
-                UI.labelSpeed.innerText = `${AppState.speechSpeed.toFixed(2)}x`;
-                
-                // Real-time speed adjustment during playback
-                if (AppState.audioPlaying) {
-                    if (AppState.audioEngine === 'gemini') {
-                        UI.audioPlayer.playbackRate = AppState.speechSpeed;
-                    } else {
-                        restartWebSpeechWithNewSpeed();
-                    }
-                }
-            });
-            
-            // Setup results close back-button strictly to close result screen
-            UI.btnCloseResults.addEventListener('click', () => {
-                stopAudio();
-                resetAudioEngine();
-                toggleView(UI.viewResults, false);
-                toggleView(UI.viewStudio, true);
-                initCamera(); // Re-activate camera stream cleanly
-            });
-        }
-
-        let confirmActionPromise = null;
-
-        function showConfirmModal(titleText, bodyText) {
-            UI.confirmTitle.innerText = titleText;
-            UI.confirmBody.innerText = bodyText;
-            UI.confirmModal.classList.remove('hidden');
-
-            return new Promise((resolve) => {
-                confirmActionPromise = resolve;
-            });
-        }
-
-        UI.btnConfirmCancel.addEventListener('click', () => {
-            UI.confirmModal.classList.add('hidden');
-            if (confirmActionPromise) confirmActionPromise(false);
+        // DOM yuklanganda ikonkalarni ishga tushirish
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadSavedWords(); // Agar LocalStorage dan yuklash kerak bo'lsa
+            renderUI();
         });
 
-        UI.btnConfirmOk.addEventListener('click', () => {
-            UI.confirmModal.classList.add('hidden');
-            if (confirmActionPromise) confirmActionPromise(true);
-        });
+        // ==========================================
+        // 2. YORDAMCHI FUNKSIYALAR
+        // ==========================================
 
-        async function initCamera() {
-            if (AppState.videoStream) {
-                AppState.videoStream.getTracks().forEach(track => track.stop());
-            }
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            let retries = 0;
+            const delays = [1000, 2000, 4000, 8000, 16000];
 
-            const constraints = {
-                video: {
-                    facingMode: AppState.activeFacingMode,
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
-                    frameRate: { ideal: 30 }
-                },
-                audio: false
-            };
-
-            try {
-                AppState.videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-                UI.video.srcObject = AppState.videoStream;
-            } catch (err) {
-                console.error("Camera access failed:", err);
-                showToast(Dictionary[AppState.language].cameraErrorMsg, "error");
-            }
-        }
-
-        UI.btnFlip.addEventListener('click', () => {
-            AppState.activeFacingMode = AppState.activeFacingMode === 'environment' ? 'user' : 'environment';
-            initCamera();
-        });
-
-        UI.btnTriggerCapture.addEventListener('click', () => {
-            if (!AppState.videoStream) {
-                showToast("Kamera tizimi faol emas.", "error");
-                return;
-            }
-
-            UI.laserLine.classList.remove('hidden');
-
-            setTimeout(() => {
-                const w = UI.video.videoWidth || 1280;
-                const h = UI.video.videoHeight || 720;
-                UI.canvas.width = w;
-                UI.canvas.height = h;
-                const context = UI.canvas.getContext('2d');
-                context.drawImage(UI.video, 0, 0, w, h);
-
-                const dataUrl = UI.canvas.toDataURL('image/jpeg', 0.85);
-                UI.laserLine.classList.add('hidden');
-                beginCognitiveAnalysis(dataUrl);
-            }, 600);
-        });
-
-        UI.filePicker.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    beginCognitiveAnalysis(event.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function cleanJsonMarkdown(text) {
-            let sanitized = text.trim();
-            if (sanitized.startsWith("```")) {
-                sanitized = sanitized.replace(/^```json\s*/i, "");
-                sanitized = sanitized.replace(/```$/s, "");
-            }
-            return sanitized.trim();
-        }
-
-        async function beginCognitiveAnalysis(base64Image) {
-            AppState.scannedBase64 = base64Image;
-            UI.analyzedPhoto.src = base64Image;
-
-            // Instantly transition to scanning loader
-            toggleView(UI.viewStudio, false);
-            toggleView(UI.viewAnalyzing, true);
-            
-            const d = Dictionary[AppState.language];
-            updateLoader(15, d.analyzingWait);
-            
-            setTimeout(() => updateLoader(35, d.analyzingGeom), 800);
-            setTimeout(() => updateLoader(60, d.analyzingService), 1500);
-
-            try {
-                const rawResponse = await requestArtifactAnalysis(base64Image);
-                const cleanedResponse = cleanJsonMarkdown(rawResponse);
-                const parsedResult = JSON.parse(cleanedResponse);
-                
-                updateLoader(90, d.analyzingInscriptions);
-                AppState.scannedResult = parsedResult;
-
-                saveItemToHistory(parsedResult, base64Image);
-                populateResults(parsedResult);
-
-                setTimeout(() => {
-                    toggleView(UI.viewAnalyzing, false);
-                    toggleView(UI.viewResults, true);
-                    resetAudioEngine();
-                }, 800);
-
-            } catch (err) {
-                console.error("AI analysis failure:", err);
-                toggleView(UI.viewAnalyzing, false);
-                toggleView(UI.viewStudio, true);
-                showToast(Dictionary[AppState.language].analysisErrorMsg, "error");
-            }
-        }
-
-        function updateLoader(percentage, statusText) {
-            UI.loaderProgress.style.width = `${percentage}%`;
-            UI.loaderStatus.innerText = statusText;
-        }
-
-        function populateResults(data) {
-            UI.resultTitle.innerText = data.title || "Noma'lum";
-            UI.badgeEra.innerText = data.era || "Noma'lum";
-            UI.badgeConfidence.innerText = `Confidence: ${data.confidence_score || "0%"}`;
-            UI.valOrigin.innerText = data.origin || "Noma'lum";
-            
-            UI.valEra.innerText = data.era || "Noma'lum";
-            UI.valMaterial.innerText = data.material || "Noma'lum";
-            UI.valDidYouKnow.innerText = data.did_you_know || "Ma'lumot yo'q";
-
-            UI.tabContentDesc.innerHTML = `<p>${data.short_summary || ""}</p><p class="mt-4 text-slate-400 font-light leading-relaxed">${data.description || ""}</p>`;
-            UI.tabContentInscription.innerHTML = `<div class="bg-slate-900/40 p-4 rounded-xl border border-slate-900/80 mb-4 font-mono text-amber-300 text-center leading-relaxed">${data.inscriptions_decoded ? data.inscriptions_decoded : "No inscriptions or ancient glyphs found on this artifact."}</div>`;
-            UI.tabContentContext.innerHTML = `<p class="leading-relaxed text-slate-400 font-light">${data.historical_context || ""}</p>`;
-
-            switchTab('desc');
-        }
-
-        function switchTab(tabKey) {
-            const tabs = {
-                desc: { btn: UI.tabBtnDesc, panel: UI.tabContentDesc },
-                inscription: { btn: UI.tabBtnInsc, panel: UI.tabContentInscription },
-                context: { btn: UI.tabBtnCont, panel: UI.tabContentContext }
-            };
-
-            Object.keys(tabs).forEach(k => {
-                if (k === tabKey) {
-                    tabs[k].btn.classList.add('border-amber-500', 'text-amber-400');
-                    tabs[k].btn.classList.remove('border-transparent', 'text-slate-400');
-                    tabs[k].panel.classList.remove('hidden');
-                } else {
-                    tabs[k].btn.classList.add('border-transparent', 'text-slate-400');
-                    tabs[k].btn.classList.remove('border-amber-500', 'text-amber-400');
-                    tabs[k].panel.classList.add('hidden');
-                }
-            });
-        }
-
-        async function requestArtifactAnalysis(base64Img) {
-            const base64Clean = base64Img.includes(',') ? base64Img.split(',')[1] : base64Img;
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AppState.apiKey}`;
-            
-            const systemPrompts = {
-                uz: "Siz Buyuk Ipak yo'lidagi muzeylar va obidalar uchun yaratilgan jahon darajasidagi arxeolog, tarixchi va epigrafist-gidsiz. Har doim to'liq O'ZBEK tilida, sayyohga tushunarli va professional muloqot qiling.",
-                en: "You are a world-class archeologist, historian, and epigraphist guide built for museums along the Silk Road. Always communicate fully in ENGLISH in an informative, engaging, and professional manner.",
-                ru: "Вы — первоклассный археолог, историк и эпиграфист, гид по музеям Великого шелкового пути. Всегда общайтесь полностью на РУССКОМ языке в познавательной, дружелюбной и профессиональной форме."
-            };
-
-            const prompts = {
-                uz: `Ushbu suratdagi obidani, eksponatni yoki uning ustidagi yozuvlarni/iyerogliflarni batafsil tahlil qiling va JSON formatida O'ZBEK tilida javob bering.
-                Tahlil strukturasi:
-                1. title: Obyektning professional nomi.
-                2. era: Tarixiy davr.
-                3. origin: Kelib chiqishi/Topilgan joy.
-                4. material: Ashyosi.
-                5. confidence_score: To'g'riligiga ishonch (masalan, '95%').
-                6. short_summary: Sayyoh uchun qisqa va qiziqarli xulosa.
-                7. description: Batafsil ilmiy va ommabop ta'rif.
-                8. inscriptions_decoded: Agar rasmda qadimgi yozuvlar bo'lsa, ularni aniqlab o'zbek tiliga tarjima qiling. Bo'lmasa: 'Ushbu eksponatda bitiklar yoki iyerogliflar aniqlanmadi'.
-                9. historical_context: Obyekt davridagi ijtimoiy-siyosiy vaziyat va uning roli.
-                10. did_you_know: Turistni hayratga soluvchi 1 ta qiziqarli fakt.`,
-                
-                en: `Analyze this historical artifact or inscription in the photo and respond in JSON format in ENGLISH language.
-                Structure:
-                1. title: Professional name of the artifact.
-                2. era: Historical epoch or century.
-                3. origin: Origin / Location found.
-                4. material: Material type.
-                5. confidence_score: Confidence level (e.g., '95%').
-                6. short_summary: Short, easy-to-read, engaging conclusion for tourists.
-                7. description: In-depth historical description.
-                8. inscriptions_decoded: If there are ancient scripts, decode and translate them into English. Otherwise write: 'No inscriptions or ancient glyphs found on this artifact'.
-                9. historical_context: Historical context of the epoch and its purpose.
-                10. did_you_know: 1 extremely fascinating fact to surprise tourists.`,
-                
-                ru: `Проанализируйте этот исторический артефакт или надпись на фотографии и ответьте в формате JSON на РУССКОМ языке.
-                Структура:
-                1. title: Профессиональное название экспоната.
-                2. era: Историческая эпоха или век.
-                3. origin: Происхождение / Место нахождения.
-                4. material: Материал.
-                5. confidence_score: Уровень точности.
-                6. short_summary: Краткое резюме для туристов.
-                7. description: Подробное историческое описание.
-                8. inscriptions_decoded: Если на изображении есть древние надписи, расшифруйте их и переведите на русский язык. Если нет: 'Древние надписи или иероглифы на данном экспонате не обнаружены'.
-                9. historical_context: Иисторический контекст эпохи и назначение артефакта.
-                10. did_you_know: 1 удивительный факт для туриста.`
-            };
-
-            const payload = {
-                contents: [{
-                    parts: [
-                        { text: prompts[AppState.language] },
-                        { inlineData: { mimeType: "image/jpeg", data: base64Clean } }
-                    ]
-                }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompts[AppState.language] }]
-                },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: ArtifactSchema
-                }
-            };
-
-            const responseText = await fetchWithRetry(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }, true);
-
-            const jsonResponse = JSON.parse(responseText);
-            return jsonResponse.candidates[0].content.parts[0].text;
-        }
-
-        UI.btnAudioAction.addEventListener('click', async () => {
-            if (window.AudioContext || window.webkitAudioContext) {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-            }
-
-            if (AppState.audioPlaying) {
-                stopAudio();
-                return;
-            }
-
-            if (!AppState.scannedResult) return;
-
-            const textToSpeak = getSpeechText();
-
-            // ENGINE 1: Premium Gemini Voice
-            if (AppState.audioEngine === 'gemini') {
-                if (AppState.audioUrl) {
-                    playPremiumAudio();
-                    return;
-                }
-
+            while (retries < maxRetries) {
                 try {
-                    UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xs"></i>`;
-                    UI.audioStatusLabel.innerText = "Premium voice loading...";
-                    
-                    const pcmBase64 = await generateSpeechWithGemini(textToSpeak);
-                    if (pcmBase64) {
-                        const wavBlob = pcmToWavBlob(pcmBase64, 24000);
-                        AppState.audioUrl = URL.createObjectURL(wavBlob);
-                        UI.audioPlayer.src = AppState.audioUrl;
-                        playPremiumAudio();
-                    } else {
-                        throw new Error("No premium audio data returned");
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP xatolik! status: ${response.status}`);
                     }
-                } catch (err) {
-                    console.error("Gemini TTS engine fallback:", err);
-                    
-                    // Fallback instantly without breaking the user experience
-                    AppState.audioEngine = 'webspeech';
-                    UI.settingEngine.value = 'webspeech';
-                    UI.containerVoiceSelect.classList.add('hidden');
-                    playWebSpeech(textToSpeak);
-                }
-            } 
-            // ENGINE 2: Native WebSpeech
-            else {
-                playWebSpeech(textToSpeak);
-            }
-        });
-
-        function getSpeechText() {
-            const data = AppState.scannedResult;
-            let intro = "";
-            let trivia = "";
-            
-            if (AppState.language === 'uz') {
-                intro = `Eksponat nomi: ${data.title || "Noma'lum"}. Davri: ${data.era || "Noma'lum"}. Topilgan joy: ${data.origin || "Noma'lum"}. Qisqacha xulosa: ${data.short_summary || ""}. `;
-                trivia = `Qiziqarli fakt: ${data.did_you_know || ""}`;
-            } else if (AppState.language === 'en') {
-                intro = `Artifact name: ${data.title || "Unknown"}. Period: ${data.era || "Unknown"}. Origin: ${data.origin || "Unknown"}. Summary: ${data.short_summary || ""}. `;
-                trivia = `Interesting fact: ${data.did_you_know || ""}`;
-            } else {
-                intro = `Название экспоната: ${data.title || "Неизвестно"}. Период: ${data.era || "Неизвестно"}. Происхождение: ${data.origin || "Неизвестно"}. Резюме: ${data.short_summary || ""}. `;
-                trivia = `Интересный факт: ${data.did_you_know || ""}`;
-            }
-            return intro + trivia;
-        }
-
-        async function generateSpeechWithGemini(text) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${AppState.apiKey}`;
-            const payload = {
-                contents: [{
-                    parts: [{ text: text }]
-                }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: AppState.selectedVoice }
-                        }
+                    return await response.json();
+                } catch (error) {
+                    retries++;
+                    if (retries >= maxRetries) {
+                        throw new Error("Kechirasiz, tarmoqda xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.");
                     }
+                    await new Promise(resolve => setTimeout(resolve, delays[retries - 1]));
                 }
-            };
-
-            const rawText = await fetchWithRetry(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }, true);
-
-            const data = JSON.parse(rawText);
-            return data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        }
-
-        function playPremiumAudio() {
-            UI.audioPlayer.playbackRate = AppState.speechSpeed;
-            UI.audioPlayer.play().then(() => {
-                AppState.audioPlaying = true;
-                UI.audioStatusLabel.innerText = Dictionary[AppState.language].voiceStatusPlaying;
-                setVisualizerActive(true);
-                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> ` + Dictionary[AppState.language].toxtatish;
-            }).catch(e => {
-                console.error("Narration failed:", e);
-                playWebSpeech(getSpeechText());
-            });
-        }
-
-        let webSpeechUtterance = null;
-        function playWebSpeech(text) {
-            window.speechSynthesis.cancel();
-
-            webSpeechUtterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            
-            let voiceLang = 'en-US';
-            if (AppState.language === 'uz') voiceLang = 'tr-TR'; 
-            else if (AppState.language === 'ru') voiceLang = 'ru-RU';
-
-            const localVoice = voices.find(v => v.lang.startsWith(voiceLang));
-            if (localVoice) {
-                webSpeechUtterance.voice = localVoice;
-            }
-            
-            webSpeechUtterance.lang = voiceLang;
-            webSpeechUtterance.rate = AppState.speechSpeed;
-
-            webSpeechUtterance.onstart = () => {
-                AppState.audioPlaying = true;
-                UI.audioStatusLabel.innerText = Dictionary[AppState.language].voiceStatusSysPlaying;
-                setVisualizerActive(true);
-                UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-pause"></i> ` + Dictionary[AppState.language].toxtatish;
-            };
-
-            webSpeechUtterance.onend = () => {
-                stopAudio();
-            };
-
-            webSpeechUtterance.onerror = (e) => {
-                console.error("WebSpeech error:", e);
-                stopAudio();
-            };
-
-            window.speechSynthesis.speak(webSpeechUtterance);
-        }
-
-        function restartWebSpeechWithNewSpeed() {
-            if (AppState.audioEngine === 'webspeech' && AppState.audioPlaying) {
-                stopAudio();
-                setTimeout(() => {
-                    playWebSpeech(getSpeechText());
-                }, 100);
             }
         }
 
-        function stopAudio() {
-            AppState.audioPlaying = false;
-            setVisualizerActive(false);
-            UI.btnAudioAction.innerHTML = `<i class="fa-solid fa-volume-high"></i> ` + Dictionary[AppState.language].tinglash;
-            
-            if (AppState.audioEngine === 'gemini') {
-                UI.audioPlayer.pause();
-            } else {
-                window.speechSynthesis.cancel();
-            }
-            UI.audioStatusLabel.innerText = Dictionary[AppState.language].voiceStatusStopped;
-        }
+        function pcmToWav(pcmData, sampleRate = 24000) {
+            const numChannels = 1; 
+            const bytesPerSample = 2; 
+            const byteRate = sampleRate * numChannels * bytesPerSample;
+            const blockAlign = numChannels * bytesPerSample;
 
-        UI.audioPlayer.addEventListener('ended', () => {
-            stopAudio();
-        });
-
-        function setVisualizerActive(active) {
-            const bars = UI.audioVisualizer.querySelectorAll('.wave-bar');
-            bars.forEach(bar => {
-                if (active) {
-                    bar.classList.add('wave-active');
-                } else {
-                    bar.classList.remove('wave-active');
-                }
-            });
-        }
-
-        function resetAudioEngine() {
-            stopAudio();
-            if (AppState.audioUrl) {
-                URL.revokeObjectURL(AppState.audioUrl);
-                AppState.audioUrl = null;
-            }
-            const dict = Dictionary[AppState.language];
-            if (AppState.audioEngine === 'gemini') {
-                UI.audioVoiceUsed.innerText = `Voice: ${AppState.selectedVoice}`;
-            } else {
-                UI.audioVoiceUsed.innerText = `Voice: OS Fallback Speech`;
-            }
-            UI.audioStatusLabel.innerText = dict.voiceStatusReady;
-        }
-
-        async function exportPdfForArtifact(result, base64Img) {
-            try {
-                const dict = Dictionary[AppState.language];
-                showToast("Generating Document...", "info");
-                
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pWidth = pdf.internal.pageSize.getWidth();
-                const margin = 20;
-                const contentWidth = pWidth - (margin * 2);
-
-                pdf.setFillColor(15, 23, 42); 
-                pdf.rect(0, 0, pWidth, 48, 'F');
-
-                pdf.setFillColor(217, 119, 6); 
-                pdf.rect(0, 48, pWidth, 3, 'F');
-
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(16);
-                pdf.setTextColor(255, 255, 255);
-                pdf.text(dict.pdfReportTitle, margin, 22);
-
-                pdf.setFont("helvetica", "normal");
-                pdf.setFontSize(8.5);
-                pdf.setTextColor(217, 119, 6);
-                pdf.text(dict.pdfReportSub, margin, 30);
-
-                pdf.setFontSize(8);
-                pdf.setTextColor(148, 163, 184);
-                const currentStr = new Date().toLocaleString(AppState.language === 'uz' ? 'uz-UZ' : (AppState.language === 'ru' ? 'ru-RU' : 'en-US'));
-                pdf.text(`Sana/Date: ${currentStr} | Guide Engine v2.5`, margin, 38);
-
-                let nextY = 65;
-                try {
-                    const imgProps = pdf.getImageProperties(base64Img);
-                    const fitHeight = 75; 
-                    const fitWidth = (imgProps.width * fitHeight) / imgProps.height;
-                    const finalWidth = Math.min(fitWidth, contentWidth);
-                    const centerOffset = (pWidth - finalWidth) / 2;
-
-                    pdf.setDrawColor(226, 232, 240);
-                    pdf.setFillColor(248, 250, 252);
-                    pdf.rect(centerOffset - 2, nextY - 2, finalWidth + 4, fitHeight + 4, 'FD');
-
-                    pdf.addImage(base64Img, 'JPEG', centerOffset, nextY, finalWidth, fitHeight);
-                    nextY += fitHeight + 15;
-                } catch(e) {
-                    console.error("Image loading onto PDF failed:", e);
-                    pdf.text("[Image could not be embedded]", margin, nextY);
-                    nextY += 10;
-                }
-
-                pdf.setFillColor(241, 245, 249);
-                pdf.rect(margin, nextY, contentWidth, 24, 'F');
-                pdf.setDrawColor(203, 213, 225);
-                pdf.rect(margin, nextY, contentWidth, 24, 'D');
-
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(8.5);
-                pdf.setTextColor(71, 85, 105);
-                pdf.text(dict.pdfEksponat, margin + 5, nextY + 7);
-                pdf.text(dict.pdfDavr, margin + 5, nextY + 15);
-                pdf.text(dict.pdfAshyo, margin + 85, nextY + 7);
-                pdf.text(dict.pdfIshonch, margin + 85, nextY + 15);
-
-                pdf.setFont("helvetica", "normal");
-                pdf.setTextColor(15, 23, 42);
-                
-                // Safe checks to avoid undefined text generation crash
-                const titleStr = (result.title || "Noma'lum").toUpperCase();
-                const eraStr = result.era || "Noma'lum";
-                const materialStr = result.material || "Noma'lum";
-                const confidenceStr = result.confidence_score || "Noma'lum";
-
-                pdf.text(titleStr, margin + 40, nextY + 7);
-                pdf.text(eraStr, margin + 40, nextY + 15);
-                pdf.text(materialStr, margin + 125, nextY + 7);
-                pdf.text(confidenceStr, margin + 125, nextY + 15);
-
-                nextY += 34;
-
-                const addParagraph = (title, bodyText) => {
-                    const textContent = bodyText || "Ma'lumot mavjud emas.";
-                    if (nextY > 260) {
-                        pdf.addPage();
-                        nextY = 25;
-                    }
-
-                    pdf.setFont("helvetica", "bold");
-                    pdf.setFontSize(11);
-                    pdf.setTextColor(217, 119, 6); 
-                    pdf.text(title, margin, nextY);
-                    
-                    pdf.setDrawColor(217, 119, 6);
-                    pdf.line(margin, nextY + 1.5, margin + 30, nextY + 1.5);
-                    nextY += 7;
-
-                    pdf.setFont("helvetica", "normal");
-                    pdf.setFontSize(9);
-                    pdf.setTextColor(51, 65, 85);
-                    
-                    const wrapped = pdf.splitTextToSize(textContent, contentWidth);
-                    for(let i=0; i<wrapped.length; i++) {
-                        if (nextY > 280) {
-                            pdf.addPage();
-                            nextY = 25;
-                        }
-                        pdf.text(wrapped[i], margin, nextY);
-                        nextY += 5.5;
-                    }
-                    nextY += 10;
-                };
-
-                addParagraph(dict.pdfSec1, result.description);
-                addParagraph(dict.pdfSec2, result.inscriptions_decoded);
-                addParagraph(dict.pdfSec3, result.historical_context);
-                addParagraph(dict.pdfSec4, result.did_you_know);
-
-                const pageCount = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(7.5);
-                    pdf.setTextColor(148, 163, 184);
-                    pdf.text(`${dict.pdfPage} ${i} / ${pageCount}`, pWidth - margin - 15, 287);
-                    pdf.text(`Silk Road Guide Engine: "Tarixiy Koshif" Smart Guide Report`, margin, 287);
-                }
-
-                pdf.save(`koshif-${(result.title || "export").replace(/\s+/g, '-').toLowerCase()}.pdf`);
-                showToast("PDF saved!", "success");
-
-            } catch (error) {
-                console.error("PDF generator failure:", error);
-                showToast("Could not generate PDF.", "error");
-            }
-        }
-
-        UI.btnExportPdf.addEventListener('click', () => {
-            if (!AppState.scannedResult || !AppState.scannedBase64) {
-                showToast("Ma'lumotlar yetarli emas.", "error");
-                return;
-            }
-            exportPdfForArtifact(AppState.scannedResult, AppState.scannedBase64);
-        });
-
-        function loadHistory() {
-            try {
-                const raw = localStorage.getItem('silk_road_discoveries');
-                AppState.history = raw ? JSON.parse(raw) : [];
-            } catch (e) {
-                AppState.history = [];
-            }
-        }
-
-        function saveItemToHistory(artifact, imgBase64) {
-            const historyItem = {
-                id: Date.now(),
-                timestamp: new Date().toLocaleString('uz-UZ'),
-                image: imgBase64,
-                data: artifact
-            };
-
-            AppState.history.unshift(historyItem);
-            if (AppState.history.length > 30) {
-                AppState.history.pop();
-            }
-
-            try {
-                localStorage.setItem('silk_road_discoveries', JSON.stringify(AppState.history));
-            } catch (err) {
-                console.warn("Storage limits triggered", err);
-            }
-        }
-
-        function renderHistory() {
-            UI.historyContainer.innerHTML = '';
-            const dict = Dictionary[AppState.language];
-            
-            if (AppState.history.length === 0) {
-                UI.historyContainer.innerHTML = `
-                    <div class="text-center py-12 text-slate-500 text-xs">
-                        <i class="fa-solid fa-box-open text-3xl mb-3 block text-slate-600"></i>
-                        ${dict.noHistoryText}
-                    </div>`;
-                return;
-            }
-
-            AppState.history.forEach(item => {
-                const el = document.createElement('div');
-                el.className = 'glass-dark p-3.5 rounded-xl border border-slate-900 hover:border-amber-500/20 transition-all flex items-center justify-between gap-3';
-                el.innerHTML = `
-                    <div class="flex items-center gap-3 flex-1 overflow-hidden cursor-pointer btn-open-hist">
-                        <img class="w-12 h-12 rounded-lg object-cover bg-black shrink-0 border border-slate-800" src="${item.image}">
-                        <div class="overflow-hidden">
-                            <h5 class="text-xs font-extrabold text-slate-200 truncate">${item.data.title || "Noma'lum"}</h5>
-                            <p class="text-[10px] text-slate-400 mt-0.5"><i class="fa-regular fa-clock mr-1"></i>${item.timestamp}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-emerald-400 active:scale-90 transition-all btn-pdf-hist" title="${dict.pdfdownload}">
-                            <i class="fa-solid fa-file-pdf text-xs"></i>
-                        </button>
-                        <button class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 active:scale-90 transition-all btn-delete-hist" title="O'chirish">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
-                    </div>
-                `;
-
-                // Bind open record from history
-                el.querySelector('.btn-open-hist').addEventListener('click', () => {
-                    AppState.scannedResult = item.data;
-                    AppState.scannedBase64 = item.image;
-                    UI.analyzedPhoto.src = item.image;
-                    
-                    populateResults(item.data);
-                    resetAudioEngine();
-
-                    toggleView(UI.viewHistory, false);
-                    toggleView(UI.viewStudio, false);
-                    toggleView(UI.viewResults, true);
-                });
-
-                // Bind Download PDF
-                el.querySelector('.btn-pdf-hist').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    exportPdfForArtifact(item.data, item.image);
-                });
-
-                // Bind Individual Delete
-                el.querySelector('.btn-delete-hist').addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const confirmed = await showConfirmModal(dict.confirmDeleteSingleTitle, dict.confirmDeleteSingleBody);
-                    if (confirmed) {
-                        AppState.history = AppState.history.filter(hist => hist.id !== item.id);
-                        localStorage.setItem('silk_road_discoveries', JSON.stringify(AppState.history));
-                        renderHistory();
-                        showToast("O'chirildi / Deleted", "info");
-                    }
-                });
-
-                UI.historyContainer.appendChild(el);
-            });
-        }
-
-        async function clearHistory() {
-            const dict = Dictionary[AppState.language];
-            const confirmed = await showConfirmModal(dict.confirmClearHistoryTitle, dict.confirmClearHistoryBody);
-            if (confirmed) {
-                AppState.history = [];
-                localStorage.removeItem('silk_road_discoveries');
-                renderHistory();
-                showToast("Tarix tozalandi", "info");
-            }
-        }
-
-        function initSettings() {
-            UI.settingEngine.value = AppState.audioEngine;
-            UI.settingVoice.value = AppState.selectedVoice;
-            UI.settingSpeed.value = AppState.speechSpeed;
-            UI.labelSpeed.innerText = `${AppState.speechSpeed.toFixed(2)}x`;
-            
-            if (AppState.audioEngine === 'webspeech') {
-                UI.containerVoiceSelect.classList.add('hidden');
-            } else {
-                UI.containerVoiceSelect.classList.remove('hidden');
-            }
-        }
-
-        function pcmToWavBlob(base64Pcm, sampleRate = 24000) {
-            const binaryString = window.atob(base64Pcm);
-            const pcmLength = binaryString.length;
-            const buffer = new ArrayBuffer(pcmLength);
-            const view = new Uint8Array(buffer);
-            for (let i = 0; i < pcmLength; i++) {
-                view[i] = binaryString.charCodeAt(i);
-            }
-
-            const numChannels = 1;
-            const bitsPerSample = 16;
-            const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
-            const blockAlign = numChannels * (bitsPerSample / 8);
-            const dataSize = buffer.byteLength;
-            const wavBuffer = new ArrayBuffer(44 + dataSize);
-            const dataView = new DataView(wavBuffer);
+            const buffer = new ArrayBuffer(44 + pcmData.length);
+            const view = new DataView(buffer);
 
             const writeString = (offset, string) => {
                 for (let i = 0; i < string.length; i++) {
-                    dataView.setUint8(offset + i, string.charCodeAt(i));
+                    view.setUint8(offset + i, string.charCodeAt(i));
                 }
             };
 
             writeString(0, 'RIFF');
-            dataView.setUint32(4, 36 + dataSize, true);
+            view.setUint32(4, 36 + pcmData.length, true);
             writeString(8, 'WAVE');
-
             writeString(12, 'fmt ');
-            dataView.setUint32(16, 16, true);
-            dataView.setUint16(20, 1, true); 
-            dataView.setUint16(22, numChannels, true);
-            dataView.setUint32(24, sampleRate, true);
-            dataView.setUint32(28, byteRate, true);
-            dataView.setUint16(32, blockAlign, true);
-            dataView.setUint16(34, bitsPerSample, true);
-
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true);
             writeString(36, 'data');
-            dataView.setUint32(40, dataSize, true);
+            view.setUint32(40, pcmData.length, true);
 
-            const pcmView = new Uint8Array(buffer);
-            const outView = new Uint8Array(wavBuffer, 44);
-            outView.set(pcmView);
-
-            return new Blob([dataView], { type: 'audio/wav' });
-        }
-
-        function toggleView(viewElement, show) {
-            if (show) {
-                viewElement.classList.remove('hidden');
-                viewElement.classList.add('flex');
-            } else {
-                viewElement.classList.remove('flex');
-                viewElement.classList.add('hidden');
-            }
-        }
-
-        let toastTimeout;
-        function showToast(text, type = "info") {
-            const dict = Dictionary[AppState.language];
-            UI.toastBody.innerText = text;
-            UI.toastTitle.innerText = type === "error" ? dict.toastError : (type === "success" ? dict.toastSuccess : dict.toastInfo);
-            
-            if (type === "error") {
-                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20 text-red-400 mt-0.5";
-                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-emerald-500/g, 'border-red-500');
-            } else if (type === "success") {
-                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400 mt-0.5";
-                UI.toast.className = UI.toast.className.replace(/border-slate-800|border-red-500/g, 'border-emerald-500');
-            } else {
-                UI.toastIndicator.className = "w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400 mt-0.5";
-                UI.toast.className = UI.toast.className.replace(/border-red-500|border-emerald-500/g, 'border-slate-800');
+            const pcmView = new Uint8Array(pcmData);
+            for (let i = 0; i < pcmView.length; i++) {
+                view.setUint8(44 + i, pcmView[i]);
             }
 
-            UI.toast.classList.remove('opacity-0', '-translate-y-32');
-            UI.toast.classList.add('opacity-100', 'translate-y-0');
-
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                hideToast();
-            }, 5000);
+            return new Blob([view], { type: 'audio/wav' });
         }
 
-        function hideToast() {
-            UI.toast.classList.remove('opacity-100', 'translate-y-0');
-            UI.toast.classList.add('opacity-0', '-translate-y-32');
-        }
+        // ==========================================
+        // 3. OVOZLI O'QISH (TTS API)
+        // ==========================================
 
-        async function fetchWithRetry(url, options, returnRaw = false, maxRetries = 5) {
-            const delays = [1000, 2000, 4000, 8000, 16000];
-            let lastError;
+        async function playHumanAudio(text, id, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
 
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    
-                    if (!response.ok) {
-                        const errBody = await response.text();
-                        let parsedErr = null;
-                        try { parsedErr = JSON.parse(errBody); } catch(e){}
-                        
-                        // Handle Rate Limits / Quotas (HTTP 429) smoothly
-                        if (response.status === 429) {
-                            showToast(Dictionary[AppState.language].quotaToast, "info");
-                            
-                            // Dynamically read retry delay recommended by API (default: 2 seconds)
-                            let waitTime = 2000;
-                            if (parsedErr && parsedErr.error && parsedErr.error.message) {
-                                const match = parsedErr.error.message.match(/retry in ([0-9.]+)/i);
-                                if (match && match[1]) {
-                                    waitTime = Math.ceil(parseFloat(match[1]) * 1000) + 200; // Add safe margin
-                                }
-                            }
-                            await new Promise(resolve => setTimeout(resolve, waitTime));
-                            continue; // Retry after delay
+            if (state.playingAudioId) return;
+
+            if(!API_KEY || API_KEY === "AIzaSyCVoV1cPOY4fiJOjEzSzX9a68dfCrCxaZE") {
+                alert("Ovozli o'qish uchun API kalit kiritilmagan.");
+                // Brauzer ovoziga o'tish
+                fallbackAudio(text, id);
+                return;
+            }
+
+            state.playingAudioId = id;
+            renderUI(); // Animatsiyani boshlash
+
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: text }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }
                         }
-                        
-                        throw new Error(`HTTP ${response.status}: ${errBody}`);
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
+                
+                const response = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const audioBase64 = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                const mimeType = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType;
+
+                if (audioBase64) {
+                    const binaryString = window.atob(audioBase64);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
                     }
+
+                    let sampleRate = 24000;
+                    if (mimeType && mimeType.includes('rate=')) {
+                        const match = mimeType.match(/rate=(\d+)/);
+                        if(match) sampleRate = parseInt(match[1], 10);
+                    }
+
+                    const blob = pcmToWav(bytes.buffer, sampleRate);
+                    const audioUrl = URL.createObjectURL(blob);
                     
-                    if (returnRaw) {
-                         return await response.text();
-                    }
-
-                    const data = await response.json();
-                    if (data.candidates && data.candidates[0].content) {
-                        return data.candidates[0].content.parts[0].text;
-                    } else {
-                        throw new Error("Invalid schema structure returned.");
-                    }
-                } catch (error) {
-                    lastError = error;
-                    if (i < maxRetries - 1) {
-                        await new Promise(resolve => setTimeout(resolve, delays[i]));
-                    }
-                }
-            }
-            throw lastError;
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initCamera();
-            loadHistory();
-            initSettings();
-            setupEventListeners();
-            changeSystemLanguage('uz');
-            
-            showToast("Smart Gid tizimi tayyor va faol!", "success");
-        });
-
-    </script>
-</body>
-</html>
+                    const audio = new Audio(audioUrl);
+                    audio.onended = () => {
+                        state.playingAudioId = null;
+                        URL.revokeObjectURL(audioUrl);
+                        renderUI();
+                    };
+                    audio.onerror = () => {
+                        state.playingAudioId = null;
+                        renderUI();
+                    };
+                    
+                    

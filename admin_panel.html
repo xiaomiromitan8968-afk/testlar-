@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin panel — O'quv yordamchisi</title>
+<style>
+/* ============================================================
+   TOKEN TIZIMI — "boshqaruv markazi" uslubi
+   Mini App'dan ataylab farqli: neytral kulrang-ko'k, zich jadvallar,
+   ish stantsiyasi hissi. Signature element: status-rang chiziqli
+   foydalanuvchi qatorlari + kengayuvchi tafsilot paneli.
+   ============================================================ */
+:root{
+  --bg: #F4F5F7;
+  --surface: #FFFFFF;
+  --surface-2: #FAFBFC;
+  --ink: #1A1D23;
+  --ink-soft: #6B7280;
+  --ink-faint: #9CA3AF;
+  --line: #E5E7EB;
+  --line-soft: #EFF1F4;
+  --accent: #2D5BFF;
+  --accent-soft: #EAEFFF;
+  --accent-ink: #1A3CC4;
+  --ok: #0F9D58;
+  --ok-soft: #E6F7EC;
+  --warn: #B7791F;
+  --warn-soft: #FBF1DC;
+  --danger: #D33A3A;
+  --danger-soft: #FCEAEA;
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.06);
+  --shadow-md: 0 4px 16px -4px rgba(16,24,40,0.12);
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --sidebar-w: 240px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ height:100%; }
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  font-size:14px;
+  -webkit-font-smoothing:antialiased;
+}
+button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+input{ font-family:inherit; }
+img{ max-width:100%; display:block; }
+::selection{ background:var(--accent-soft); }
+
+.hidden{ display:none !important; }
+
+/* ============================================================
+   LOGIN EKRANI
+   ============================================================ */
+#login-screen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:20px; background:
+    radial-gradient(circle at 15% 15%, #EAEFFF 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, #EAEFFF 0%, transparent 45%),
+    var(--bg);
+}
+.login-card{
+  width:100%; max-width:380px;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius-l); padding:36px 32px;
+  box-shadow:var(--shadow-md);
+}
+.login-mark{
+  width:44px; height:44px; border-radius:11px;
+  background:var(--ink); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-size:20px; font-weight:600;
+  margin-bottom:20px;
+}
+.login-card h1{
+  font-family:var(--font-display); font-size:22px; font-weight:600;
+  margin-bottom:4px; letter-spacing:-0.01em;
+}
+.login-card .sub{ color:var(--ink-soft); font-size:13px; margin-bottom:26px; }
+
+.field{ margin-bottom:16px; }
+.field label{
+  display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+  margin-bottom:6px;
+}
+.field input{
+  width:100%; padding:11px 13px;
+  border:1.5px solid var(--line); border-radius:var(--radius-s);
+  font-size:14px; color:var(--ink); background:var(--surface-2);
+  transition:border-color .15s ease, background .15s ease;
+}
+.field input:focus{ outline:none; border-color:var(--accent); background:var(--surface); }
+
+.login-btn{
+  width:100%; padding:12px; margin-top:8px;
+  background:var(--ink); color:#fff; border-radius:var(--radius-s);
+  font-size:14px; font-weight:600;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:opacity .15s ease, transform .1s ease;
+}
+.login-btn:active{ transform:scale(0.98); }
+.login-btn:disabled{ opacity:.6; pointer-events:none; }
+
+.login-error{
+  margin-top:14px; padding:10px 12px;
+  background:var(--danger-soft); color:var(--danger);
+  border-radius:var(--radius-s); font-size:13px; font-weight:500;
+  display:none; align-items:center; gap:8px;
+}
+.login-error.show{ display:flex; }
+
+/* ============================================================
+   ASOSIY LAYOUT
+   ============================================================ */
+#app-shell{
+  display:flex; min-height:100vh;
+}
+
+/* ---------- Yon panel ---------- */
+.sidebar{
+  width:var(--sidebar-w); flex:0 0 auto;
+  background:var(--surface); border-right:1px solid var(--line);
+  display:flex; flex-direction:column;
+  position:fixed; top:0; bottom:0; left:0; z-index:40;
+  transition:transform .25s ease;
+}
+.sidebar-head{
+  padding:20px 18px 16px; display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid var(--line-soft);
+}
+.sidebar-mark{
+  width:32px; height:32px; border-radius:9px; background:var(--ink); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-size:15px; font-weight:600; flex:0 0 auto;
+}
+.sidebar-head .t{ font-size:14px; font-weight:700; }
+.sidebar-head .s{ font-size:11px; color:var(--ink-soft); }
+
+.nav-group{ padding:14px 12px; }
+.nav-label{
+  font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--ink-faint); padding:0 8px; margin-bottom:6px;
+}
+.nav-item{
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:9px 10px; border-radius:var(--radius-s);
+  font-size:13.5px; font-weight:600; color:var(--ink-soft);
+  margin-bottom:2px; transition:all .12s ease;
+}
+.nav-item:hover{ background:var(--surface-2); color:var(--ink); }
+.nav-item.active{ background:var(--accent-soft); color:var(--accent-ink); }
+.nav-item svg{ width:17px; height:17px; flex:0 0 auto; }
+.nav-item .badge{
+  margin-left:auto; background:var(--danger); color:#fff;
+  font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:999px;
+}
+.nav-item.active .badge{ background:var(--accent); }
+
+.sidebar-foot{
+  margin-top:auto; padding:14px 18px; border-top:1px solid var(--line-soft);
+}
+.logout-btn{
+  display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600;
+  color:var(--ink-soft); padding:8px; border-radius:var(--radius-s); width:100%;
+}
+.logout-btn:hover{ background:var(--danger-soft); color:var(--danger); }
+.logout-btn svg{ width:16px; height:16px; }
+
+/* ---------- Asosiy kontent ---------- */
+.main-content{
+  flex:1; margin-left:var(--sidebar-w);
+  min-width:0;
+}
+.topbar{
+  height:60px; background:var(--surface); border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; position:sticky; top:0; z-index:20;
+}
+.topbar h1{ font-family:var(--font-display); font-size:19px; font-weight:600; }
+.mobile-menu-btn{
+  display:none; width:36px; height:36px; align-items:center; justify-content:center;
+  border-radius:var(--radius-s); background:var(--surface-2);
+}
+.mobile-menu-btn svg{ width:18px; height:18px; }
+
+.page{ display:none; padding:24px; max-width:1180px; }
+.page.active{ display:block; }
+
+/* ---------- Statistika kartalari ---------- */
+.stat-grid{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:24px;
+}
+.stat-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-m);
+  padding:16px 18px;
+}
+.stat-card .label{
+  font-size:11.5px; font-weight:600; color:var(--ink-soft);
+  text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px;
+  display:flex; align-items:center; gap:6px;
+}
+.stat-card .label svg{ width:13px; height:13px; }
+.stat-card .value{ font-family:var(--font-display); font-size:26px; font-weight:600; }
+.stat-card .value.warn{ color:var(--warn); }
+.stat-card .value.ok{ color:var(--ok); }
+
+/* ---------- Qidiruv va filtr ---------- */
+.toolbar{
+  display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;
+}
+.search-box{
+  flex:1; min-width:220px; position:relative;
+}
+.search-box svg{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:15px; height:15px; color:var(--ink-faint);
+}
+.search-box input{
+  width:100%; padding:9px 12px 9px 36px;
+  border:1.5px solid var(--line); border-radius:var(--radius-s);
+  font-size:13.5px; background:var(--surface);
+}
+.search-box input:focus{ outline:none; border-color:var(--accent); }
+
+.filter-pills{ display:flex; gap:6px; flex-wrap:wrap; }
+.filter-pill{
+  padding:8px 13px; border-radius:999px; border:1.5px solid var(--line);
+  font-size:12.5px; font-weight:600; color:var(--ink-soft); background:var(--surface);
+  transition:all .12s ease;
+}
+.filter-pill.active{ background:var(--ink); border-color:var(--ink); color:#fff; }
+
+/* ---------- Foydalanuvchilar jadvali ---------- */
+.data-table-wrap{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-m);
+  overflow:hidden;
+}
+.user-row{
+  display:flex; align-items:center; gap:14px; padding:13px 18px;
+  border-bottom:1px solid var(--line-soft); cursor:pointer;
+  transition:background .12s ease; position:relative;
+}
+.user-row:last-child{ border-bottom:none; }
+.user-row:hover{ background:var(--surface-2); }
+.user-row::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:transparent;
+}
+.user-row.has-pending::before{ background:var(--warn); }
+
+.user-avatar{
+  width:38px; height:38px; border-radius:50%; flex:0 0 auto;
+  background:var(--accent-soft); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:14px; font-family:var(--font-display);
+  overflow:hidden;
+}
+.user-avatar img{ width:100%; height:100%; object-fit:cover; }
+
+.user-info{ flex:1; min-width:0; }
+.user-info .name{ font-size:14px; font-weight:700; }
+.user-info .meta{ font-size:12px; color:var(--ink-soft); margin-top:1px; }
+
+.user-stats-mini{
+  display:flex; gap:16px; flex:0 0 auto;
+}
+.user-stats-mini .mini-stat{ text-align:right; }
+.user-stats-mini .mini-stat .n{ font-size:14px; font-weight:700; }
+.user-stats-mini .mini-stat .l{ font-size:10.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.03em; }
+.user-stats-mini .mini-stat.warn .n{ color:var(--warn); }
+.user-stats-mini .mini-stat.ok .n{ color:var(--ok); }
+
+.user-balance{
+  font-family:var(--font-mono); font-size:13.5px; font-weight:700;
+  flex:0 0 auto; min-width:90px; text-align:right;
+}
+
+.chevron-icon{ width:16px; height:16px; color:var(--ink-faint); flex:0 0 auto; }
+
+.empty-state{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  padding:64px 24px; color:var(--ink-soft);
+}
+.empty-state .emoji{ font-size:36px; margin-bottom:10px; }
+.empty-state .t{ font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:4px; }
+.empty-state .d{ font-size:12.5px; }
+
+/* ---------- Status badge ---------- */
+.status-badge{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700;
+  white-space:nowrap;
+}
+.status-badge.pending{ background:var(--warn-soft); color:var(--warn); }
+.status-badge.approved{ background:var(--ok-soft); color:var(--ok); }
+.status-badge.rejected{ background:var(--danger-soft); color:var(--danger); }
+.status-badge .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+/* ============================================================
+   FOYDALANUVCHI TAFSILOT PANELI (drawer)
+   ============================================================ */
+.drawer-overlay{
+  position:fixed; inset:0; background:rgba(16,20,28,.4);
+  z-index:50; opacity:0; pointer-events:none; transition:opacity .2s ease;
+}
+.drawer-overlay.open{ opacity:1; pointer-events:auto; }
+.drawer{
+  position:fixed; top:0; right:0; bottom:0; width:480px; max-width:94vw;
+  background:var(--surface); z-index:51; box-shadow:-8px 0 32px rgba(16,24,40,.16);
+  transform:translateX(100%); transition:transform .28s cubic-bezier(.32,.72,0,1);
+  display:flex; flex-direction:column;
+}
+.drawer-overlay.open .drawer{ transform:translateX(0); }
+
+.drawer-head{
+  padding:20px 22px; border-bottom:1px solid var(--line);
+  display:flex; align-items:flex-start; gap:14px;
+}
+.drawer-close{
+  width:32px; height:32px; border-radius:50%; background:var(--surface-2);
+  display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+}
+.drawer-close svg{ width:15px; height:15px; }
+
+.drawer-user-avatar{
+  width:50px; height:50px; border-radius:50%; flex:0 0 auto;
+  background:var(--accent-soft); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:18px; font-family:var(--font-display);
+  overflow:hidden;
+}
+.drawer-user-avatar img{ width:100%; height:100%; object-fit:cover; }
+
+.drawer-user-info{ flex:1; min-width:0; }
+.drawer-user-info .name{ font-size:16px; font-weight:700; }
+.drawer-user-info .meta{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+.drawer-user-info .id{ font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); margin-top:3px; }
+
+.drawer-body{ flex:1; overflow-y:auto; padding:18px 22px; }
+
+.drawer-stat-grid{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:22px;
+}
+.drawer-stat{
+  background:var(--surface-2); border-radius:var(--radius-s); padding:11px 12px;
+  text-align:center;
+}
+.drawer-stat .v{ font-size:17px; font-weight:700; font-family:var(--font-display); }
+.drawer-stat .l{ font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+.drawer-stat.balance .v{ color:var(--accent-ink); }
+
+.drawer-tabs{
+  display:flex; gap:4px; background:var(--surface-2); border-radius:var(--radius-s);
+  padding:3px; margin-bottom:16px;
+}
+.drawer-tab{
+  flex:1; padding:8px 4px; border-radius:7px; font-size:12.5px; font-weight:600;
+  color:var(--ink-soft); text-align:center;
+}
+.drawer-tab.active{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow-sm); }
+
+.drawer-panel{ display:none; }
+.drawer-panel.active{ display:block; }
+
+.tx-row{
+  display:flex; align-items:center; gap:12px; padding:12px;
+  border:1px solid var(--line-soft); border-radius:var(--radius-s); margin-bottom:8px;
+}
+.tx-row .tx-icon{
+  width:34px; height:34px; border-radius:9px; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+.tx-row.pending .tx-icon{ background:var(--warn-soft); }
+.tx-row.approved .tx-icon{ background:var(--ok-soft); }
+.tx-row.rejected .tx-icon{ background:var(--danger-soft); }
+.tx-row .tx-body{ flex:1; min-width:0; }
+.tx-row .tx-amount{ font-family:var(--font-mono); font-weight:700; font-size:13.5px; }
+.tx-row .tx-date{ font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+.tx-row .tx-actions{ display:flex; gap:6px; flex:0 0 auto; }
+
+.icon-btn-sm{
+  width:30px; height:30px; border-radius:var(--radius-s);
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface-2); transition:all .12s ease;
+}
+.icon-btn-sm svg{ width:14px; height:14px; }
+.icon-btn-sm:hover{ background:var(--line); }
+.icon-btn-sm.approve:hover{ background:var(--ok-soft); color:var(--ok); }
+.icon-btn-sm.reject:hover{ background:var(--danger-soft); color:var(--danger); }
+.icon-btn-sm.view-receipt{ background:var(--accent-soft); color:var(--accent-ink); }
+
+.q-row{
+  padding:12px; border:1px solid var(--line-soft); border-radius:var(--radius-s); margin-bottom:8px;
+}
+.q-row .q-meta{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.q-row .q-subject{ font-size:11.5px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); padding:2px 8px; border-radius:999px; }
+.q-row .q-date{ font-size:11px; color:var(--ink-faint); }
+.q-row .q-text{ font-size:13px; line-height:1.5; }
+.q-row .q-price{ font-size:11px; color:var(--ink-soft); margin-top:6px; font-weight:600; }
+
+/* ============================================================
+   KUTILAYOTGAN TO'LOVLAR SAHIFASI
+   ============================================================ */
+.pending-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-m);
+  padding:16px; margin-bottom:12px;
+  display:flex; gap:14px; align-items:flex-start;
+}
+.pending-card .receipt-thumb{
+  width:64px; height:64px; border-radius:var(--radius-s); flex:0 0 auto;
+  background:var(--surface-2); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;
+}
+.pending-card .receipt-thumb img{ width:100%; height:100%; object-fit:cover; }
+.pending-card .receipt-thumb svg{ width:22px; height:22px; color:var(--ink-faint); }
+
+.pending-card .body{ flex:1; min-width:0; }
+.pending-card .top-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px; }
+.pending-card .user-link{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; }
+.pending-card .user-link .mini-avatar{
+  width:24px; height:24px; border-radius:50%; background:var(--accent-soft); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; overflow:hidden;
+}
+.pending-card .amount{ font-family:var(--font-mono); font-size:18px; font-weight:700; color:var(--accent-ink); }
+.pending-card .date{ font-size:12px; color:var(--ink-soft); margin-bottom:10px; }
+.pending-card .actions{ display:flex; gap:8px; }
+
+.action-btn{
+  padding:8px 16px; border-radius:var(--radius-s); font-size:12.5px; font-weight:700;
+  display:flex; align-items:center; gap:6px;
+}
+.action-btn svg{ width:14px; height:14px; }
+.action-btn.approve{ background:var(--ok); color:#fff; }
+.action-btn.reject{ background:var(--danger-soft); color:var(--danger); }
+.action-btn:active{ transform:scale(.97); }
+
+/* ---------- Rasm lightbox ---------- */
+.lightbox{
+  position:fixed; inset:0; background:rgba(10,12,16,.92); z-index:80;
+  display:none; align-items:center; justify-content:center; padding:30px;
+}
+.lightbox.open{ display:flex; }
+.lightbox img{ max-width:100%; max-height:90vh; border-radius:var(--radius-m); }
+.lightbox-close{
+  position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%;
+  background:rgba(255,255,255,.12); color:#fff; display:flex; align-items:center; justify-content:center;
+}
+.lightbox-close svg{ width:18px; height:18px; }
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translate(-50%, 20px);
+  background:var(--ink); color:#fff; padding:12px 20px; border-radius:var(--radius-s);
+  font-size:13px; font-weight:600; z-index:90; opacity:0; pointer-events:none;
+  transition:all .25s ease; display:flex; align-items:center; gap:8px;
+  box-shadow:var(--shadow-md);
+}
+.toast.show{ opacity:1; transform:translate(-50%, 0); }
+.toast.error{ background:var(--danger); }
+.toast.success{ background:var(--ok); }
+
+.spinner{
+  width:15px; height:15px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.35); border-top-color:#fff;
+  animation:spin .7s linear infinite; flex:0 0 auto;
+}
+.spinner.dark{ border-color:rgba(0,0,0,.15); border-top-color:var(--ink); }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+.confirm-modal-overlay{
+  position:fixed; inset:0; background:rgba(16,20,28,.45); z-index:70;
+  display:none; align-items:center; justify-content:center; padding:20px;
+}
+.confirm-modal-overlay.open{ display:flex; }
+.confirm-modal{
+  background:var(--surface); border-radius:var(--radius-l); padding:24px;
+  width:100%; max-width:340px; box-shadow:var(--shadow-md);
+}
+.confirm-modal h3{ font-family:var(--font-display); font-size:17px; margin-bottom:8px; }
+.confirm-modal p{ font-size:13.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px; }
+.confirm-modal .row{ display:flex; gap:8px; }
+.confirm-modal button{ flex:1; padding:10px; border-radius:var(--radius-s); font-size:13.5px; font-weight:700; }
+.confirm-modal .cancel-btn{ background:var(--surface-2); color:var(--ink); }
+.confirm-modal .confirm-btn{ background:var(--danger); color:#fff; }
+.confirm-modal .confirm-btn.ok{ background:var(--ok); }
+
+/* ============================================================
+   RESPONSIVE — telefon uchun moslashuv
+   ============================================================ */
+@media (max-width: 880px){
+  .sidebar{ transform:translateX(-100%); box-shadow:var(--shadow-md); }
+  .sidebar.open{ transform:translateX(0); }
+  .main-content{ margin-left:0; }
+  .mobile-menu-btn{ display:flex; }
+  .stat-grid{ grid-template-columns:repeat(2, 1fr); }
+  .drawer{ width:100%; max-width:100%; }
+  .page{ padding:16px; }
+  .user-stats-mini{ display:none; }
+  .user-balance{ min-width:auto; }
+}
+@media (max-width: 480px){
+  .pending-card{ flex-direction:column; }
+  .pending-card .receipt-thumb{ width:100%; height:140px; }
+  .login-card{ padding:28px 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN EKRANI ================= -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-mark">A</div>
+    <h1>Admin panel</h1>
+    <div class="sub">O'quv yordamchisi boshqaruv markazi</div>
+
+    <form id="login-form" onsubmit="return false;">
+      <div class="field">
+        <label for="login-username">Login</label>
+        <input type="text" id="login-username" autocomplete="username" placeholder="admin">
+      </div>
+      <div class="field">
+        <label for="login-password">Parol</label>
+        <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="login-btn" id="login-btn" onclick="doLogin()">Kirish</button>
+      <div class="login-error" id="login-error">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span id="login-error-text">Login yoki parol noto'g'ri</span>
+      </div>
+    </form>
+    <div style="margin-top:18px; padding-top:16px; border-top:1px solid var(--line-soft); font-size:11.5px; color:var(--ink-faint); line-height:1.5;">
+      Sinab ko'rish uchun: <b>demo</b> / <b>demo</b> (backend ulanmasa ham namuna ma'lumotlar bilan ishlaydi)
+    </div>
+  </div>
+</div>
+
+<!-- ================= ASOSIY ILOVA ================= -->
+<div id="app-shell" class="hidden">
+
+  <!-- ---- YON PANEL ---- -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-mark">A</div>
+      <div>
+        <div class="t">Admin panel</div>
+        <div class="s">O'quv yordamchisi</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Boshqaruv</div>
+      <button class="nav-item active" data-page="dashboard" onclick="goToPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Bosh sahifa
+      </button>
+      <button class="nav-item" data-page="pending" onclick="goToPage('pending')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Kutilayotgan to'lovlar
+        <span class="badge hidden" id="pending-nav-badge">0</span>
+      </button>
+      <button class="nav-item" data-page="users" onclick="goToPage('users')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Foydalanuvchilar
+      </button>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="logout-btn" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Chiqish
+      </button>
+    </div>
+  </div>
+
+  <!-- ---- ASOSIY KONTENT ---- -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <h1 id="page-title">Bosh sahifa</h1>
+      </div>
+    </div>
+
+    <!-- ---- BOSH SAHIFA (statistika) ---- -->
+    <div class="page active" id="page-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Foydalanuvchilar
+          </div>
+          <div class="value" id="stat-users">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Kutilmoqda
+          </div>
+          <div class="value warn" id="stat-pending">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            Tasdiqlangan summa
+          </div>
+          <div class="value ok" id="stat-revenue">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Jami savollar
+          </div>
+          <div class="value" id="stat-questions">—</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <h2 style="font-family:var(--font-display); font-size:16px; font-weight:600;">So'nggi kutilayotgan to'lovlar</h2>
+      </div>
+      <div id="dashboard-pending-preview"></div>
+    </div>
+
+    <!-- ---- KUTILAYOTGAN TO'LOVLAR ---- -->
+    <div class="page" id="page-pending">
+      <div id="pending-list"></div>
+    </div>
+
+    <!-- ---- FOYDALANUVCHILAR ---- -->
+    <div class="page" id="page-users">
+      <div class="toolbar">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="user-search" placeholder="Ism yoki username bo'yicha qidirish..." oninput="onUserSearch(this.value)">
+        </div>
+        <div class="filter-pills">
+          <button class="filter-pill active" data-filter="all" onclick="setUserFilter('all')">Hammasi</button>
+          <button class="filter-pill" data-filter="pending" onclick="setUserFilter('pending')">Kutilayotgani bor</button>
+        </div>
+      </div>
+      <div class="data-table-wrap" id="users-table"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FOYDALANUVCHI TAFSILOT PANELI ================= -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawerOnOverlay(event)">
+  <div class="drawer" onclick="event.stopPropagation()">
+    <div class="drawer-head">
+      <div class="drawer-user-avatar" id="drawer-avatar">
+        <span id="drawer-avatar-initial">?</span>
+        <img id="drawer-avatar-img" class="hidden" src="">
+      </div>
+      <div class="drawer-user-info">
+        <div class="name" id="drawer-name">—</div>
+        <div class="meta" id="drawer-username">—</div>
+        <div class="id" id="drawer-id">—</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="drawer-stat-grid">
+        <div class="drawer-stat balance">
+          <div class="v" id="drawer-balance">—</div>
+          <div class="l">Balans</div>
+        </div>
+        <div class="drawer-stat">
+          <div class="v" id="drawer-q-count">—</div>
+          <div class="l">Savollar</div>
+        </div>
+        <div class="drawer-stat">
+          <div class="v" id="drawer-tx-count">—</div>
+          <div class="l">To'lovlar</div>
+        </div>
+      </div>
+
+      <div class="drawer-tabs">
+        <button class="drawer-tab active" data-tab="transactions" onclick="setDrawerTab('transactions')">To'lov tarixi</button>
+        <button class="drawer-tab" data-tab="questions" onclick="setDrawerTab('questions')">Savollar</button>
+      </div>
+
+      <div class="drawer-panel active" id="drawer-panel-transactions">
+        <div id="drawer-tx-list"></div>
+      </div>
+      <div class="drawer-panel" id="drawer-panel-questions">
+        <div id="drawer-q-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= RASM LIGHTBOX ================= -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <img id="lightbox-img" src="" onclick="event.stopPropagation()">
+</div>
+
+<!-- ================= TASDIQLASH MODALI ================= -->
+<div class="confirm-modal-overlay" id="confirm-overlay">
+  <div class="confirm-modal">
+    <h3 id="confirm-title">Tasdiqlaysizmi?</h3>
+    <p id="confirm-text">Bu amalni ortga qaytarib bo'lmaydi.</p>
+    <div class="row">
+      <button class="cancel-btn" onclick="closeConfirmModal()">Bekor qilish</button>
+      <button class="confirm-btn" id="confirm-action-btn">Tasdiqlash</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   SOZLAMALAR — backend manzilini shu yerda almashtiring
+   ============================================================ */
+const CONFIG = {
+  API_BASE_URL: "https://YOUR-BACKEND-DOMAIN.com", // <-- bu yerni o'z backend manzilingizga almashtiring
+};
+
+const STORAGE_KEY = "admin_panel_token";
+
+/* ============================================================
+   DEMO MA'LUMOTLAR — backend hali ulanmaganida UI'ni sinash uchun.
+   Login: demo / demo
+   ============================================================ */
+const DEMO_USERS = [
+  { telegram_id: 100001, full_name: "Aziz Karimov", username: "aziz_k", avatar_url: null, balance: 24000, pending_count: 1, approved_count: 3, rejected_count: 0, questions_count: 14, created_at: "2026-05-02T10:00:00" },
+  { telegram_id: 100002, full_name: "Malika Yusupova", username: "malika_y", avatar_url: null, balance: 5000, pending_count: 0, approved_count: 1, rejected_count: 1, questions_count: 3, created_at: "2026-05-10T10:00:00" },
+  { telegram_id: 100003, full_name: "Sardor Tashkentov", username: null, avatar_url: null, balance: 0, pending_count: 1, approved_count: 0, rejected_count: 0, questions_count: 0, created_at: "2026-06-18T10:00:00" },
+  { telegram_id: 100004, full_name: "Dilnoza Rashidova", username: "dilnoza_r", avatar_url: null, balance: 67000, pending_count: 0, approved_count: 5, rejected_count: 0, questions_count: 31, created_at: "2026-04-21T10:00:00" },
+];
+const DEMO_TRANSACTIONS = {
+  100001: [
+    { id: 1, amount: 15000, status: "pending", receipt_image_url: null, created_at: "2026-06-20T14:00:00", reviewed_at: null },
+    { id: 2, amount: 10000, status: "approved", receipt_image_url: null, created_at: "2026-06-01T09:00:00", reviewed_at: "2026-06-01T10:00:00" },
+    { id: 3, amount: 25000, status: "approved", receipt_image_url: null, created_at: "2026-05-15T09:00:00", reviewed_at: "2026-05-15T11:00:00" },
+    { id: 4, amount: 10000, status: "approved", receipt_image_url: null, created_at: "2026-05-03T09:00:00", reviewed_at: "2026-05-03T12:00:00" },
+  ],
+  100002: [
+    { id: 5, amount: 5000, status: "approved", receipt_image_url: null, created_at: "2026-05-12T09:00:00", reviewed_at: "2026-05-12T10:00:00" },
+    { id: 6, amount: 3000, status: "rejected", receipt_image_url: null, created_at: "2026-05-11T09:00:00", reviewed_at: "2026-05-11T13:00:00" },
+  ],
+  100003: [
+    { id: 7, amount: 20000, status: "pending", receipt_image_url: null, created_at: "2026-06-19T16:00:00", reviewed_at: null },
+  ],
+  100004: [
+    { id: 8, amount: 50000, status: "approved", receipt_image_url: null, created_at: "2026-06-10T09:00:00", reviewed_at: "2026-06-10T10:00:00" },
+  ],
+};
+const DEMO_QUESTIONS = {
+  100001: [
+    { id: 1, subject: "fizika", question_text: "Nyutonning uchinchi qonuni nima?", image_url: null, ai_answer: "...", price_paid: 0, created_at: "2026-06-19T10:00:00" },
+    { id: 2, subject: "matematika", question_text: "Kvadrat tenglamani qanday yechish kerak?", image_url: null, ai_answer: "...", price_paid: 1000, created_at: "2026-06-18T10:00:00" },
+  ],
+  100002: [
+    { id: 3, subject: "tarix", question_text: "Amir Temur qachon tug'ilgan?", image_url: null, ai_answer: "...", price_paid: 0, created_at: "2026-06-15T10:00:00" },
+  ],
+  100003: [],
+  100004: [
+    { id: 4, subject: "kimyo", question_text: "Davriy jadval nima?", image_url: null, ai_answer: "...", price_paid: 0, created_at: "2026-06-17T10:00:00" },
+  ],
+};
+
+/* ============================================================
+   HOLAT
+   ============================================================ */
+const state = {
+  token: null,
+  stats: null,
+  users: [],
+  pendingTransactions: [],
+  userFilter: "all",
+  userSearch: "",
+  searchDebounce: null,
+  currentDrawerUserId: null,
+  currentDrawerTransactions: [],
+  currentDrawerQuestions: [],
+};
+
+/* ============================================================
+   ISHGA TUSHIRISH
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  const savedToken = sessionStorage.getItem(STORAGE_KEY);
+  if (savedToken) {
+    state.token = savedToken;
+    if (savedToken === "demo-mode") state.isDemoMode = true;
+    showApp();
+  }
+
+  document.getElementById("login-password").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLogin();
+  });
+  document.getElementById("login-username").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLogin();
+  });
+});
+
+/* ============================================================
+   API HELPER
+   ============================================================ */
+async function apiRequest(path, options = {}) {
+  const headers = {
+    ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}),
+    ...(options.headers || {}),
+  };
+
+  const res = await fetch(`${CONFIG.API_BASE_URL}${path}`, { ...options, headers });
+
+  if (res.status === 401) {
+    doLogout();
+    throw new Error("Sessiya tugadi, qayta kiring");
+  }
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody.detail || `Xatolik (${res.status})`);
+  }
+  return res.json();
+}
+
+/* ============================================================
+   LOGIN / LOGOUT
+   ============================================================ */
+async function doLogin() {
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value;
+  const btn = document.getElementById("login-btn");
+  const errorBox = document.getElementById("login-error");
+
+  if (!username || !password) {
+    document.getElementById("login-error-text").textContent = "Login va parolni kiriting";
+    errorBox.classList.add("show");
+    return;
+  }
+
+  errorBox.classList.remove("show");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span>`;
+
+  try {
+    const result = await apiRequest("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    state.token = result.access_token;
+    sessionStorage.setItem(STORAGE_KEY, state.token);
+    showApp();
+  } catch (err) {
+    // Backend hali ulanmagan bo'lsa: demo/admin orqali DEMO rejimda kirish mumkin,
+    // shunda interfeysni backend tayyor bo'lmasdan oldin ham sinab ko'rish mumkin.
+    if (username === "demo" && password === "demo") {
+      state.token = "demo-mode";
+      state.isDemoMode = true;
+      sessionStorage.setItem(STORAGE_KEY, state.token);
+      showApp();
+    } else {
+      document.getElementById("login-error-text").textContent = err.message || "Login yoki parol noto'g'ri";
+      errorBox.classList.add("show");
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Kirish";
+  }
+}
+
+function doLogout() {
+  state.token = null;
+  state.isDemoMode = false;
+  sessionStorage.removeItem(STORAGE_KEY);
+  document.getElementById("app-shell").classList.add("hidden");
+  document.getElementById("login-screen").classList.remove("hidden");
+  document.getElementById("login-password").value = "";
+}
+
+function showApp() {
+  document.getElementById("login-screen").classList.add("hidden");
+  document.getElementById("app-shell").classList.remove("hidden");
+  loadDashboard();
+}
+
+/* ============================================================
+   NAVIGATSIYA
+   ============================================================ */
+function goToPage(pageName) {
+  document.querySelectorAll(".page").forEach((el) => el.classList.remove("active"));
+  document.getElementById(`page-${pageName}`).classList.add("active");
+
+  document.querySelectorAll(".nav-item").forEach((el) => {
+    el.classList.toggle("active", el.dataset.page === pageName);
+  });
+
+  const titles = { dashboard: "Bosh sahifa", pending: "Kutilayotgan to'lovlar", users: "Foydalanuvchilar" };
+  document.getElementById("page-title").textContent = titles[pageName] || "";
+
+  if (window.innerWidth <= 880) document.getElementById("sidebar").classList.remove("open");
+
+  if (pageName === "pending") loadPendingTransactions();
+  if (pageName === "users") loadUsers();
+  if (pageName === "dashboard") loadDashboard();
+}
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+}
+
+/* ============================================================
+   BOSH SAHIFA / STATISTIKA
+   ============================================================ */
+async function loadDashboard() {
+  if (state.isDemoMode) {
+    const allTx = Object.values(DEMO_TRANSACTIONS).flat();
+    const pending = allTx.filter((t) => t.status === "pending");
+    const approved = allTx.filter((t) => t.status === "approved");
+    document.getElementById("stat-users").textContent = formatNumber(DEMO_USERS.length);
+    document.getElementById("stat-pending").textContent = formatNumber(pending.length);
+    document.getElementById("stat-revenue").textContent = formatNumber(approved.reduce((s, t) => s + t.amount, 0)) + " so'm";
+    document.getElementById("stat-questions").textContent = formatNumber(Object.values(DEMO_QUESTIONS).flat().length);
+    updatePendingBadge(pending.length);
+
+    const pendingWithUser = pending.map((t) => {
+      const owner = DEMO_USERS.find((u) => DEMO_TRANSACTIONS[u.telegram_id]?.includes(t));
+      return { ...t, user_id: owner.telegram_id, user_full_name: owner.full_name, user_username: owner.username, user_avatar_url: owner.avatar_url };
+    });
+    renderPendingList(pendingWithUser.slice(0, 5), "dashboard-pending-preview", true);
+    return;
+  }
+
+  try {
+    const stats = await apiRequest("/api/admin/stats");
+    state.stats = stats;
+    document.getElementById("stat-users").textContent = formatNumber(stats.total_users);
+    document.getElementById("stat-pending").textContent = formatNumber(stats.total_pending);
+    document.getElementById("stat-revenue").textContent = formatNumber(stats.total_revenue) + " so'm";
+    document.getElementById("stat-questions").textContent = formatNumber(stats.total_questions);
+
+    updatePendingBadge(stats.total_pending);
+  } catch (err) {
+    showToast(err.message || "Statistikani yuklashda xatolik", true);
+  }
+
+  try {
+    const pending = await apiRequest("/api/admin/transactions/pending");
+    state.pendingTransactions = pending;
+    renderPendingList(pending.slice(0, 5), "dashboard-pending-preview", true);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function updatePendingBadge(count) {
+  const badge = document.getElementById("pending-nav-badge");
+  if (count > 0) {
+    badge.textContent = count;
+    badge.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+  }
+}
+
+/* ============================================================
+   KUTILAYOTGAN TO'LOVLAR
+   ============================================================ */
+async function loadPendingTransactions() {
+  const container = document.getElementById("pending-list");
+
+  if (state.isDemoMode) {
+    const allTx = Object.values(DEMO_TRANSACTIONS).flat();
+    const pending = allTx.filter((t) => t.status === "pending").map((t) => {
+      const owner = DEMO_USERS.find((u) => DEMO_TRANSACTIONS[u.telegram_id]?.includes(t));
+      return { ...t, user_id: owner.telegram_id, user_full_name: owner.full_name, user_username: owner.username, user_avatar_url: owner.avatar_url };
+    });
+    renderPendingList(pending, "pending-list", false);
+    updatePendingBadge(pending.length);
+    return;
+  }
+
+  container.innerHTML = `<div style="padding:40px; text-align:center;"><span class="spinner dark"></span></div>`;
+
+  try {
+    const pending = await apiRequest("/api/admin/transactions/pending");
+    state.pendingTransactions = pending;
+    renderPendingList(pending, "pending-list", false);
+    updatePendingBadge(pending.length);
+  } catch (err) {
+    container.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><div class="t">Yuklashda xatolik</div><div class="d">${escapeHtml(err.message)}</div></div>`;
+  }
+}
+
+function renderPendingList(transactions, containerId, isPreview) {
+  const container = document.getElementById(containerId);
+  if (!transactions || transactions.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">✅</div>
+        <div class="t">Kutilayotgan to'lovlar yo'q</div>
+        <div class="d">Barcha cheklar ko'rib chiqilgan</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = transactions.map((tx) => `
+    <div class="pending-card">
+      <div class="receipt-thumb" onclick="openLightbox('${resolveUrl(tx.receipt_image_url)}')">
+        ${tx.receipt_image_url
+          ? `<img src="${resolveUrl(tx.receipt_image_url)}" alt="Chek">`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`
+        }
+      </div>
+      <div class="body">
+        <div class="top-row">
+          <button class="user-link" onclick="openUserDrawer(${tx.user_id})">
+            <span class="mini-avatar">${initial(tx.user_full_name)}</span>
+            ${escapeHtml(tx.user_full_name)}
+          </button>
+          <span class="amount">${formatNumber(tx.amount)} so'm</span>
+        </div>
+        <div class="date">${formatDate(tx.created_at)} ${tx.user_username ? "· @" + escapeHtml(tx.user_username) : ""}</div>
+        <div class="actions">
+          <button class="action-btn approve" onclick="confirmApprove(${tx.id}, '${escapeHtml(tx.user_full_name)}', ${tx.amount})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            Tasdiqlash
+          </button>
+          <button class="action-btn reject" onclick="confirmReject(${tx.id}, '${escapeHtml(tx.user_full_name)}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            Rad etish
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ---------- Tasdiqlash / rad etish (umumiy modal orqali) ---------- */
+function confirmApprove(txId, userName, amount) {
+  document.getElementById("confirm-title").textContent = "To'lovni tasdiqlaysizmi?";
+  document.getElementById("confirm-text").textContent =
+    `${userName} uchun ${formatNumber(amount)} so'm balansga qo'shiladi va foydalanuvchiga Telegram orqali xabar boradi.`;
+  const btn = document.getElementById("confirm-action-btn");
+  btn.textContent = "Ha, tasdiqlash";
+  btn.className = "confirm-btn ok";
+  btn.onclick = () => runApprove(txId);
+  openConfirmModal();
+}
+
+function confirmReject(txId, userName) {
+  document.getElementById("confirm-title").textContent = "To'lovni rad etasizmi?";
+  document.getElementById("confirm-text").textContent =
+    `${userName} ning to'lovi rad etiladi va unga Telegram orqali xabar boradi. Bu amalni ortga qaytarib bo'lmaydi.`;
+  const btn = document.getElementById("confirm-action-btn");
+  btn.textContent = "Ha, rad etish";
+  btn.className = "confirm-btn";
+  btn.onclick = () => runReject(txId);
+  openConfirmModal();
+}
+
+async function runApprove(txId) {
+  closeConfirmModal();
+
+  if (state.isDemoMode) {
+    for (const userId in DEMO_TRANSACTIONS) {
+      const tx = DEMO_TRANSACTIONS[userId].find((t) => t.id === txId);
+      if (tx) {
+        tx.status = "approved";
+        tx.reviewed_at = new Date().toISOString();
+        const user = DEMO_USERS.find((u) => u.telegram_id === Number(userId));
+        user.balance += tx.amount;
+        user.pending_count = Math.max(0, user.pending_count - 1);
+        user.approved_count += 1;
+        break;
+      }
+    }
+    showToast("To'lov tasdiqlandi ✓ (DEMO)", false, true);
+    await refreshAfterAction();
+    return;
+  }
+
+  try {
+    await apiRequest(`/api/admin/transactions/${txId}/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    showToast("To'lov tasdiqlandi ✓", false, true);
+    await refreshAfterAction();
+  } catch (err) {
+    showToast(err.message || "Xatolik yuz berdi", true);
+  }
+}
+
+async function runReject(txId) {
+  closeConfirmModal();
+
+  if (state.isDemoMode) {
+    for (const userId in DEMO_TRANSACTIONS) {
+      const tx = DEMO_TRANSACTIONS[userId].find((t) => t.id === txId);
+      if (tx) {
+        tx.status = "rejected";
+        tx.reviewed_at = new Date().toISOString();
+        const user = DEMO_USERS.find((u) => u.telegram_id === Number(userId));
+        user.pending_count = Math.max(0, user.pending_count - 1);
+        user.rejected_count += 1;
+        break;
+      }
+    }
+    showToast("To'lov rad etildi (DEMO)", false, true);
+    await refreshAfterAction();
+    return;
+  }
+
+  try {
+    await apiRequest(`/api/admin/transactions/${txId}/reject`, { method: "POST" });
+    showToast("To'lov rad etildi", false, true);
+    await refreshAfterAction();
+  } catch (err) {
+    showToast(err.message || "Xatolik yuz berdi", true);
+  }
+}
+
+async function refreshAfterAction() {
+  const activePage = document.querySelector(".page.active")?.id;
+  if (activePage === "page-pending") await loadPendingTransactions();
+  if (activePage === "page-dashboard") await loadDashboard();
+  if (activePage === "page-users") await loadUsers();
+  if (state.currentDrawerUserId) await loadDrawerData(state.currentDrawerUserId);
+}
+
+function openConfirmModal() { document.getElementById("confirm-overlay").classList.add("open"); }
+function closeConfirmModal() { document.getElementById("confirm-overlay").classList.remove("open"); }
+
+/* ============================================================
+   FOYDALANUVCHILAR RO'YXATI
+   ============================================================ */
+async function loadUsers() {
+  const container = document.getElementById("users-table");
+
+  if (state.isDemoMode) {
+    let users = DEMO_USERS;
+    if (state.userSearch) {
+      const q = state.userSearch.toLowerCase();
+      users = users.filter((u) => u.full_name.toLowerCase().includes(q) || (u.username || "").toLowerCase().includes(q));
+    }
+    state.users = users;
+    renderUsersTable();
+    return;
+  }
+
+  container.innerHTML = `<div style="padding:40px; text-align:center;"><span class="spinner dark"></span></div>`;
+
+  try {
+    const params = new URLSearchParams();
+    if (state.userSearch) params.set("search", state.userSearch);
+    const users = await apiRequest(`/api/admin/users?${params.toString()}`);
+    state.users = users;
+    renderUsersTable();
+  } catch (err) {
+    container.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><div class="t">Yuklashda xatolik</div><div class="d">${escapeHtml(err.message)}</div></div>`;
+  }
+}
+
+function onUserSearch(value) {
+  state.userSearch = value.trim();
+  clearTimeout(state.searchDebounce);
+  state.searchDebounce = setTimeout(loadUsers, 350);
+}
+
+function setUserFilter(filter) {
+  state.userFilter = filter;
+  document.querySelectorAll(".filter-pill").forEach((el) => {
+    el.classList.toggle("active", el.dataset.filter === filter);
+  });
+  renderUsersTable();
+}
+
+function renderUsersTable() {
+  const container = document.getElementById("users-table");
+  let users = state.users;
+  if (state.userFilter === "pending") {
+    users = users.filter((u) => u.pending_count > 0);
+  }
+
+  if (users.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">👤</div>
+        <div class="t">Foydalanuvchi topilmadi</div>
+        <div class="d">Qidiruv yoki filtrni o'zgartirib ko'ring</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = users.map((u) => `
+    <div class="user-row ${u.pending_count > 0 ? "has-pending" : ""}" onclick="openUserDrawer(${u.telegram_id})">
+      <div class="user-avatar">
+        ${u.avatar_url ? `<img src="${resolveUrl(u.avatar_url)}">` : initial(u.full_name)}
+      </div>
+      <div class="user-info">
+        <div class="name">${escapeHtml(u.full_name)}</div>
+        <div class="meta">${u.username ? "@" + escapeHtml(u.username) : "username yo'q"} · ID ${u.telegram_id}</div>
+      </div>
+      <div class="user-stats-mini">
+        <div class="mini-stat ${u.pending_count > 0 ? "warn" : ""}">
+          <div class="n">${u.pending_count}</div>
+          <div class="l">Kutilmoqda</div>
+        </div>
+        <div class="mini-stat ok">
+          <div class="n">${u.approved_count}</div>
+          <div class="l">Tasdiqlangan</div>
+        </div>
+        <div class="mini-stat">
+          <div class="n">${u.questions_count}</div>
+          <div class="l">Savollar</div>
+        </div>
+      </div>
+      <div class="user-balance">${formatNumber(u.balance)} so'm</div>
+      <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+  `).join("");
+}
+
+/* ============================================================
+   FOYDALANUVCHI TAFSILOT PANELI (drawer)
+   ============================================================ */
+async function openUserDrawer(userId) {
+  state.currentDrawerUserId = userId;
+  document.getElementById("drawer-overlay").classList.add("open");
+  setDrawerTab("transactions");
+  await loadDrawerData(userId);
+}
+
+function closeDrawer() {
+  document.getElementById("drawer-overlay").classList.remove("open");
+  state.currentDrawerUserId = null;
+}
+
+function closeDrawerOnOverlay(event) {
+  if (event.target.id === "drawer-overlay") closeDrawer();
+}
+
+async function loadDrawerData(userId) {
+  if (state.isDemoMode) {
+    const detail = DEMO_USERS.find((u) => u.telegram_id === userId);
+    const transactions = DEMO_TRANSACTIONS[userId] || [];
+    const questions = DEMO_QUESTIONS[userId] || [];
+    renderDrawerHead(detail, transactions, questions);
+    renderDrawerTransactions(transactions);
+    renderDrawerQuestions(questions);
+    return;
+  }
+
+  try {
+    const [detail, transactions, questions] = await Promise.all([
+      apiRequest(`/api/admin/users/${userId}`),
+      apiRequest(`/api/admin/users/${userId}/transactions`),
+      apiRequest(`/api/admin/users/${userId}/questions`),
+    ]);
+
+    state.currentDrawerTransactions = transactions;
+    state.currentDrawerQuestions = questions;
+
+    renderDrawerHead(detail, transactions, questions);
+    renderDrawerTransactions(transactions);
+    renderDrawerQuestions(questions);
+  } catch (err) {
+    showToast(err.message || "Ma'lumotlarni yuklashda xatolik", true);
+  }
+}
+
+function renderDrawerHead(detail, transactions, questions) {
+  document.getElementById("drawer-name").textContent = detail.full_name;
+  document.getElementById("drawer-username").textContent = detail.username ? "@" + detail.username : "Username yo'q";
+  document.getElementById("drawer-id").textContent = `ID: ${detail.telegram_id}`;
+  document.getElementById("drawer-balance").textContent = formatNumber(detail.balance);
+  document.getElementById("drawer-q-count").textContent = questions.length;
+  document.getElementById("drawer-tx-count").textContent = transactions.length;
+
+  const avatarImg = document.getElementById("drawer-avatar-img");
+  const avatarInitial = document.getElementById("drawer-avatar-initial");
+  if (detail.avatar_url) {
+    avatarImg.src = resolveUrl(detail.avatar_url);
+    avatarImg.classList.remove("hidden");
+    avatarInitial.classList.add("hidden");
+  } else {
+    avatarImg.classList.add("hidden");
+    avatarInitial.classList.remove("hidden");
+    avatarInitial.textContent = initial(detail.full_name);
+  }
+}
+
+function setDrawerTab(tab) {
+  document.querySelectorAll(".drawer-tab").forEach((el) => el.classList.toggle("active", el.dataset.tab === tab));
+  document.querySelectorAll(".drawer-panel").forEach((el) => el.classList.remove("active"));
+  document.getElementById(`drawer-panel-${tab}`).classList.add("active");
+}
+
+function renderDrawerTransactions(transactions) {
+  const container = document.getElementById("drawer-tx-list");
+  if (transactions.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="emoji">🧾</div><div class="t">To'lovlar yo'q</div><div class="d">Bu foydalanuvchi hali to'lov qilmagan</div></div>`;
+    return;
+  }
+
+  const statusLabels = { pending: "Kutilmoqda", approved: "Tasdiqlangan", rejected: "Rad etilgan" };
+  const statusIcons = { pending: "⏳", approved: "✅", rejected: "❌" };
+
+  container.innerHTML = transactions.map((tx) => `
+    <div class="tx-row ${tx.status}">
+      <div class="tx-icon">${statusIcons[tx.status]}</div>
+      <div class="tx-body">
+        <div class="tx-amount">${formatNumber(tx.amount)} so'm</div>
+        <div class="tx-date">${formatDate(tx.created_at)}</div>
+      </div>
+      <div class="tx-actions">
+        ${tx.receipt_image_url ? `
+          <button class="icon-btn-sm view-receipt" onclick="openLightbox('${resolveUrl(tx.receipt_image_url)}')" title="Chekni ko'rish">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>` : ""}
+        ${tx.status === "pending" ? `
+          <button class="icon-btn-sm approve" onclick="confirmApprove(${tx.id}, '', ${tx.amount})" title="Tasdiqlash">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          </button>
+          <button class="icon-btn-sm reject" onclick="confirmReject(${tx.id}, '')" title="Rad etish">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>` : `
+          <span class="status-badge ${tx.status}"><span class="dot"></span>${statusLabels[tx.status]}</span>`}
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderDrawerQuestions(questions) {
+  const container = document.getElementById("drawer-q-list");
+  if (questions.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="emoji">💭</div><div class="t">Savollar yo'q</div><div class="d">Bu foydalanuvchi hali savol bermagan</div></div>`;
+    return;
+  }
+
+  container.innerHTML = questions.map((q) => `
+    <div class="q-row">
+      <div class="q-meta">
+        <span class="q-subject">${escapeHtml(q.subject || "Boshqa")}</span>
+        <span class="q-date">${formatDate(q.created_at)}</span>
+      </div>
+      <div class="q-text">${escapeHtml(q.question_text || "(rasm orqali savol)")}</div>
+      <div class="q-price">${q.price_paid > 0 ? `${formatNumber(q.price_paid)} so'm to'landi` : "Bepul savol"}</div>
+    </div>
+  `).join("");
+}
+
+/* ============================================================
+   LIGHTBOX (chek rasmini kattalashtirib ko'rish)
+   ============================================================ */
+function openLightbox(imgUrl) {
+  if (!imgUrl || imgUrl.includes("undefined") || imgUrl.includes("null")) {
+    showToast("Chek rasmi mavjud emas", true);
+    return;
+  }
+  document.getElementById("lightbox-img").src = imgUrl;
+  document.getElementById("lightbox").classList.add("open");
+}
+function closeLightbox() {
+  document.getElementById("lightbox").classList.remove("open");
+}
+
+/* ============================================================
+   YORDAMCHI FUNKSIYALAR
+   ============================================================ */
+function resolveUrl(path) {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  return `${CONFIG.API_BASE_URL}${path}`;
+}
+
+function formatNumber(num) {
+  return Math.round(Number(num) || 0).toLocaleString("ru-RU").replace(/,/g, " ");
+}
+
+function formatDate(isoString) {
+  const d = new Date(isoString);
+  return d.toLocaleDateString("uz-UZ", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function initial(name) {
+  return (name || "?").trim().charAt(0).toUpperCase();
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text || "";
+  return div.innerHTML;
+}
+
+let toastTimer = null;
+function showToast(message, isError = false, isSuccess = false) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.remove("error", "success");
+  if (isError) toast.classList.add("error");
+  if (isSuccess) toast.classList.add("success");
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 3000);
+}
+</script>
+
+</body>
+</html>

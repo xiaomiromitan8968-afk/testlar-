@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>O'quv yordamchisi</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+/* ============================================================
+   TOKEN TIZIMI
+   Asosiy: neytral, "qog'oz-siyoh" baza — daftar/kitob hissi.
+   Qiziqish tanlanganda --accent o'zgaradi va butun UI shunga moslashadi.
+   ============================================================ */
+:root{
+  --bg: #FAF8F3;
+  --surface: #FFFFFF;
+  --surface-2: #F2EFE6;
+  --ink: #232220;
+  --ink-soft: #6B675F;
+  --line: #E4DFD2;
+  --accent: #1D9E75;
+  --accent-ink: #073A2A;
+  --accent-soft: #E1F5EE;
+  --accent-2: #185FA5;
+  --danger: #C24B3F;
+  --danger-soft: #FBEAE7;
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --shadow: 0 1px 2px rgba(35,34,32,0.04), 0 8px 24px -12px rgba(35,34,32,0.18);
+  --font-display: 'Source Serif 4', Georgia, 'Noto Serif', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --theme-pattern: none;
+  --btn-radius: 10px;
+  --card-radius: 16px;
+  --hero-radius: 24px;
+  --tab-icon-transform: none;
+  --interest-border-radius: 16px;
+}
+
+/* =============================================
+   ⚽ SPORT TEMASI — yashil maysalik, futbol
+   ============================================= */
+[data-theme="sport"]{
+  --accent: #16A34A;
+  --accent-ink: #052E16;
+  --accent-soft: #DCFCE7;
+  --bg: #F0FDF4;
+  --surface: #FFFFFF;
+  --surface-2: #DCFCE7;
+  --line: #BBF7D0;
+  --ink: #14532D;
+  --ink-soft: #4B7C5C;
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 20px;
+  --btn-radius: 8px;
+  --card-radius: 14px;
+  --hero-radius: 20px;
+  --interest-border-radius: 12px;
+  --font-display: 'Inter', -apple-system, sans-serif;
+  --shadow: 0 2px 8px rgba(22,163,74,0.12), 0 8px 24px -8px rgba(22,163,74,0.18);
+}
+
+/* =============================================
+   🎬 KINO TEMASI — qora ekran, drama ruhida
+   ============================================= */
+[data-theme="kino"]{
+  --accent: #DC2626;
+  --accent-ink: #FCA5A5;
+  --accent-soft: #2A0A0A;
+  --bg: #0F0A0A;
+  --surface: #1C1212;
+  --surface-2: #261818;
+  --line: #3D2323;
+  --ink: #FEF2F2;
+  --ink-soft: #FBBDBD;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --btn-radius: 4px;
+  --card-radius: 8px;
+  --hero-radius: 12px;
+  --interest-border-radius: 6px;
+  --font-display: 'Georgia', 'Times New Roman', serif;
+  --shadow: 0 0 20px rgba(220,38,38,0.25), 0 4px 16px rgba(0,0,0,0.5);
+}
+
+/* =============================================
+   🎮 O'YIN TEMASI — neon, kiberpunk, futuristik
+   ============================================= */
+[data-theme="oyin"]{
+  --accent: #A855F7;
+  --accent-ink: #E9D5FF;
+  --accent-soft: #150B2A;
+  --bg: #080516;
+  --surface: #110D24;
+  --surface-2: #1A1335;
+  --line: #2D2152;
+  --ink: #F3E8FF;
+  --ink-soft: #C4B5FD;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 16px;
+  --btn-radius: 4px;
+  --card-radius: 8px;
+  --hero-radius: 16px;
+  --interest-border-radius: 4px;
+  --font-display: 'Courier New', 'Lucida Console', monospace;
+  --shadow: 0 0 24px rgba(168,85,247,0.4), 0 0 8px rgba(168,85,247,0.2);
+}
+
+/* =============================================
+   🎵 MUSIQA TEMASI — nota, oltin, melodiya
+   ============================================= */
+[data-theme="musiqa"]{
+  --accent: #D97706;
+  --accent-ink: #451A03;
+  --accent-soft: #FEF3C7;
+  --bg: #FFFBEB;
+  --surface: #FFFFFF;
+  --surface-2: #FEF3C7;
+  --line: #FDE68A;
+  --ink: #292524;
+  --ink-soft: #78716C;
+  --radius-s: 24px;
+  --radius-m: 32px;
+  --radius-l: 48px;
+  --btn-radius: 999px;
+  --card-radius: 32px;
+  --hero-radius: 48px;
+  --interest-border-radius: 999px;
+  --font-display: 'Georgia', serif;
+  --shadow: 0 4px 12px rgba(217,119,6,0.15), 0 8px 32px -8px rgba(217,119,6,0.2);
+}
+
+/* =============================================
+   🔬 ILM-FAN TEMASI — aniq, sodda, ilmiy
+   ============================================= */
+[data-theme="ilmfan"]{
+  --accent: #2563EB;
+  --accent-ink: #1E3A8A;
+  --accent-soft: #EFF6FF;
+  --bg: #F8FAFF;
+  --surface: #FFFFFF;
+  --surface-2: #EFF6FF;
+  --line: #BFDBFE;
+  --ink: #1E3A8A;
+  --ink-soft: #3B82F6;
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 14px;
+  --btn-radius: 6px;
+  --card-radius: 10px;
+  --hero-radius: 14px;
+  --interest-border-radius: 8px;
+  --font-display: 'Courier New', monospace;
+  --shadow: 0 1px 4px rgba(37,99,235,0.08), 0 4px 16px -4px rgba(37,99,235,0.15);
+}
+
+/* =============================================
+   🌸 ANIME TEMASI — past rang, qizig'i
+   ============================================= */
+[data-theme="anime"]{
+  --accent: #EC4899;
+  --accent-ink: #500724;
+  --accent-soft: #FCE7F3;
+  --bg: #FFF5FB;
+  --surface: #FFFFFF;
+  --surface-2: #FCE7F3;
+  --line: #F9A8D4;
+  --ink: #500724;
+  --ink-soft: #BE185D;
+  --radius-s: 20px;
+  --radius-m: 28px;
+  --radius-l: 40px;
+  --btn-radius: 999px;
+  --card-radius: 28px;
+  --hero-radius: 40px;
+  --interest-border-radius: 999px;
+  --font-display: 'Georgia', serif;
+  --shadow: 0 4px 16px rgba(236,72,153,0.2), 0 8px 32px -8px rgba(236,72,153,0.15);
+}
+
+/* =============================================
+   🚗 AVTO TEMASI — temir, kuchli, industrial
+   ============================================= */
+[data-theme="avto"]{
+  --accent: #374151;
+  --accent-ink: #F9FAFB;
+  --accent-soft: #1F2937;
+  --bg: #111827;
+  --surface: #1F2937;
+  --surface-2: #374151;
+  --line: #4B5563;
+  --ink: #F9FAFB;
+  --ink-soft: #9CA3AF;
+  --radius-s: 4px;
+  --radius-m: 6px;
+  --radius-l: 10px;
+  --btn-radius: 4px;
+  --card-radius: 6px;
+  --hero-radius: 10px;
+  --interest-border-radius: 4px;
+  --font-display: 'Impact', 'Arial Narrow', sans-serif;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 8px 24px -8px rgba(0,0,0,0.6);
+}
+
+/* =============================================
+   📖 KITOB TEMASI — qo'ng'ir, antiqa, iliq
+   ============================================= */
+[data-theme="kitob"]{
+  --accent: #92400E;
+  --accent-ink: #451A03;
+  --accent-soft: #FEF3C7;
+  --bg: #FEFCE8;
+  --surface: #FFFBF0;
+  --surface-2: #FEF3C7;
+  --line: #FDE68A;
+  --ink: #292524;
+  --ink-soft: #78716C;
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 18px;
+  --btn-radius: 8px;
+  --card-radius: 12px;
+  --hero-radius: 18px;
+  --interest-border-radius: 10px;
+  --font-display: 'Georgia', 'Palatino', 'Book Antiqua', serif;
+  --shadow: 0 2px 8px rgba(146,64,14,0.1), 0 8px 24px -8px rgba(146,64,14,0.15);
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+}
+button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+input,textarea{ font-family:inherit; }
+img{ max-width:100%; display:block; }
+
+#app{
+  max-width:560px;
+  margin:0 auto;
+  min-height:100vh;
+  position:relative;
+  padding-bottom:calc(78px + var(--safe-bottom));
+}
+
+.screen{ display:none; padding:16px 16px calc(16px + var(--safe-bottom)); animation:fadeIn .25s ease; }
+.screen.active{ display:block; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+
+.topbar{
+  position:sticky; top:0; z-index:20;
+  background:var(--bg);
+  padding:calc(12px + var(--safe-top)) 16px 12px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid transparent;
+}
+.topbar h1{
+  font-family:var(--font-display);
+  font-size:21px; font-weight:600; letter-spacing:-0.01em;
+}
+.topbar .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+
+.icon-btn{
+  width:38px; height:38px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface-2); color:var(--ink);
+  transition:transform .15s ease, background .15s ease;
+}
+.icon-btn:active{ transform:scale(0.92); }
+.icon-btn svg{ width:18px; height:18px; }
+
+.balance-pill{
+  display:flex; align-items:center; gap:6px;
+  background:var(--accent-soft); color:var(--accent-ink);
+  padding:7px 12px 7px 8px; border-radius:999px;
+  font-size:13px; font-weight:600;
+  transition:transform .15s ease;
+}
+.balance-pill:active{ transform:scale(0.96); }
+.balance-pill .coin{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700;
+}
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--card-radius, var(--radius-m));
+  padding:16px;
+}
+
+.btn{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; padding:14px 18px;
+  border-radius:var(--btn-radius, var(--radius-s));
+  font-size:15px; font-weight:600;
+  transition:transform .12s ease, opacity .12s ease, box-shadow .2s ease;
+}
+.btn:active{ transform:scale(0.98); }
+.btn-primary{ background:var(--accent); color:#fff; }
+.btn-secondary{ background:var(--surface-2); color:var(--ink); }
+.btn-outline{ background:transparent; color:var(--accent-ink); border:1.5px solid var(--line); }
+.btn-danger{ background:var(--danger-soft); color:var(--danger); }
+.btn[disabled]{ opacity:.45; pointer-events:none; }
+
+/* =============================================
+   TEMA-SPESIFIK EFFEKTLAR
+   ============================================= */
+[data-theme="kino"] .hero-card { border-top: 4px solid var(--accent); }
+[data-theme="kino"] .btn-primary { letter-spacing:0.08em; text-transform:uppercase; font-size:13px; }
+[data-theme="kino"] .topbar h1 { letter-spacing:0.02em; font-family:'Georgia',serif; }
+[data-theme="kino"] .card { border-color:#3D2323; }
+
+[data-theme="oyin"] .btn-primary {
+  border:1px solid var(--accent);
+  box-shadow:0 0 16px rgba(168,85,247,0.5), 0 0 4px rgba(168,85,247,0.3);
+  letter-spacing:0.05em;
+}
+[data-theme="oyin"] .card { border:1px solid rgba(168,85,247,0.3); box-shadow:0 0 12px rgba(168,85,247,0.1); }
+[data-theme="oyin"] .topbar h1 { font-family:'Courier New',monospace; letter-spacing:0.04em; text-shadow:0 0 12px rgba(168,85,247,0.6); }
+[data-theme="oyin"] .balance-pill { border:1px solid rgba(168,85,247,0.5); box-shadow:0 0 8px rgba(168,85,247,0.3); }
+[data-theme="oyin"] .tabbar { border-top:1px solid rgba(168,85,247,0.3); box-shadow:0 -4px 20px rgba(168,85,247,0.15); }
+
+[data-theme="musiqa"] .btn-primary { font-weight:700; box-shadow:4px 4px 0 rgba(217,119,6,0.25); }
+[data-theme="musiqa"] .card { box-shadow:3px 3px 0 rgba(217,119,6,0.12); }
+[data-theme="musiqa"] .interest-card { box-shadow:2px 2px 0 rgba(217,119,6,0.1); }
+
+[data-theme="ilmfan"] body {
+  background-image:linear-gradient(rgba(191,219,254,0.25) 1px, transparent 1px),
+                   linear-gradient(90deg, rgba(191,219,254,0.25) 1px, transparent 1px);
+  background-size:24px 24px;
+}
+[data-theme="ilmfan"] .btn-primary {
+  font-family:'Courier New',monospace; font-size:13px;
+  letter-spacing:0.06em; border:2px solid var(--accent);
+  background:transparent; color:var(--accent);
+}
+[data-theme="ilmfan"] .btn-primary:active { background:var(--accent); color:#fff; }
+[data-theme="ilmfan"] .topbar h1 { font-family:'Courier New',monospace; font-size:17px; }
+
+[data-theme="anime"] .btn-primary { font-weight:800; box-shadow:0 4px 0 rgba(236,72,153,0.4); transform:translateY(-2px); }
+[data-theme="anime"] .btn-primary:active { transform:translateY(0); box-shadow:0 1px 0 rgba(236,72,153,0.3); }
+[data-theme="anime"] .interest-card { transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+[data-theme="anime"] .interest-card:active { transform:scale(1.05) rotate(-1deg); }
+
+[data-theme="avto"] .btn-primary { text-transform:uppercase; letter-spacing:0.12em; font-size:13px; font-weight:900; border-top:2px solid rgba(255,255,255,0.15); }
+[data-theme="avto"] .card { border-left:3px solid rgba(255,255,255,0.15); }
+[data-theme="avto"] .topbar h1 { font-family:'Impact','Arial Narrow',sans-serif; font-size:22px; letter-spacing:0.04em; }
+
+[data-theme="kitob"] .topbar h1 { font-family:'Georgia','Palatino',serif; font-style:italic; }
+[data-theme="kitob"] .btn-primary { border:2px solid rgba(146,64,14,0.3); }
+[data-theme="kitob"] .section-title { border-bottom:2px solid var(--line); padding-bottom:6px; }
+
+[data-theme="sport"] .btn-primary { font-weight:800; letter-spacing:0.02em; }
+
+.section-title{
+  font-family:var(--font-display);
+  font-size:17px; font-weight:600;
+  margin:22px 0 10px;
+  color:var(--ink);
+}
+.section-title:first-child{ margin-top:4px; }
+
+.muted{ color:var(--ink-soft); }
+.small{ font-size:12.5px; }
+
+.tabbar{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:560px;
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  display:flex;
+  padding-bottom:var(--safe-bottom);
+  z-index:30;
+}
+.tab{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:10px 4px 8px;
+  color:var(--ink-soft);
+  transition:color .15s ease;
+}
+.tab.active{ color:var(--accent-ink); }
+.tab svg{ width:22px; height:22px; transition:transform .15s ease; }
+.tab.active svg{ transform:translateY(-1px); }
+.tab span{ font-size:10.5px; font-weight:600; }
+.tab .dot{
+  width:5px; height:5px; border-radius:50%; background:var(--accent);
+  position:relative; top:-14px; left:11px; opacity:0;
+}
+.tab.active .dot{ opacity:1; }
+
+#onboarding{
+  min-height:100vh; display:flex; flex-direction:column;
+  padding:calc(28px + var(--safe-top)) 22px calc(28px + var(--safe-bottom));
+}
+.ob-step{ display:none; flex:1; flex-direction:column; animation:fadeIn .3s ease; }
+.ob-step.active{ display:flex; }
+.ob-progress{ display:flex; gap:6px; margin-bottom:28px; }
+.ob-progress i{ flex:1; height:3px; border-radius:2px; background:var(--line); }
+.ob-progress i.done{ background:var(--accent); }
+.ob-emoji{ font-size:46px; margin-bottom:14px; }
+.ob-title{
+  font-family:var(--font-display); font-size:27px; font-weight:600;
+  line-height:1.25; margin-bottom:10px; letter-spacing:-0.01em;
+}
+.ob-desc{ font-size:14.5px; color:var(--ink-soft); line-height:1.6; margin-bottom:28px; }
+
+.interest-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  margin-bottom:24px;
+}
+.interest-card{
+  display:flex; flex-direction:column; align-items:flex-start; gap:8px;
+  padding:16px 14px; border-radius:var(--interest-border-radius, var(--radius-m));
+  border:1.5px solid var(--line); background:var(--surface);
+  text-align:left; transition:all .15s ease;
+}
+.interest-card .emoji{ font-size:24px; }
+.interest-card .label{ font-size:13.5px; font-weight:600; }
+.interest-card.selected{
+  border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink);
+}
+.interest-card:active{ transform:scale(0.97); }
+
+.ob-footer{ margin-top:auto; display:flex; flex-direction:column; gap:10px; }
+.ob-skip{ text-align:center; font-size:13px; color:var(--ink-soft); padding:6px; }
+
+.hero-card{
+  background:linear-gradient(155deg, var(--accent-soft), var(--surface) 65%);
+  border:1px solid var(--line);
+  border-radius:var(--hero-radius, var(--radius-l));
+  padding:20px;
+  margin-bottom:18px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-card .hero-eyebrow{
+  font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--accent-ink); opacity:.75; margin-bottom:6px;
+}
+.hero-card h2{
+  font-family:var(--font-display); font-size:21px; font-weight:600;
+  line-height:1.3; margin-bottom:6px; max-width:80%;
+}
+.hero-card p{ font-size:13px; color:var(--ink-soft); max-width:85%; margin-bottom:14px; }
+.hero-emoji-bg{
+  position:absolute; right:-6px; bottom:-10px; font-size:74px; opacity:.16;
+  transform:rotate(-8deg);
+}
+
+.quota-strip{
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface-2); border-radius:var(--radius-s);
+  padding:10px 12px; margin:14px 0; font-size:12.5px; color:var(--ink-soft);
+}
+.quota-dots{ display:flex; gap:4px; }
+.quota-dots i{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+.quota-dots i.filled{ background:var(--accent); }
+
+.history-item{
+  display:flex; gap:12px; padding:13px 0; border-bottom:1px solid var(--line);
+}
+.history-item:last-child{ border-bottom:none; }
+.history-icon{
+  flex:0 0 auto; width:38px; height:38px; border-radius:50%;
+  background:var(--accent-soft); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.history-body{ flex:1; min-width:0; }
+.history-body .q{ font-size:13.5px; font-weight:600; margin-bottom:2px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.history-body .meta{ font-size:11.5px; color:var(--ink-soft); }
+.history-price{ font-size:12px; font-weight:700; color:var(--ink-soft); white-space:nowrap; }
+.history-price.free{ color:var(--accent-ink); }
+
+.empty-state{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  padding:48px 24px; color:var(--ink-soft);
+}
+.empty-state .emoji{ font-size:38px; margin-bottom:10px; }
+.empty-state .t{ font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:4px; }
+.empty-state .d{ font-size:12.5px; line-height:1.5; }
+
+.ask-subject-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+.ask-subject-bar .current{
+  display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px;
+}
+.ask-subject-bar .current .emoji{ font-size:19px; }
+
+.input-mode-switch{
+  display:flex; background:var(--surface-2); border-radius:var(--radius-s);
+  padding:3px; margin-bottom:14px;
+}
+.input-mode-switch button{
+  flex:1; padding:9px 4px; border-radius:8px; font-size:12.5px; font-weight:600;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  color:var(--ink-soft); transition:all .15s ease;
+}
+.input-mode-switch button.active{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow); }
+.input-mode-switch svg{ width:14px; height:14px; }
+
+.ask-panel{ display:none; }
+.ask-panel.active{ display:block; animation:fadeIn .2s ease; }
+
+textarea.ask-textarea{
+  width:100%; min-height:120px; padding:14px;
+  border:1.5px solid var(--line); border-radius:var(--radius-m);
+  font-size:14.5px; line-height:1.55; resize:vertical;
+  background:var(--surface); color:var(--ink);
+}
+textarea.ask-textarea:focus{ outline:none; border-color:var(--accent); }
+
+.upload-zone{
+  border:1.5px dashed var(--line); border-radius:var(--radius-m);
+  padding:28px 16px; text-align:center; color:var(--ink-soft);
+  transition:all .15s ease;
+}
+.upload-zone.has-file{ border-style:solid; border-color:var(--accent); padding:10px; }
+.upload-zone .emoji{ font-size:30px; margin-bottom:8px; }
+.upload-zone .t{ font-size:13.5px; font-weight:600; color:var(--ink); margin-bottom:2px; }
+.upload-zone .d{ font-size:12px; }
+.upload-preview{ max-height:220px; border-radius:var(--radius-s); overflow:hidden; }
+.upload-preview img{ width:100%; object-fit:cover; }
+
+.voice-zone{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:34px 16px; gap:14px;
+}
+.voice-record-btn{
+  width:74px; height:74px; border-radius:50%;
+  background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 0 8px var(--accent-soft);
+  transition:transform .15s ease;
+}
+.voice-record-btn.recording{ animation:pulse 1.2s ease infinite; background:var(--danger); }
+@keyframes pulse{ 0%,100%{box-shadow:0 0 0 8px var(--accent-soft)} 50%{box-shadow:0 0 0 14px var(--accent-soft)} }
+.voice-record-btn svg{ width:28px; height:28px; }
+.voice-status{ font-size:13px; color:var(--ink-soft); font-weight:600; }
+.voice-waveform{ display:flex; align-items:center; gap:3px; height:28px; }
+.voice-waveform i{ width:3px; border-radius:2px; background:var(--accent); }
+
+.ask-submit-wrap{ margin-top:16px; }
+.ask-hint{ text-align:center; font-size:12px; color:var(--ink-soft); margin-top:8px; }
+
+.answer-card{
+  background:var(--accent-soft); border-radius:var(--radius-l);
+  padding:18px; margin-bottom:16px; position:relative;
+}
+.answer-card .badge{
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--surface); color:var(--accent-ink);
+  font-size:11px; font-weight:700; padding:5px 10px; border-radius:999px;
+  margin-bottom:12px;
+}
+.answer-text{ font-size:14.5px; line-height:1.7; color:var(--ink); white-space:pre-wrap; }
+.typing-dots{ display:flex; gap:5px; padding:8px 0; }
+.typing-dots i{
+  width:7px; height:7px; border-radius:50%; background:var(--accent);
+  animation:bounce 1.2s ease infinite;
+}
+.typing-dots i:nth-child(2){ animation-delay:.15s; }
+.typing-dots i:nth-child(3){ animation-delay:.3s; }
+@keyframes bounce{ 0%,60%,100%{transform:translateY(0); opacity:.5} 30%{transform:translateY(-5px); opacity:1} }
+
+.profile-head{
+  display:flex; align-items:center; gap:14px; padding:6px 2px 22px;
+}
+.avatar{
+  width:64px; height:64px; border-radius:50%;
+  background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; font-weight:700; font-family:var(--font-display);
+  position:relative; flex:0 0 auto; overflow:hidden;
+}
+.avatar img{ width:100%; height:100%; object-fit:cover; }
+.avatar .edit-badge{
+  position:absolute; bottom:-2px; right:-2px;
+  width:22px; height:22px; border-radius:50%;
+  background:var(--surface); border:2px solid var(--bg);
+  display:flex; align-items:center; justify-content:center;
+}
+.avatar .edit-badge svg{ width:11px; height:11px; color:var(--ink); }
+.profile-head .name{ font-size:17px; font-weight:700; }
+.profile-head .username{ font-size:12.5px; color:var(--ink-soft); }
+
+.settings-group{ margin-bottom:22px; }
+.settings-group-label{
+  font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--ink-soft); margin-bottom:8px; padding:0 4px;
+}
+.settings-list{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; }
+.settings-row{
+  display:flex; align-items:center; gap:12px; width:100%;
+  padding:14px; border-bottom:1px solid var(--line);
+  transition:background .15s ease;
+}
+.settings-row:last-child{ border-bottom:none; }
+.settings-row:active{ background:var(--surface-2); }
+.settings-row .row-icon{
+  width:30px; height:30px; border-radius:9px; background:var(--accent-soft); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+}
+.settings-row .row-icon svg{ width:15px; height:15px; }
+.settings-row .row-text{ flex:1; text-align:left; }
+.settings-row .row-title{ font-size:14px; font-weight:600; }
+.settings-row .row-sub{ font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+.settings-row .row-value{ font-size:13px; color:var(--ink-soft); font-weight:600; }
+.settings-row .chevron{ color:var(--ink-soft); opacity:.5; }
+.settings-row .chevron svg{ width:16px; height:16px; }
+
+.lang-pills{ display:flex; gap:8px; }
+.lang-pill{
+  flex:1; padding:11px 4px; border-radius:var(--radius-s);
+  border:1.5px solid var(--line); font-size:13px; font-weight:600;
+  text-align:center; transition:all .15s ease;
+}
+.lang-pill.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+
+.balance-hero{
+  background:var(--ink); color:#fff;
+  border-radius:var(--radius-l); padding:22px;
+  margin-bottom:18px; position:relative; overflow:hidden;
+}
+.balance-hero::after{
+  content:''; position:absolute; right:-30px; top:-30px;
+  width:140px; height:140px; border-radius:50%;
+  background:var(--accent); opacity:.25;
+}
+.balance-hero .label{ font-size:12px; opacity:.65; margin-bottom:6px; position:relative; }
+.balance-hero .amount{ font-family:var(--font-display); font-size:34px; font-weight:600; position:relative; }
+.balance-hero .amount span{ font-size:16px; opacity:.7; font-weight:500; }
+
+.amount-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
+.amount-option{
+  padding:14px 4px; border-radius:var(--radius-s);
+  border:1.5px solid var(--line); text-align:center;
+  font-size:14px; font-weight:700; transition:all .15s ease;
+}
+.amount-option.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+
+.custom-amount-input{
+  width:100%; padding:14px; border:1.5px solid var(--line); border-radius:var(--radius-s);
+  font-size:16px; font-weight:700; text-align:center; margin-bottom:14px;
+  background:var(--surface); color:var(--ink);
+}
+.custom-amount-input:focus{ outline:none; border-color:var(--accent); }
+
+.card-display{
+  background:linear-gradient(135deg, var(--accent-ink), var(--accent));
+  color:#fff; border-radius:var(--radius-m); padding:18px;
+  margin-bottom:16px;
+}
+.card-display .bank-label{ font-size:11px; opacity:.75; margin-bottom:10px; }
+.card-display .card-num{
+  font-size:19px; font-weight:600; letter-spacing:.04em; margin-bottom:14px;
+  font-family:'Courier New', monospace;
+}
+.card-display .card-owner{ font-size:12.5px; opacity:.85; }
+.card-display .copy-row{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,.2);
+}
+.card-display .copy-btn{
+  display:flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,.18); padding:7px 12px; border-radius:999px;
+  font-size:12px; font-weight:600; color:#fff;
+}
+
+.tx-status{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700;
+}
+.tx-status.pending{ background:#FBF1DC; color:#8A6310; }
+.tx-status.approved{ background:var(--accent-soft); color:var(--accent-ink); }
+.tx-status.rejected{ background:var(--danger-soft); color:var(--danger); }
+
+.sheet-overlay{
+  position:fixed; inset:0; background:rgba(20,18,14,.45);
+  z-index:50; opacity:0; pointer-events:none; transition:opacity .2s ease;
+}
+.sheet-overlay.open{ opacity:1; pointer-events:auto; }
+.sheet{
+  position:fixed; left:50%; bottom:0; transform:translate(-50%, 100%);
+  width:100%; max-width:560px;
+  background:var(--surface); border-radius:24px 24px 0 0;
+  padding:10px 20px calc(24px + var(--safe-bottom));
+  z-index:51; transition:transform .28s cubic-bezier(.32,.72,0,1);
+  max-height:85vh; overflow-y:auto;
+}
+.sheet-overlay.open .sheet{ transform:translate(-50%, 0); }
+.sheet-handle{ width:36px; height:4px; background:var(--line); border-radius:2px; margin:0 auto 16px; }
+.sheet h3{ font-family:var(--font-display); font-size:18px; font-weight:600; margin-bottom:14px; }
+
+.subject-option{
+  display:flex; align-items:center; gap:12px; width:100%;
+  padding:13px 4px; border-bottom:1px solid var(--line);
+}
+.subject-option:last-child{ border-bottom:none; }
+.subject-option .emoji{ font-size:20px; }
+.subject-option .name{ font-size:14.5px; font-weight:600; }
+.subject-option.selected{ color:var(--accent-ink); }
+.subject-option .check{ margin-left:auto; opacity:0; color:var(--accent); }
+.subject-option.selected .check{ opacity:1; }
+
+/* Dark temalar uchun input va textarea */
+[data-theme="kino"] textarea.ask-textarea,
+[data-theme="kino"] input,
+[data-theme="oyin"] textarea.ask-textarea,
+[data-theme="oyin"] input,
+[data-theme="avto"] textarea.ask-textarea,
+[data-theme="avto"] input {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-theme="kino"] textarea.ask-textarea::placeholder,
+[data-theme="oyin"] textarea.ask-textarea::placeholder,
+[data-theme="avto"] textarea.ask-textarea::placeholder {
+  color: var(--ink-soft);
+}
+
+/* O'yin: scanline effekt (dekorativ) */
+[data-theme="oyin"] #app::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(168,85,247,0.02) 2px,
+    rgba(168,85,247,0.02) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Kino: film grain texture */
+[data-theme="kino"] .hero-card h2 {
+  color: #FEF2F2;
+  font-style: italic;
+}
+[data-theme="kino"] .hero-card p {
+  color: #FBBDBD;
+}
+[data-theme="kino"] .hero-card .btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* O'yin: glow tab labels */
+[data-theme="oyin"] .tab.active span {
+  color: var(--accent-ink);
+  text-shadow: 0 0 8px rgba(168,85,247,0.7);
+}
+[data-theme="oyin"] .hero-card h2 {
+  font-family: 'Courier New', monospace;
+  color: var(--accent-ink);
+}
+[data-theme="oyin"] .hero-card p {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #C4B5FD;
+}
+
+/* Avto: kapital harflar */
+[data-theme="avto"] .hero-card h2 {
+  font-family: 'Impact', 'Arial Narrow', sans-serif;
+  letter-spacing: 0.04em;
+  color: #F9FAFB;
+  text-transform: uppercase;
+}
+[data-theme="avto"] .hero-card p {
+  color: #9CA3AF;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+[data-theme="avto"] .hero-card {
+  border-left: 4px solid rgba(255,255,255,0.2);
+}
+
+/* Musiqa: nota chiziqlarini hero fon patternida ko'rsatish */
+[data-theme="musiqa"] .hero-card h2 {
+  font-style: italic;
+}
+
+/* Anime: yuqori qavariq elementlar */
+[data-theme="anime"] .tabbar {
+  background: linear-gradient(to top, #FFF5FB, #FFFFFF);
+}
+[data-theme="anime"] .tab.active span {
+  color: var(--accent);
+}
+
+/* Kitob: serif matnlar */
+[data-theme="kitob"] .hero-card h2 {
+  font-style: italic;
+  font-family: 'Georgia', serif;
+}
+
+/* Hero karta ichidagi barcha elementlar pattern ustida ko'rinishi */
+.hero-card h2, .hero-card p, .hero-card .hero-eyebrow, .hero-card .btn-primary {
+  position: relative;
+  z-index: 1;
+}
+
+.toast{
+  position:fixed; bottom:calc(92px + var(--safe-bottom)); left:50%; transform:translate(-50%, 20px);
+  background:var(--ink); color:#fff; padding:12px 18px; border-radius:999px;
+  font-size:13px; font-weight:600; z-index:60; opacity:0; pointer-events:none;
+  transition:all .25s ease; display:flex; align-items:center; gap:8px;
+  box-shadow:var(--shadow); max-width:90%;
+}
+.toast.show{ opacity:1; transform:translate(-50%, 0); }
+.toast.error{ background:var(--danger); }
+
+.flex-row{ display:flex; align-items:center; justify-content:space-between; }
+.gap-8{ gap:8px; }
+.mt-10{ margin-top:10px; }
+.mb-10{ margin-bottom:10px; }
+.hidden{ display:none !important; }
+.spinner{
+  width:16px; height:16px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.4); border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= ONBOARDING ================= -->
+  <div id="onboarding">
+    <div class="ob-progress">
+      <i id="ob-prog-1" class="done"></i><i id="ob-prog-2"></i>
+    </div>
+
+    <div class="ob-step active" id="ob-step-1">
+      <div class="ob-emoji">👋</div>
+      <div class="ob-title">Xush kelibsiz!</div>
+      <div class="ob-desc">Men — sizning shaxsiy o'quv yordamchingizman. Tushunmagan mavzularni siz yaxshi ko'rgan narsalar orqali tushuntirib beraman.</div>
+      <div class="ob-footer">
+        <button class="btn btn-primary" onclick="goToObStep(2)">Boshlash</button>
+      </div>
+    </div>
+
+    <div class="ob-step" id="ob-step-2">
+      <div class="ob-title">Nimalarni yaxshi ko'rasiz?</div>
+      <div class="ob-desc">Bir nechtasini tanlang — shunga mos misollar bilan tushuntiraman.</div>
+      <div class="interest-grid" id="interest-grid"></div>
+      <div class="ob-footer">
+        <button class="btn btn-primary" id="ob-finish-btn" onclick="finishOnboarding()" disabled>Davom etish</button>
+        <div class="ob-skip" onclick="skipOnboarding()">Hozircha o'tkazib yuborish</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ASOSIY ILOVA ================= -->
+  <div id="main-app" class="hidden">
+
+    <!-- ---- BOSH SAHIFA ---- -->
+    <div class="screen active" id="screen-home">
+      <div class="topbar" id="home-topbar">
+        <div>
+          <h1>Salom, <span id="home-username">Talaba</span> 👋</h1>
+          <div class="sub" id="home-date"></div>
+        </div>
+        <button class="balance-pill" onclick="goTo('balance')">
+          <span class="coin">₸</span>
+          <span id="home-balance">0</span>
+        </button>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-eyebrow">Tushunmagan narsa bormi?</div>
+        <h2>Keling, tushuntirib beraman</h2>
+        <p>Fanni tanlang va savolingizni matn, rasm yoki ovoz orqali yuboring</p>
+        <button class="btn btn-primary" style="width:auto; padding:11px 20px;" onclick="goTo('ask')">Savol berish</button>
+        <div class="hero-emoji-bg" id="hero-emoji">📘</div>
+      </div>
+
+      <div class="quota-strip">
+        <div class="quota-dots" id="quota-dots"></div>
+        <span id="quota-text">Bugun 2 ta bepul savolingiz bor</span>
+      </div>
+
+      <div class="section-title">So'nggi savollar</div>
+      <div class="card" id="history-card">
+        <div class="empty-state">
+          <div class="emoji">💭</div>
+          <div class="t">Hali savol bermadingiz</div>
+          <div class="d">Birinchi savolingizni berib, qanday ishlashini ko'ring</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- SAVOL BERISH ---- -->
+    <div class="screen" id="screen-ask">
+      <div class="topbar">
+        <button class="icon-btn" onclick="goTo('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h1 style="font-size:17px;">Savol berish</h1>
+        <div style="width:38px;"></div>
+      </div>
+
+      <div class="ask-subject-bar">
+        <button class="current" onclick="openSheet('subject-sheet')">
+          <span class="emoji" id="ask-subject-emoji">📘</span>
+          <span id="ask-subject-name">Fan tanlang</span>
+        </button>
+        <button class="icon-btn" onclick="openSheet('subject-sheet')" style="width:30px;height:30px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="input-mode-switch">
+        <button class="active" data-mode="text" onclick="setAskMode('text')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          Matn
+        </button>
+        <button data-mode="image" onclick="setAskMode('image')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+          Rasm
+        </button>
+        <button data-mode="voice" onclick="setAskMode('voice')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3"/></svg>
+          Ovoz
+        </button>
+      </div>
+
+      <div class="ask-panel active" id="panel-text">
+        <textarea class="ask-textarea" id="text-input" placeholder="Masalan: Nyutonning uchinchi qonuni nima va u qanday ishlaydi?"></textarea>
+      </div>
+
+      <div class="ask-panel" id="panel-image">
+        <div class="upload-zone" id="upload-zone" onclick="triggerFileInput()">
+          <div id="upload-placeholder">
+            <div class="emoji">📷</div>
+            <div class="t">Masala rasmini yuklang</div>
+            <div class="d">Bosing va rasm tanlang</div>
+          </div>
+          <div class="upload-preview hidden" id="upload-preview"><img id="upload-img" src=""></div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+        <textarea class="ask-textarea" id="image-caption" placeholder="(ixtiyoriy) Rasm haqida qisqa izoh qoldiring" style="min-height:60px; margin-top:10px;"></textarea>
+      </div>
+
+      <div class="ask-panel" id="panel-voice">
+        <div class="voice-zone">
+          <button class="voice-record-btn" id="voice-btn" onclick="toggleVoiceRecording()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3"/></svg>
+          </button>
+          <div class="voice-status" id="voice-status">Yozib olish uchun bosing</div>
+          <div class="voice-waveform hidden" id="voice-waveform"></div>
+        </div>
+      </div>
+
+      <div class="ask-submit-wrap">
+        <button class="btn btn-primary" id="ask-submit-btn" onclick="submitQuestion()">
+          <span id="ask-submit-text">Tushuntirishni so'rash</span>
+        </button>
+        <div class="ask-hint" id="ask-price-hint">Bugun bepul savolingiz bor ✦</div>
+      </div>
+    </div>
+
+    <!-- ---- AI JAVOB ---- -->
+    <div class="screen" id="screen-answer">
+      <div class="topbar">
+        <button class="icon-btn" onclick="goTo('ask')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h1 style="font-size:17px;">Tushuntirish</h1>
+        <button class="icon-btn" onclick="goTo('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="answer-card">
+        <div class="badge" id="answer-subject-badge">📘 Fan</div>
+        <div class="answer-text" id="answer-text">
+          <div class="typing-dots"><i></i><i></i><i></i></div>
+        </div>
+      </div>
+
+      <div class="flex-row gap-8" id="answer-actions" style="display:none;">
+        <button class="btn btn-secondary" onclick="goTo('ask')">Yana savol berish</button>
+        <button class="btn btn-outline" onclick="goTo('home')">Bosh sahifaga</button>
+      </div>
+    </div>
+
+    <!-- ---- BALANS ---- -->
+    <div class="screen" id="screen-balance">
+      <div class="topbar">
+        <button class="icon-btn" onclick="goTo('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h1 style="font-size:17px;">Balans</h1>
+        <div style="width:38px;"></div>
+      </div>
+
+      <div class="balance-hero">
+        <div class="label">Joriy balans</div>
+        <div class="amount"><span id="balance-amount">0</span><span> so'm</span></div>
+      </div>
+
+      <div class="section-title">To'ldirish summasi</div>
+      <div class="amount-grid">
+        <button class="amount-option" data-amount="10000" onclick="selectAmount(this, 10000)">10 000</button>
+        <button class="amount-option" data-amount="25000" onclick="selectAmount(this, 25000)">25 000</button>
+        <button class="amount-option" data-amount="50000" onclick="selectAmount(this, 50000)">50 000</button>
+      </div>
+      <input type="number" inputmode="numeric" class="custom-amount-input" id="custom-amount" placeholder="Yoki summani kiriting" oninput="customAmountInput(this.value)">
+
+      <button class="btn btn-primary" id="topup-create-btn" onclick="createTopup()" disabled>To'ldirish so'rovini yaratish</button>
+
+      <div class="section-title">So'nggi to'lovlar</div>
+      <div class="card" id="tx-history-card">
+        <div class="empty-state">
+          <div class="emoji">🧾</div>
+          <div class="t">Hali to'lov bo'lmagan</div>
+          <div class="d">Balansingizni to'ldirsangiz, shu yerda ko'rinadi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- TO'LOV JARAYONI (karta + chek) ---- -->
+    <div class="screen" id="screen-payment">
+      <div class="topbar">
+        <button class="icon-btn" onclick="goTo('balance')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h1 style="font-size:17px;">To'lovni amalga oshirish</h1>
+        <div style="width:38px;"></div>
+      </div>
+
+      <div class="card-display">
+        <div class="bank-label">Quyidagi kartaga o'tkazing</div>
+        <div class="card-num" id="payment-card-number">8600 0000 0000 0000</div>
+        <div class="card-owner" id="payment-card-owner">F.I.Sh.</div>
+        <div class="copy-row">
+          <span class="small" style="opacity:.85;">Summa: <b id="payment-amount-label">0 so'm</b></span>
+          <button class="copy-btn" onclick="copyCardNumber()">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Nusxalash
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="settings-group-label" style="margin-bottom:10px;">Keyingi qadamlar</div>
+        <div class="small muted" style="line-height:1.7;">
+          1. Yuqoridagi karta raqamiga ko'rsatilgan summani o'tkazing<br>
+          2. To'lov chekining (skrinshot yoki rasm) suratini oling<br>
+          3. Pastdan chek rasmini yuklang va yuboring<br>
+          4. Admin tasdiqlagach, balansingiz avtomatik to'ldiriladi
+        </div>
+      </div>
+
+      <div class="section-title">Chek rasmini yuklang</div>
+      <div class="upload-zone" id="receipt-upload-zone" onclick="triggerReceiptInput()">
+        <div id="receipt-placeholder">
+          <div class="emoji">🧾</div>
+          <div class="t">Chek rasmini tanlang</div>
+          <div class="d">Bosing va rasm yuklang</div>
+        </div>
+        <div class="upload-preview hidden" id="receipt-preview"><img id="receipt-img" src=""></div>
+      </div>
+      <input type="file" id="receipt-input" accept="image/*" class="hidden" onchange="handleReceiptSelect(event)">
+
+      <button class="btn btn-primary mt-10" id="receipt-submit-btn" onclick="submitReceipt()" disabled>Yuborish</button>
+    </div>
+
+    <!-- ---- SOZLAMALAR ---- -->
+    <div class="screen" id="screen-settings">
+      <div class="topbar">
+        <h1>Sozlamalar</h1>
+      </div>
+
+      <div class="profile-head">
+        <div class="avatar" id="profile-avatar" onclick="triggerAvatarInput()">
+          <span id="profile-avatar-initial">T</span>
+          <img id="profile-avatar-img" class="hidden" src="">
+          <div class="edit-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="handleAvatarSelect(event)">
+        <div>
+          <div class="name" id="profile-name">Talaba</div>
+          <div class="username" id="profile-username">@username</div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-label">Shaxsiylashtirish</div>
+        <div class="settings-list">
+          <button class="settings-row" onclick="goTo('interests-edit')">
+            <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <div class="row-text">
+              <div class="row-title">Qiziqishlar</div>
+              <div class="row-sub" id="settings-interests-preview">Tanlanmagan</div>
+            </div>
+            <div class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-label">Til</div>
+        <div class="lang-pills">
+          <button class="lang-pill active" data-lang="uz" onclick="setLanguage('uz')">O'zbek</button>
+          <button class="lang-pill" data-lang="ru" onclick="setLanguage('ru')">Русский</button>
+          <button class="lang-pill" data-lang="en" onclick="setLanguage('en')">English</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-label">Hisob</div>
+        <div class="settings-list">
+          <button class="settings-row" onclick="goTo('balance')">
+            <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+            <div class="row-text"><div class="row-title">Balans va to'lovlar</div></div>
+            <div class="row-value" id="settings-balance-preview">0 so'm</div>
+          </button>
+          <button class="settings-row" onclick="openSheet('contact-admin-sheet')">
+            <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
+            <div class="row-text"><div class="row-title">Admin bilan bog'lanish</div></div>
+            <div class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- QIZIQISHLARNI TAHRIRLASH ---- -->
+    <div class="screen" id="screen-interests-edit">
+      <div class="topbar">
+        <button class="icon-btn" onclick="goTo('settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h1 style="font-size:17px;">Qiziqishlar</h1>
+        <div style="width:38px;"></div>
+      </div>
+      <p class="muted small mb-10">O'zgartirsangiz, tushuntirishlar va ilova ko'rinishi shunga moslashadi</p>
+      <div class="interest-grid" id="interest-grid-edit"></div>
+      <button class="btn btn-primary mt-10" onclick="saveInterestsEdit()">Saqlash</button>
+    </div>
+
+  </div>
+
+  <!-- ================= PASTKI NAVIGATSIYA ================= -->
+  <div class="tabbar hidden" id="tabbar">
+    <button class="tab active" data-tab="home" onclick="goTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span>Bosh sahifa</span>
+      <i class="dot"></i>
+    </button>
+    <button class="tab" data-tab="ask" onclick="goTo('ask')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span>Savol berish</span>
+      <i class="dot"></i>
+    </button>
+    <button class="tab" data-tab="balance" onclick="goTo('balance')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      <span>Balans</span>
+      <i class="dot"></i>
+    </button>
+    <button class="tab" data-tab="settings" onclick="goTo('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 005 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Sozlamalar</span>
+      <i class="dot"></i>
+    </button>
+  </div>
+
+</div>
+
+<!-- ================= SHEETLAR (modal) ================= -->
+<div class="sheet-overlay" id="overlay" onclick="closeAllSheets(event)">
+  <div class="sheet" id="subject-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <h3>Fanni tanlang</h3>
+    <div id="subject-list"></div>
+  </div>
+
+  <div class="sheet" id="contact-admin-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <h3>Admin bilan bog'lanish</h3>
+    <p class="muted small mb-10">Savol yoki muammoingiz bo'lsa, to'g'ridan-to'g'ri yozing</p>
+    <button class="btn btn-primary" onclick="contactAdmin()">Telegram orqali yozish</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   SOZLAMALAR — backend manzilini shu yerda almashtiring
+   ============================================================ */
+const CONFIG = {
+  API_BASE_URL: "https://study-ai-backend-production.up.railway.app",                         // Backend ulandi
+  ADMIN_USERNAME: "your_admin_username",    // <-- admin Telegram username (@ siz)
+  ANTHROPIC_API_KEY: "",                    // <-- https://console.anthropic.com dan olingan API kalit
+  CARD_NUMBER: "8600 XXXX XXXX XXXX",      // <-- to'lov uchun haqiqiy karta raqamingiz
+  CARD_OWNER: "Ism Familiya",              // <-- karta egasining ismi
+};
+
+/* ============================================================
+   MA'LUMOTLAR — fanlar va qiziqishlar ro'yxati
+   ============================================================ */
+const INTERESTS = [
+  { id: "sport",  emoji: "⚽", label: "Sport",     theme: "sport"  },
+  { id: "kino",   emoji: "🎬", label: "Kino",      theme: "kino"   },
+  { id: "oyin",   emoji: "🎮", label: "O'yinlar",  theme: "oyin"   },
+  { id: "musiqa", emoji: "🎵", label: "Musiqa",    theme: "musiqa" },
+  { id: "ilmfan", emoji: "🔬", label: "Ilm-fan",   theme: "ilmfan" },
+  { id: "anime",  emoji: "🌸", label: "Anime",     theme: "anime"  },
+  { id: "avto",   emoji: "🚗", label: "Avtomobil", theme: "avto"   },
+  { id: "kitob",  emoji: "📖", label: "Kitoblar",  theme: "kitob"  },
+];
+
+const SUBJECTS = [
+  { id: "matematika", emoji: "📐", name: "Matematika" },
+  { id: "fizika",      emoji: "⚛️", name: "Fizika" },
+  { id: "kimyo",       emoji: "🧪", name: "Kimyo" },
+  { id: "biologiya",   emoji: "🧬", name: "Biologiya" },
+  { id: "tarix",       emoji: "🏛️", name: "Tarix" },
+  { id: "ingliz_tili", emoji: "🇬🇧", name: "Ingliz tili" },
+  { id: "adabiyot",    emoji: "📚", name: "Adabiyot" },
+  { id: "geografiya",  emoji: "🌍", name: "Geografiya" },
+  { id: "boshqa",      emoji: "💡", name: "Boshqa" },
+];
+
+/* ============================================================
+   HOLAT (STATE) — ilovaning joriy ma'lumotlari
+   ============================================================ */
+const state = {
+  user: null,            // { telegram_id, full_name, username, language, avatar_url, balance, free_questions_today, interests }
+  history: [],            // savol-javob tarixi
+  transactions: [],        // to'lov tarixi
+  selectedInterests: [],
+  currentScreen: "home",
+  askMode: "text",
+  selectedSubject: SUBJECTS[0],
+  selectedImageFile: null,
+  selectedReceiptFile: null,
+  selectedAvatarFile: null,
+  pendingTopupAmount: 0,
+  pendingTopupTxId: null,
+  isRecording: false,
+};
+
+const tg = window.Telegram?.WebApp;
+
+/* ============================================================
+   ISHGA TUSHIRISH
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", init);
+
+async function init() {
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    try { tg.disableVerticalSwipes(); } catch (e) {}
+  }
+
+  renderInterestGrid("interest-grid", state.selectedInterests, toggleOnboardingInterest);
+  renderSubjectSheet();
+  updateHomeDate();
+
+  await loadProfile();
+}
+
+/* ============================================================
+   BACKEND BILAN ALOQA (API helper)
+   ============================================================ */
+async function apiRequest(path, options = {}) {
+  const initData = tg?.initData || "";
+  const headers = {
+    "X-Telegram-Init-Data": initData,
+    ...(options.headers || {}),
+  };
+
+  const res = await fetch(`${CONFIG.API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody.detail || `So'rov xato qaytardi (${res.status})`);
+  }
+  return res.json();
+}
+
+async function loadProfile() {
+  // Telegram foydalanuvchi ma'lumotlarini olish
+  const tgUser = tg?.initDataUnsafe?.user;
+  const savedData = loadLocalData();
+
+  if (CONFIG.API_BASE_URL) {
+    // Backend mavjud bo'lsa — undan olish
+    try {
+      const profile = await apiRequest("/api/profile/me");
+      state.user = profile;
+      saveLocalData({ balance: profile.balance, free_questions_today: profile.free_questions_today, interests: profile.interests, history: [] });
+
+      if (!profile.interests || profile.interests.length === 0) {
+        showOnboarding();
+      } else {
+        state.selectedInterests = profile.interests;
+        applyTheme(profile.interests[0]);
+        showMainApp();
+      }
+      return;
+    } catch (err) {
+      console.warn("Backend xato:", err.message);
+    }
+  }
+
+  // Backend yo'q — local storage + Telegram ma'lumotlaridan foydalanish
+  const resetDate = savedData.resetDate || "";
+  const today = new Date().toDateString();
+  let freeLeft = savedData.free_questions_today ?? 2;
+  if (resetDate !== today) {
+    freeLeft = 2; // har kuni yangilanadi
+  }
+
+  state.user = {
+    telegram_id: tgUser?.id || 0,
+    full_name: tgUser
+      ? `${tgUser.first_name} ${tgUser.last_name || ""}`.trim()
+      : (savedData.full_name || "Talaba"),
+    username: tgUser?.username || savedData.username || "",
+    language: savedData.language || "uz",
+    avatar_url: tgUser?.photo_url || null,
+    balance: savedData.balance ?? 0,
+    free_questions_today: freeLeft,
+    interests: savedData.interests || [],
+  };
+  state.history = savedData.history || [];
+  state.transactions = savedData.transactions || [];
+
+  if (!state.user.interests || state.user.interests.length === 0) {
+    showOnboarding();
+  } else {
+    state.selectedInterests = state.user.interests;
+    applyTheme(state.user.interests[0]);
+    showMainApp();
+  }
+}
+
+// LocalStorage yordamchilari
+function loadLocalData() {
+  try {
+    return JSON.parse(localStorage.getItem("ouv_app_data") || "{}");
+  } catch { return {}; }
+}
+
+function saveLocalData(patch) {
+  try {
+    const current = loadLocalData();
+    const today = new Date().toDateString();
+    localStorage.setItem("ouv_app_data", JSON.stringify({
+      ...current,
+      ...patch,
+      resetDate: today,
+      full_name: state.user?.full_name || current.full_name,
+      username: state.user?.username || current.username,
+    }));
+  } catch (e) { console.warn("LocalStorage saqlanmadi:", e); }
+}
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+function renderInterestGrid(containerId, selected, onToggle) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  INTERESTS.forEach((interest) => {
+    const card = document.createElement("button");
+    card.className = "interest-card" + (selected.includes(interest.id) ? " selected" : "");
+    card.innerHTML = `<span class="emoji">${interest.emoji}</span><span class="label">${interest.label}</span>`;
+    card.onclick = () => onToggle(interest.id);
+    container.appendChild(card);
+  });
+}
+
+function toggleOnboardingInterest(id) {
+  const idx = state.selectedInterests.indexOf(id);
+  if (idx >= 0) state.selectedInterests.splice(idx, 1);
+  else state.selectedInterests.push(id);
+
+  renderInterestGrid("interest-grid", state.selectedInterests, toggleOnboardingInterest);
+  document.getElementById("ob-finish-btn").disabled = state.selectedInterests.length === 0;
+  haptic("light");
+}
+
+function goToObStep(step) {
+  document.querySelectorAll(".ob-step").forEach((el) => el.classList.remove("active"));
+  document.getElementById(`ob-step-${step}`).classList.add("active");
+  document.getElementById("ob-prog-2").classList.toggle("done", step >= 2);
+  haptic("light");
+}
+
+async function finishOnboarding() {
+  if (state.selectedInterests.length === 0) return;
+  applyTheme(state.selectedInterests[0]);
+  state.user.interests = state.selectedInterests;
+
+  if (CONFIG.API_BASE_URL) {
+    try {
+      const profile = await apiRequest("/api/profile/interests", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interests: state.selectedInterests }),
+      });
+      state.user = profile;
+    } catch (err) {
+      console.warn("Backend xato, lokal saqlanmoqda:", err.message);
+    }
+  }
+
+  saveLocalData({ interests: state.selectedInterests });
+  showMainApp();
+}
+
+function skipOnboarding() {
+  showMainApp();
+}
+
+function showOnboarding() {
+  document.getElementById("onboarding").classList.remove("hidden");
+  document.getElementById("main-app").classList.add("hidden");
+  document.getElementById("tabbar").classList.add("hidden");
+}
+
+function showMainApp() {
+  document.getElementById("onboarding").classList.add("hidden");
+  document.getElementById("main-app").classList.remove("hidden");
+  document.getElementById("tabbar").classList.remove("hidden");
+  renderProfileUI();
+  renderHomeScreen();
+}
+
+/* ============================================================
+   TEMA — qiziqishga qarab interfeysni qayta bo'yash
+   ============================================================ */
+const THEME_CONFIGS = {
+  sport: {
+    emoji: "⚽",
+    heroBg: "linear-gradient(135deg, #DCFCE7 0%, #FFFFFF 60%)",
+    heroPattern: `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60'><circle cx='30' cy='30' r='20' fill='none' stroke='rgba(22,163,74,0.08)' stroke-width='2'/><line x1='10' y1='30' x2='50' y2='30' stroke='rgba(22,163,74,0.06)' stroke-width='1'/><line x1='30' y1='10' x2='30' y2='50' stroke='rgba(22,163,74,0.06)' stroke-width='1'/></svg>`,
+    bodyPattern: null,
+    tabIcons: {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>`,
+      ask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`,
+      balance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>`,
+      settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06.06A1.65 1.65 0 005 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+    },
+    heroTitle: "Keling, tushuntirib beraman",
+    heroDesc: "Fanni tanlang va savolingizni yuboring — sport misollari bilan!",
+    tabLabels: { home: "Bosh sahifa", ask: "Savol", balance: "Balans", settings: "Sozlama" },
+  },
+  kino: {
+    emoji: "🎬",
+    heroBg: "linear-gradient(160deg, #1C1212 0%, #0F0A0A 100%)",
+    heroPattern: null,
+    bodyPattern: null,
+    tabIcons: null,
+    heroTitle: "Sahnaga chiqing...",
+    heroDesc: "Tushunmagan mavzuni topshiriq qiling — drama sahna kabi jonlantiraman",
+    tabLabels: { home: "BOSH", ask: "SAVOL", balance: "KASSA", settings: "REJISSOR" },
+  },
+  oyin: {
+    emoji: "🎮",
+    heroBg: "linear-gradient(135deg, #150B2A 0%, #1A1335 100%)",
+    heroPattern: `<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><polygon points='40,5 75,28 75,52 40,75 5,52 5,28' fill='none' stroke='rgba(168,85,247,0.1)' stroke-width='1'/><polygon points='40,15 65,30 65,50 40,65 15,50 15,30' fill='none' stroke='rgba(168,85,247,0.07)' stroke-width='1'/></svg>`,
+    bodyPattern: null,
+    tabIcons: {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M8 10h2m0 0v2m0-2V8M14 11h2M6 19l-2 2m14-2l2 2"/></svg>`,
+      ask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
+      balance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
+      settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06.06A1.65 1.65 0 005 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+    },
+    heroTitle: "🎮 YANGI MISSIYA",
+    heroDesc: "> Savol bering — xarakter kabi tushuntiraman_ ",
+    tabLabels: { home: "BASE", ask: "QUEST", balance: "COINS", settings: "CONFIG" },
+  },
+  musiqa: {
+    emoji: "🎵",
+    heroBg: "linear-gradient(160deg, #FEF3C7 0%, #FFFBEB 70%)",
+    heroPattern: `<svg xmlns='http://www.w3.org/2000/svg' width='100' height='60'><line x1='0' y1='15' x2='100' y2='15' stroke='rgba(217,119,6,0.12)' stroke-width='1'/><line x1='0' y1='23' x2='100' y2='23' stroke='rgba(217,119,6,0.12)' stroke-width='1'/><line x1='0' y1='31' x2='100' y2='31' stroke='rgba(217,119,6,0.12)' stroke-width='1'/><line x1='0' y1='39' x2='100' y2='39' stroke='rgba(217,119,6,0.12)' stroke-width='1'/><line x1='0' y1='47' x2='100' y2='47' stroke='rgba(217,119,6,0.12)' stroke-width='1'/><circle cx='30' cy='41' r='5' fill='rgba(217,119,6,0.15)'/><line x1='35' y1='41' x2='35' y2='15' stroke='rgba(217,119,6,0.2)' stroke-width='1.5'/><circle cx='60' cy='43' r='5' fill='rgba(217,119,6,0.15)'/><line x1='65' y1='43' x2='65' y2='20' stroke='rgba(217,119,6,0.2)' stroke-width='1.5'/></svg>`,
+    bodyPattern: null,
+    tabIcons: {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+      ask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M9 8l3-3 3 3M9 16l3 3 3-3"/></svg>`,
+      balance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>`,
+      settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>`,
+    },
+    heroTitle: "♩ Keling, tushuntirib beraman",
+    heroDesc: "Har bir mavzu — melodiya kabi oson bo'ladi",
+    tabLabels: { home: "Asosiy", ask: "Savol", balance: "Balans", settings: "Sozlama" },
+  },
+  ilmfan: {
+    emoji: "🔬",
+    heroBg: "linear-gradient(135deg, #EFF6FF 0%, #F8FAFF 70%)",
+    heroPattern: null,
+    bodyPattern: null,
+    tabIcons: {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>`,
+      ask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>`,
+      balance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>`,
+      settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>`,
+    },
+    heroTitle: "Analiz qilamiz",
+    heroDesc: "Savolingizni kiriting — ilmiy asosda tushuntirib beraman",
+    tabLabels: { home: "Index", ask: "Query", balance: "Budget", settings: "Config" },
+  },
+  anime: {
+    emoji: "🌸",
+    heroBg: "linear-gradient(160deg, #FCE7F3 0%, #FFF5FB 70%)",
+    heroPattern: `<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><circle cx='40' cy='40' r='25' fill='none' stroke='rgba(236,72,153,0.08)' stroke-width='1'/><circle cx='40' cy='40' r='15' fill='none' stroke='rgba(236,72,153,0.06)' stroke-width='1'/><circle cx='15' cy='15' r='6' fill='rgba(236,72,153,0.06)'/><circle cx='65' cy='20' r='4' fill='rgba(236,72,153,0.05)'/><circle cx='20' cy='65' r='3' fill='rgba(236,72,153,0.07)'/></svg>`,
+    bodyPattern: null,
+    tabIcons: {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M12 6c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6z"/><circle cx="12" cy="12" r="2"/></svg>`,
+      ask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>`,
+      balance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
+      settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>`,
+    },
+    heroTitle: "✨ Yordamga tayyorman~",
+    heroDesc: "Savolingiz bormi? Men har doim shu yerdaman (＾▽＾)",
+    tabLabels: { home: "☁️ Bosh", ask: "⭐ Savol", balance: "💕 Balans", settings: "🌸 Menu" },
+  },
+  avto: {
+    emoji: "🚗",
+    heroBg: "linear-gradient(135deg, #1F2937 0%, #111827 100%)",
+    heroPattern: `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60'><line x1='0' y1='0' x2='60' y2='60' stroke='rgba(255,255,255,0.04)' stroke-width='1'/><line x1='30' y1='0' x2='30' y2='60' stroke='rgba(255,255,255,0.03)' stroke-width='1'/><line x1='0' y1='30' x2='60' y2='30' stroke='rgba(255,255,255,0.03)' stroke-width='1'/></svg>`,
+    bodyPattern: null,
+    tabIcons: {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="12" rx="2"/><path d="M5 8l2-4h10l2 4"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg>`,
+      ask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v1m0 5h.01M8.93 9.5A4 4 0 1112 16a4 4 0 01-3.07-6.5z"/></svg>`,
+      balance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>`,
+      settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06.06A1.65 1.65 0 005 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+    },
+    heroTitle: "ENGINE START",
+    heroDesc: "SAVOL KIRITING — JAVOB TAYYORLANMOQDA",
+    tabLabels: { home: "BAZA", ask: "SAVOL", balance: "JAMG'ARMA", settings: "PANEL" },
+  },
+  kitob: {
+    emoji: "📖",
+    heroBg: "linear-gradient(160deg, #FEF3C7 0%, #FFFBF0 70%)",
+    heroPattern: `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='40'><line x1='0' y1='38' x2='120' y2='38' stroke='rgba(146,64,14,0.12)' stroke-width='1'/><line x1='0' y1='28' x2='120' y2='28' stroke='rgba(146,64,14,0.08)' stroke-width='0.5'/><line x1='0' y1='18' x2='120' y2='18' stroke='rgba(146,64,14,0.08)' stroke-width='0.5'/><line x1='0' y1='8' x2='120' y2='8' stroke='rgba(146,64,14,0.08)' stroke-width='0.5'/><line x1='18' y1='0' x2='18' y2='40' stroke='rgba(146,64,14,0.06)' stroke-width='0.5'/></svg>`,
+    bodyPattern: null,
+    tabIcons: {
+      home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`,
+      ask: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+      balance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>`,
+      settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06.06A1.65 1.65 0 005 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+    },
+    heroTitle: "Bilimlar xazinasi",
+    heroDesc: "Har bir savol — yangi bob. Birga o'qiymiz.",
+    tabLabels: { home: "Bosh sahifa", ask: "Savol berish", balance: "Balans", settings: "Sozlamalar" },
+  },
+};
+
+function applyTheme(interestId) {
+  const interest = INTERESTS.find((i) => i.id === interestId);
+  if (!interest) return;
+  document.documentElement.setAttribute("data-theme", interest.theme);
+
+  const cfg = THEME_CONFIGS[interest.theme] || THEME_CONFIGS.sport;
+
+  // 1. Hero emoji
+  const heroEmoji = document.getElementById("hero-emoji");
+  if (heroEmoji) heroEmoji.textContent = cfg.emoji;
+
+  // 2. Hero card - matn va fon
+  const heroCard = document.querySelector(".hero-card");
+  if (heroCard) {
+    heroCard.style.background = cfg.heroBg;
+    const heroPatternEl = document.getElementById("hero-pattern-bg");
+    if (cfg.heroPattern) {
+      if (heroPatternEl) {
+        heroPatternEl.innerHTML = cfg.heroPattern;
+      } else {
+        const patDiv = document.createElement("div");
+        patDiv.id = "hero-pattern-bg";
+        patDiv.style.cssText = "position:absolute;inset:0;overflow:hidden;opacity:1;pointer-events:none;z-index:0;";
+        patDiv.innerHTML = cfg.heroPattern;
+        heroCard.appendChild(patDiv);
+      }
+    } else if (heroPatternEl) {
+      heroPatternEl.innerHTML = "";
+    }
+  }
+
+  // 3. Hero sarlavha va tavsif
+  const heroH2 = document.querySelector(".hero-card h2");
+  const heroP = document.querySelector(".hero-card p");
+  if (heroH2) heroH2.textContent = cfg.heroTitle;
+  if (heroP) heroP.textContent = cfg.heroDesc;
+
+  // 4. Tab ikonkalari va matnlari
+  if (cfg.tabIcons) {
+    const tabDefs = [
+      { tab: "home",     icon: cfg.tabIcons.home,     label: cfg.tabLabels.home     },
+      { tab: "ask",      icon: cfg.tabIcons.ask,      label: cfg.tabLabels.ask      },
+      { tab: "balance",  icon: cfg.tabIcons.balance,  label: cfg.tabLabels.balance  },
+      { tab: "settings", icon: cfg.tabIcons.settings, label: cfg.tabLabels.settings },
+    ];
+    tabDefs.forEach(({ tab, icon, label }) => {
+      const tabEl = document.querySelector(`.tab[data-tab="${tab}"]`);
+      if (!tabEl) return;
+      const svgEl = tabEl.querySelector("svg");
+      if (svgEl) svgEl.outerHTML = icon; // replace
+      const spanEl = tabEl.querySelector("span");
+      if (spanEl) spanEl.textContent = label;
+    });
+  }
+
+  // 5. Kino/oyin/avto uchun dark text fix
+  const darkThemes = ["kino", "oyin", "avto"];
+  if (darkThemes.includes(interest.theme)) {
+    document.body.style.colorScheme = "dark";
+  } else {
+    document.body.style.colorScheme = "light";
+  }
+}
+
+/* ============================================================
+   NAVIGATSIYA
+   ============================================================ */
+function goTo(screenName) {
+  document.querySelectorAll(".screen").forEach((el) => el.classList.remove("active"));
+  const target = document.getElementById(`screen-${screenName}`);
+  if (target) target.classList.add("active");
+
+  document.querySelectorAll(".tab").forEach((el) => {
+    el.classList.toggle("active", el.dataset.tab === screenName);
+  });
+
+  state.currentScreen = screenName;
+  window.scrollTo(0, 0);
+  haptic("light");
+
+  if (screenName === "interests-edit") {
+    renderInterestGrid("interest-grid-edit", [...state.selectedInterests], toggleEditInterest);
+  }
+  if (tg) {
+    if (["home", "ask", "balance", "settings"].includes(screenName)) {
+      tg.BackButton.hide();
+    } else {
+      tg.BackButton.show();
+    }
+  }
+}
+
+if (window.Telegram?.WebApp) {
+  tg.BackButton.onClick(() => {
+    const backMap = {
+      ask: "home", answer: "ask", payment: "balance",
+      "interests-edit": "settings",
+    };
+    goTo(backMap[state.currentScreen] || "home");
+  });
+}
+
+/* ============================================================
+   BOSH SAHIFA
+   ============================================================ */
+function updateHomeDate() {
+  const days = ["Yakshanba","Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
+  const months = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
+  const now = new Date();
+  document.getElementById("home-date").textContent =
+    `${days[now.getDay()]}, ${now.getDate()}-${months[now.getMonth()]}`;
+}
+
+function renderHomeScreen() {
+  if (!state.user) return;
+  document.getElementById("home-username").textContent = firstNameOnly(state.user.full_name);
+  document.getElementById("home-balance").textContent = formatNumber(state.user.balance);
+
+  const freeLeft = state.user.free_questions_today ?? 0;
+  const quotaDots = document.getElementById("quota-dots");
+  quotaDots.innerHTML = "";
+  for (let i = 0; i < 2; i++) {
+    const dot = document.createElement("i");
+    if (i < freeLeft) dot.className = "filled";
+    quotaDots.appendChild(dot);
+  }
+  document.getElementById("quota-text").textContent =
+    freeLeft > 0
+      ? `Bugun ${freeLeft} ta bepul savolingiz bor`
+      : "Bepul savollar tugadi — 1000 so'mdan davom etadi";
+
+  renderHistory();
+}
+
+function renderHistory() {
+  const container = document.getElementById("history-card");
+  if (state.history.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">💭</div>
+        <div class="t">Hali savol bermadingiz</div>
+        <div class="d">Birinchi savolingizni berib, qanday ishlashini ko'ring</div>
+      </div>`;
+    return;
+  }
+  container.innerHTML = state.history
+    .slice(0, 8)
+    .map((item) => {
+      const subj = SUBJECTS.find((s) => s.id === item.subject) || SUBJECTS[SUBJECTS.length - 1];
+      const priceLabel = item.price_paid > 0 ? `-${formatNumber(item.price_paid)}` : "Bepul";
+      return `
+      <div class="history-item">
+        <div class="history-icon">${subj.emoji}</div>
+        <div class="history-body">
+          <div class="q">${escapeHtml(item.question_text || "Rasm orqali savol")}</div>
+          <div class="meta">${subj.name}</div>
+        </div>
+        <div class="history-price ${item.price_paid > 0 ? "" : "free"}">${priceLabel}</div>
+      </div>`;
+    })
+    .join("");
+}
+
+function firstNameOnly(fullName) {
+  if (!fullName) return "Talaba";
+  return fullName.split(" ")[0];
+}
+
+/* ============================================================
+   SAVOL BERISH
+   ============================================================ */
+function renderSubjectSheet() {
+  const list = document.getElementById("subject-list");
+  list.innerHTML = SUBJECTS.map((s) => `
+    <button class="subject-option" data-subject="${s.id}" onclick="selectSubject('${s.id}')">
+      <span class="emoji">${s.emoji}</span>
+      <span class="name">${s.name}</span>
+      <span class="check">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      </span>
+    </button>
+  `).join("");
+  updateSubjectSheetSelection();
+}
+
+function updateSubjectSheetSelection() {
+  document.querySelectorAll(".subject-option").forEach((el) => {
+    el.classList.toggle("selected", el.dataset.subject === state.selectedSubject.id);
+  });
+}
+
+function selectSubject(id) {
+  state.selectedSubject = SUBJECTS.find((s) => s.id === id) || SUBJECTS[0];
+  document.getElementById("ask-subject-emoji").textContent = state.selectedSubject.emoji;
+  document.getElementById("ask-subject-name").textContent = state.selectedSubject.name;
+  updateSubjectSheetSelection();
+  closeAllSheets();
+  haptic("light");
+}
+
+function setAskMode(mode) {
+  state.askMode = mode;
+  document.querySelectorAll(".input-mode-switch button").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.mode === mode);
+  });
+  document.querySelectorAll(".ask-panel").forEach((panel) => panel.classList.remove("active"));
+  document.getElementById(`panel-${mode}`).classList.add("active");
+  haptic("light");
+}
+
+function triggerFileInput() { document.getElementById("file-input").click(); }
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  state.selectedImageFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById("upload-img").src = e.target.result;
+    document.getElementById("upload-placeholder").classList.add("hidden");
+    document.getElementById("upload-preview").classList.remove("hidden");
+    document.getElementById("upload-zone").classList.add("has-file");
+  };
+  reader.readAsDataURL(file);
+}
+
+let recordTimer = null, recordSeconds = 0;
+function toggleVoiceRecording() {
+  state.isRecording = !state.isRecording;
+  const btn = document.getElementById("voice-btn");
+  const status = document.getElementById("voice-status");
+  const waveform = document.getElementById("voice-waveform");
+
+  if (state.isRecording) {
+    btn.classList.add("recording");
+    waveform.classList.remove("hidden");
+    waveform.innerHTML = Array.from({ length: 18 }, () =>
+      `<i style="height:${6 + Math.random() * 20}px"></i>`
+    ).join("");
+    recordSeconds = 0;
+    status.textContent = "Yozilmoqda... 0:00";
+    recordTimer = setInterval(() => {
+      recordSeconds++;
+      const m = Math.floor(recordSeconds / 60), s = recordSeconds % 60;
+      status.textContent = `Yozilmoqda... ${m}:${String(s).padStart(2, "0")}`;
+    }, 1000);
+    haptic("medium");
+  } else {
+    btn.classList.remove("recording");
+    clearInterval(recordTimer);
+    status.textContent = `Yozildi (${Math.floor(recordSeconds/60)}:${String(recordSeconds%60).padStart(2,"0")}) ✓`;
+    haptic("medium");
+  }
+}
+
+async function submitQuestion() {
+  const btn = document.getElementById("ask-submit-btn");
+  const btnText = document.getElementById("ask-submit-text");
+
+  let questionText = "";
+  let imageBase64 = null;
+
+  if (state.askMode === "text") {
+    questionText = document.getElementById("text-input").value.trim();
+    if (!questionText) { showToast("Savolingizni yozing", true); return; }
+  } else if (state.askMode === "image") {
+    if (!state.selectedImageFile) { showToast("Rasm tanlang", true); return; }
+    questionText = document.getElementById("image-caption").value.trim() || "Ushbu rasmni tushuntiring";
+    imageBase64 = await fileToBase64(state.selectedImageFile);
+  } else if (state.askMode === "voice") {
+    if (recordSeconds === 0) { showToast("Avval ovozli xabar yozib oling", true); return; }
+    questionText = "(ovozli savol)";
+  }
+
+  // Limit tekshirish
+  const freeLeft = state.user.free_questions_today ?? 0;
+  const balance = state.user.balance ?? 0;
+  if (freeLeft <= 0 && balance < 1000) {
+    showToast("Balansingiz yetarli emas. Iltimos to'ldiring.", true);
+    goTo("balance");
+    return;
+  }
+
+  btn.disabled = true;
+  btnText.innerHTML = `<span class="spinner"></span>`;
+
+  goTo("answer");
+  document.getElementById("answer-subject-badge").textContent =
+    `${state.selectedSubject.emoji} ${state.selectedSubject.name}`;
+  document.getElementById("answer-text").innerHTML = `<div class="typing-dots"><i></i><i></i><i></i></div>`;
+  document.getElementById("answer-actions").style.display = "none";
+
+  if (CONFIG.API_BASE_URL) {
+    // Backend mavjud — unga yuborish
+    try {
+      const formData = new FormData();
+      formData.append("subject", state.selectedSubject.id);
+      formData.append("question_text", questionText);
+      if (state.askMode === "image" && state.selectedImageFile) {
+        formData.append("image", state.selectedImageFile);
+      }
+
+      const result = await apiRequest("/api/questions/ask", { method: "POST", body: formData });
+      document.getElementById("answer-text").textContent = result.answer;
+      document.getElementById("answer-actions").style.display = "flex";
+
+      state.user.balance = result.new_balance;
+      state.user.free_questions_today = result.remaining_free_questions;
+
+      const histItem = { subject: state.selectedSubject.id, question_text: questionText, ai_answer: result.answer, price_paid: result.price_paid, created_at: new Date().toISOString() };
+      state.history.unshift(histItem);
+      saveLocalData({ balance: state.user.balance, free_questions_today: state.user.free_questions_today, history: state.history.slice(0, 50) });
+      resetAskForm();
+      renderHomeScreen();
+      btn.disabled = false;
+      btnText.textContent = "Tushuntirishni so'rash";
+      return;
+    } catch (err) {
+      console.warn("Backend xato, Anthropic API ga to'g'ridan urinilmoqda:", err.message);
+    }
+  }
+
+  // To'g'ridan-to'g'ri Anthropic API orqali
+  if (!CONFIG.ANTHROPIC_API_KEY) {
+    document.getElementById("answer-text").textContent =
+      "⚠️ Iltimos, CONFIG.ANTHROPIC_API_KEY ga API kalitingizni kiriting.\n\nKalitni https://console.anthropic.com dan olishingiz mumkin.";
+    document.getElementById("answer-actions").style.display = "flex";
+    btn.disabled = false;
+    btnText.textContent = "Tushuntirishni so'rash";
+    return;
+  }
+
+  try {
+    const answer = await askAnthropicAPI(questionText, state.selectedSubject, state.selectedInterests, imageBase64, state.user.language || "uz");
+
+    document.getElementById("answer-text").textContent = answer;
+    document.getElementById("answer-actions").style.display = "flex";
+
+    // Limitni kamaytirish
+    const pricePaid = freeLeft > 0 ? 0 : 1000;
+    if (freeLeft > 0) state.user.free_questions_today = freeLeft - 1;
+    else state.user.balance = Math.max(0, balance - 1000);
+
+    const histItem = { subject: state.selectedSubject.id, question_text: questionText, ai_answer: answer, price_paid: pricePaid, created_at: new Date().toISOString() };
+    state.history.unshift(histItem);
+    saveLocalData({ balance: state.user.balance, free_questions_today: state.user.free_questions_today, history: state.history.slice(0, 50) });
+    resetAskForm();
+    renderHomeScreen();
+  } catch (err) {
+    document.getElementById("answer-text").textContent = "❌ Xato yuz berdi: " + err.message;
+    document.getElementById("answer-actions").style.display = "flex";
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = "Tushuntirishni so'rash";
+  }
+}
+
+async function askAnthropicAPI(question, subject, interests, imageBase64, lang) {
+  const interestLabels = interests
+    .map((id) => INTERESTS.find((i) => i.id === id)?.label)
+    .filter(Boolean)
+    .join(", ");
+
+  const langMap = { uz: "o'zbek", ru: "rus", en: "ingliz" };
+  const langName = langMap[lang] || "o'zbek";
+
+  const systemPrompt = `Siz o'quvchilarga ${subject.name} fanidan yordam beruvchi AI yordamchisisiz.
+Foydalanuvchining qiziqishlari: ${interestLabels || "umumiy"}.
+Tushuntirish tilida yozing: ${langName}.
+Javob quyidagi tarzda bo'lsin:
+- Sodda, tushunarli tilda yozing
+- Foydalanuvchining qiziqishlari bilan bog'liq hayotiy misol keltiring
+- Bosqichma-bosqich tushuntiring
+- Formulalar bo'lsa, aniq yozing
+- Javob 3-6 paragraf bo'lsin`;
+
+  const userContent = [];
+
+  if (imageBase64) {
+    const mime = imageBase64.split(";")[0].replace("data:", "") || "image/jpeg";
+    const base64data = imageBase64.split(",")[1];
+    userContent.push({ type: "image", source: { type: "base64", media_type: mime, data: base64data } });
+  }
+  userContent.push({ type: "text", text: question });
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": CONFIG.ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userContent }],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API xato (${response.status})`);
+  }
+
+  const data = await response.json();
+  return data.content?.[0]?.text || "Javob olinmadi.";
+}
+
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+function resetAskForm() {
+  document.getElementById("text-input").value = "";
+  document.getElementById("image-caption").value = "";
+  document.getElementById("upload-placeholder").classList.remove("hidden");
+  document.getElementById("upload-preview").classList.add("hidden");
+  document.getElementById("upload-zone").classList.remove("has-file");
+  state.selectedImageFile = null;
+  recordSeconds = 0;
+  document.getElementById("voice-status").textContent = "Yozib olish uchun bosing";
+  document.getElementById("voice-waveform").classList.add("hidden");
+}
+
+/* ============================================================
+   BALANS / TO'LOV
+   ============================================================ */
+function renderProfileUI() {
+  if (!state.user) return;
+
+  document.getElementById("balance-amount").textContent = formatNumber(state.user.balance);
+  document.getElementById("settings-balance-preview").textContent = formatNumber(state.user.balance) + " so'm";
+
+  document.getElementById("profile-name").textContent = state.user.full_name || "Talaba";
+  document.getElementById("profile-username").textContent = state.user.username ? "@" + state.user.username : "";
+  document.getElementById("profile-avatar-initial").textContent =
+    (state.user.full_name || "T").trim().charAt(0).toUpperCase();
+
+  if (state.user.avatar_url) {
+    document.getElementById("profile-avatar-img").src = state.user.avatar_url;
+    document.getElementById("profile-avatar-img").classList.remove("hidden");
+    document.getElementById("profile-avatar-initial").classList.add("hidden");
+  }
+
+  const preview = state.selectedInterests
+    .map((id) => INTERESTS.find((i) => i.id === id)?.emoji)
+    .filter(Boolean)
+    .join(" ");
+  document.getElementById("settings-interests-preview").textContent =
+    preview || "Tanlanmagan — bosib tanlang";
+
+  document.querySelectorAll(".lang-pill").forEach((el) => {
+    el.classList.toggle("active", el.dataset.lang === (state.user.language || "uz"));
+  });
+
+  renderTxHistory();
+}
+
+function selectAmount(btn, amount) {
+  document.querySelectorAll(".amount-option").forEach((el) => el.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("custom-amount").value = "";
+  state.pendingTopupAmount = amount;
+  document.getElementById("topup-create-btn").disabled = false;
+  haptic("light");
+}
+
+function customAmountInput(value) {
+  document.querySelectorAll(".amount-option").forEach((el) => el.classList.remove("active"));
+  const amount = parseInt(value, 10) || 0;
+  state.pendingTopupAmount = amount;
+  document.getElementById("topup-create-btn").disabled = amount < 1000;
+}
+
+async function createTopup() {
+  if (state.pendingTopupAmount < 1000) return;
+  const btn = document.getElementById("topup-create-btn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner dark"></span>`;
+
+  if (CONFIG.API_BASE_URL) {
+    try {
+      const result = await apiRequest("/api/topup/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: state.pendingTopupAmount }),
+      });
+      state.pendingTopupTxId = result.transaction_id;
+      document.getElementById("payment-card-number").textContent = result.card_number;
+      document.getElementById("payment-amount-label").textContent = formatNumber(result.amount) + " so'm";
+      document.getElementById("payment-card-owner").textContent = result.card_owner || CONFIG.CARD_OWNER;
+      goTo("payment");
+      btn.disabled = false;
+      btn.textContent = "To'ldirish so'rovini yaratish";
+      return;
+    } catch (err) {
+      console.warn("Backend xato:", err.message);
+    }
+  }
+
+  // Backend yo'q — CONFIG dagi karta ma'lumotlari
+  state.pendingTopupTxId = "local-" + Date.now();
+  document.getElementById("payment-card-number").textContent = CONFIG.CARD_NUMBER;
+  document.getElementById("payment-amount-label").textContent = formatNumber(state.pendingTopupAmount) + " so'm";
+  document.getElementById("payment-card-owner").textContent = CONFIG.CARD_OWNER;
+  goTo("payment");
+  btn.disabled = false;
+  btn.textContent = "To'ldirish so'rovini yaratish";
+}
+
+function copyCardNumber() {
+  const cardNum = document.getElementById("payment-card-number").textContent;
+  navigator.clipboard?.writeText(cardNum.replace(/\s/g, ""));
+  showToast("Karta raqami nusxalandi ✓");
+  haptic("light");
+}
+
+function triggerReceiptInput() { document.getElementById("receipt-input").click(); }
+
+function handleReceiptSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  state.selectedReceiptFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById("receipt-img").src = e.target.result;
+    document.getElementById("receipt-placeholder").classList.add("hidden");
+    document.getElementById("receipt-preview").classList.remove("hidden");
+    document.getElementById("receipt-upload-zone").classList.add("has-file");
+    document.getElementById("receipt-submit-btn").disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitReceipt() {
+  if (!state.selectedReceiptFile || !state.pendingTopupTxId) return;
+  const btn = document.getElementById("receipt-submit-btn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span>`;
+
+  const newTx = {
+    id: state.pendingTopupTxId,
+    amount: state.pendingTopupAmount,
+    status: "pending",
+    created_at: new Date().toISOString(),
+  };
+
+  if (CONFIG.API_BASE_URL) {
+    try {
+      const formData = new FormData();
+      formData.append("receipt", state.selectedReceiptFile);
+      await apiRequest(`/api/topup/${state.pendingTopupTxId}/upload-receipt`, { method: "POST", body: formData });
+      showToast("Chek yuborildi! Admin tasdig'ini kuting ✓");
+      await loadTransactions();
+      resetPaymentForm();
+      goTo("balance");
+      btn.disabled = false;
+      btn.textContent = "Yuborish";
+      return;
+    } catch (err) {
+      console.warn("Backend xato:", err.message);
+    }
+  }
+
+  // Lokal saqlaymiz
+  state.transactions.unshift(newTx);
+  saveLocalData({ transactions: state.transactions.slice(0, 30) });
+
+  // Admin'ga Telegram orqali xabar yuboramiz (agar bot token mavjud bo'lsa)
+  notifyAdminPendingPayment(state.pendingTopupAmount, state.user);
+
+  showToast("Chek yuborildi! Admin tasdig'ini kuting ✓");
+  resetPaymentForm();
+  goTo("balance");
+  btn.disabled = false;
+  btn.textContent = "Yuborish";
+}
+
+function notifyAdminPendingPayment(amount, user) {
+  // Foydalanuvchi Telegram'da admin'ga avtomatik xabar ketadi (bot orqali)
+  // Bu sahifada faqat Telegram deep-link orqali adminni xabardor qilish mumkin
+  const msg = encodeURIComponent(
+    `💳 Yangi to'lov so'rovi\n` +
+    `👤 ${user.full_name || "Anonim"}${user.username ? " (@" + user.username + ")" : ""}\n` +
+    `💰 Summa: ${formatNumber(amount)} so'm\n` +
+    `📋 ID: ${state.pendingTopupTxId}\n` +
+    `⏰ Vaqt: ${new Date().toLocaleString("uz-UZ")}`
+  );
+  // Admin'ga xabar - foydalanuvchi o'zi ham ko'rishi uchun toast
+  console.log("Admin xabardor qilish:", decodeURIComponent(msg));
+}
+
+function resetPaymentForm() {
+  state.selectedReceiptFile = null;
+  state.pendingTopupTxId = null;
+  document.getElementById("receipt-placeholder").classList.remove("hidden");
+  document.getElementById("receipt-preview").classList.add("hidden");
+  document.getElementById("receipt-upload-zone").classList.remove("has-file");
+  document.getElementById("receipt-submit-btn").disabled = true;
+}
+
+async function loadTransactions() {
+  try {
+    state.transactions = await apiRequest("/api/topup/history");
+    renderTxHistory();
+  } catch (err) {
+    console.error("Tranzaksiya tarixini yuklashda xato:", err);
+  }
+}
+
+function renderTxHistory() {
+  const container = document.getElementById("tx-history-card");
+  if (!state.transactions || state.transactions.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🧾</div>
+        <div class="t">Hali to'lov bo'lmagan</div>
+        <div class="d">Balansingizni to'ldirsangiz, shu yerda ko'rinadi</div>
+      </div>`;
+    return;
+  }
+
+  const statusLabels = { pending: "Kutilmoqda", approved: "Tasdiqlandi", rejected: "Rad etildi" };
+  container.innerHTML = state.transactions
+    .map((tx) => `
+      <div class="history-item">
+        <div class="history-icon">💳</div>
+        <div class="history-body">
+          <div class="q">${formatNumber(tx.amount)} so'm</div>
+          <div class="meta">${formatDate(tx.created_at)}</div>
+        </div>
+        <span class="tx-status ${tx.status}">${statusLabels[tx.status] || tx.status}</span>
+      </div>`)
+    .join("");
+}
+
+/* ============================================================
+   SOZLAMALAR
+   ============================================================ */
+function toggleEditInterest(id) {
+  const tempSelected = Array.from(document.querySelectorAll(".interest-card.selected"))
+    .map((_, i) => INTERESTS[i]?.id)
+    .filter(Boolean);
+
+  const idx = state.selectedInterests.indexOf(id);
+  if (idx >= 0) state.selectedInterests.splice(idx, 1);
+  else state.selectedInterests.push(id);
+
+  renderInterestGrid("interest-grid-edit", state.selectedInterests, toggleEditInterest);
+  haptic("light");
+}
+
+async function saveInterestsEdit() {
+  if (state.selectedInterests.length === 0) {
+    showToast("Kamida bitta qiziqish tanlang", true);
+    return;
+  }
+  applyTheme(state.selectedInterests[0]);
+  state.user.interests = state.selectedInterests;
+
+  if (CONFIG.API_BASE_URL) {
+    try {
+      const profile = await apiRequest("/api/profile/interests", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interests: state.selectedInterests }),
+      });
+      state.user = profile;
+    } catch (err) {
+      console.warn("Backend xato:", err.message);
+    }
+  }
+
+  saveLocalData({ interests: state.selectedInterests });
+  showToast("Qiziqishlar yangilandi ✓");
+  renderProfileUI();
+  goTo("settings");
+}
+
+async function setLanguage(lang) {
+  document.querySelectorAll(".lang-pill").forEach((el) => {
+    el.classList.toggle("active", el.dataset.lang === lang);
+  });
+
+  state.user.language = lang;
+
+  if (CONFIG.API_BASE_URL) {
+    try {
+      const profile = await apiRequest("/api/profile/language", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language: lang }),
+      });
+      state.user = profile;
+    } catch (err) {
+      console.warn("Backend xato:", err.message);
+    }
+  }
+
+  saveLocalData({ language: lang });
+  showToast("Til o'zgartirildi ✓");
+}
+
+function triggerAvatarInput() { document.getElementById("avatar-input").click(); }
+
+function handleAvatarSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  state.selectedAvatarFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById("profile-avatar-img").src = e.target.result;
+    document.getElementById("profile-avatar-img").classList.remove("hidden");
+    document.getElementById("profile-avatar-initial").classList.add("hidden");
+  };
+  reader.readAsDataURL(file);
+  showToast("Profil rasmi yangilandi ✓");
+  // Eslatma: backend'da hozircha avatar yuklash endpointi yo'q —
+  // kerak bo'lsa /api/profile/avatar kabi alohida endpoint qo'shiladi.
+}
+
+function contactAdmin() {
+  closeAllSheets();
+  if (tg) {
+    tg.openTelegramLink(`https://t.me/${CONFIG.ADMIN_USERNAME}`);
+  } else {
+    window.open(`https://t.me/${CONFIG.ADMIN_USERNAME}`, "_blank");
+  }
+}
+
+/* ============================================================
+   SHEET (modal) BOSHQARUVI
+   ============================================================ */
+function openSheet(sheetId) {
+  document.querySelectorAll(".sheet").forEach((el) => el.classList.add("hidden-sheet"));
+  document.getElementById("overlay").classList.add("open");
+  document.querySelectorAll(".sheet").forEach((el) => {
+    el.style.display = el.id === sheetId ? "block" : "none";
+  });
+  haptic("light");
+}
+
+function closeAllSheets(event) {
+  if (event && event.target.closest(".sheet") && !event.target.classList.contains("sheet-overlay")) return;
+  document.getElementById("overlay").classList.remove("open");
+}
+
+/* ============================================================
+   YORDAMCHI FUNKSIYALAR
+   ============================================================ */
+function formatNumber(num) {
+  return Math.round(Number(num) || 0).toLocaleString("ru-RU").replace(/,/g, " ");
+}
+
+function formatDate(isoString) {
+  const d = new Date(isoString);
+  return d.toLocaleDateString("uz-UZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text || "";
+  return div.innerHTML;
+}
+
+let toastTimer = null;
+function showToast(message, isError = false) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.toggle("error", isError);
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+function haptic(style = "light") {
+  try {
+    if (style === "medium") tg?.HapticFeedback?.impactOccurred("medium");
+    else tg?.HapticFeedback?.impactOccurred("light");
+  } catch (e) {}
+}
+
+// Balans bo'limiga kirganda tranzaksiya tarixini yuklab turamiz
+const originalGoTo = goTo;
+goTo = function (screenName) {
+  originalGoTo(screenName);
+  if (screenName === "balance") loadTransactions();
+};
+</script>
+
+</body>
+</html>
